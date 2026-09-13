@@ -1,0 +1,17 @@
+{
+  "name": "TamilAI Prompt",
+  "short_name": "TamilAI",
+  "description": "High-quality AI prompts in Tamil.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf5ff",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
