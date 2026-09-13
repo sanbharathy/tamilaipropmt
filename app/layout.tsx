@@ -16,11 +16,11 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://tamilaiprompt.com'),
-  title: 'TamilAI Prompt — தமிழில் சிறந்த AI Prompts',
-  description: 'வேலை, கல்வி, படங்கள் மற்றும் கோடிங்கிற்கான தரமான AI prompts தமிழில்.',
+  title: 'TamilAI Prompt — தமிழர்களுக்கான Trending AI Prompts',
+  description: 'வைரல் படங்கள், வீடியோக்கள் மற்றும் பல துறைகளுக்கான trending AI prompts — அனைத்தும் தமிழில்.',
   openGraph: {
-    title: 'TamilAI Prompt — சரியான Prompt. சிறந்த முடிவு.',
-    description: 'Discover high-quality Tamil AI prompts for work, learning, images, and coding.',
+    title: 'TamilAI Prompt — ட்ரெண்ட் ஆகும் முன்பே உருவாக்குங்கள்',
+    description: 'Copy-ready Tamil prompts for viral images, videos, and useful everyday work.',
     type: 'website',
     locale: 'ta_IN',
     url: 'https://tamilaiprompt.com',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'TamilAI Prompt',
-    description: 'AI prompts in Tamil, made simple for everyone.',
+    description: 'Trending AI image and video prompts for Tamil creators.',
     images: ['/og.png'],
   },
   manifest: '/manifest.webmanifest',
