@@ -20,7 +20,6 @@ import {
   Lightbulb,
   Megaphone,
   Menu,
-  Play,
   Search,
   Sparkles,
   TrendingUp,
@@ -1331,7 +1330,6 @@ export default function HomePage() {
                 <article key={item.id} className={`group overflow-hidden rounded-3xl border border-border bg-card shadow-[0_10px_36px_-24px_oklch(0.25_0.08_300/.45)] transition-[border-color,box-shadow] duration-200 hover:border-primary/30 hover:shadow-[0_20px_55px_-28px_oklch(0.45_0.18_305/.48)] ${item.featured ? 'md:col-span-2 xl:col-span-2' : ''}`}>
                   <TrendPreview
                     item={item}
-                    language={language}
                     saved={saved}
                     onToggleSaved={() => toggleSaved(item.id)}
                   />
@@ -1554,12 +1552,10 @@ export default function HomePage() {
 
 function TrendPreview({
   item,
-  language,
   saved,
   onToggleSaved,
 }: {
   item: TrendPrompt;
-  language: Language;
   saved: boolean;
   onToggleSaved: () => void;
 }) {
@@ -1569,9 +1565,6 @@ function TrendPreview({
     sceneTa: 'AI Trend',
     sceneEn: 'AI Trend',
   };
-  const VisualIcon = item.category === 'video' ? Play : item.category === 'business' ? Megaphone : ImageIcon;
-  const title = language === 'ta' ? item.titleTa : item.titleEn;
-
   return (
     <div
       className={`relative overflow-hidden bg-slate-950 ${item.featured ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}
@@ -1587,25 +1580,10 @@ function TrendPreview({
         priority={item.featured}
       />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,white/.18,transparent_24%),linear-gradient(to_bottom,black/.08,transparent_45%,black/.34)]" aria-hidden="true" />
-      <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-3">
-        <div className="min-w-0 max-w-[calc(100%-3.5rem)]">
-          <span className="inline-flex min-h-8 max-w-full items-center gap-1.5 truncate rounded-full bg-foreground/88 px-3 text-xs font-bold text-background shadow-sm backdrop-blur">
-            {item.category === 'video' ? <Play className="size-3.5 fill-current" aria-hidden="true" /> : <Flame className="size-3.5" aria-hidden="true" />}
-            {item.category === 'video' ? 'Video prompt' : language === 'ta' ? 'ட்ரெண்டிங்' : 'Trending'}
-          </span>
-        </div>
+      <div className="absolute right-3 top-3">
         <button type="button" onClick={onToggleSaved} aria-label={saved ? 'Remove saved prompt' : 'Save prompt'} aria-pressed={saved} className={`grid size-11 cursor-pointer place-items-center rounded-full border border-white/30 bg-foreground/72 text-white shadow-sm backdrop-blur transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/70 ${saved ? 'bg-primary' : 'hover:bg-foreground/90'}`}>
           <Bookmark className={`size-4 ${saved ? 'fill-current' : ''}`} aria-hidden="true" />
         </button>
-      </div>
-      <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
-        <div className="min-w-0 rounded-2xl border border-white/20 bg-black/28 px-3 py-2 text-white shadow-sm backdrop-blur">
-          <p className="truncate text-sm font-extrabold">{title}</p>
-          <p className="mt-0.5 text-[11px] font-semibold text-white/78">{item.models.slice(0, 2).join(' + ')}</p>
-        </div>
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/25 bg-white/18 text-white backdrop-blur">
-          <VisualIcon className="size-5" aria-hidden="true" />
-        </span>
       </div>
     </div>
   );
