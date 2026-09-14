@@ -71,28 +71,36 @@ const popularSearches = [
 const watermarkEn =
   'Add the exact text “tamilaiprompt.com” as a small, clean, readable watermark in the bottom-right corner with safe padding, white at 70% opacity. Do not add any other text, logo, or watermark.';
 
-const visualStyles = {
-  portrait: {
-    className: 'from-fuchsia-500 via-orange-300 to-amber-100',
-    labelTa: 'Portrait',
-    labelEn: 'Portrait',
-  },
-  memory: {
-    className: 'from-indigo-500 via-sky-300 to-emerald-100',
-    labelTa: 'Memory',
-    labelEn: 'Memory',
-  },
-  video: {
-    className: 'from-slate-950 via-violet-700 to-cyan-300',
-    labelTa: 'Video',
-    labelEn: 'Video',
-  },
-  product: {
-    className: 'from-amber-700 via-yellow-300 to-stone-100',
-    labelTa: 'Brand',
-    labelEn: 'Brand',
-  },
-} as const;
+const trendVisualThemes: Record<number, { bg: string; accent: string; sceneTa: string; sceneEn: string }> = {
+  1: { bg: '#7c2d12', accent: '#fbbf24', sceneTa: '80s Studio', sceneEn: '80s Studio' },
+  2: { bg: '#312e81', accent: '#93c5fd', sceneTa: 'Memory', sceneEn: 'Memory' },
+  3: { bg: '#020617', accent: '#22d3ee', sceneTa: 'Night Ride', sceneEn: 'Night Ride' },
+  4: { bg: '#78350f', accent: '#fde68a', sceneTa: 'Coffee Ad', sceneEn: 'Coffee Ad' },
+  9: { bg: '#7f1d1d', accent: '#facc15', sceneTa: 'Wedding', sceneEn: 'Wedding' },
+  10: { bg: '#475569', accent: '#f5f5f4', sceneTa: 'Polaroid', sceneEn: 'Polaroid' },
+  11: { bg: '#991b1b', accent: '#fb7185', sceneTa: 'Hero Poster', sceneEn: 'Hero Poster' },
+  12: { bg: '#134e4a', accent: '#5eead4', sceneTa: 'Product', sceneEn: 'Product' },
+  13: { bg: '#164e63', accent: '#67e8f9', sceneTa: 'Rainy', sceneEn: 'Rainy' },
+  14: { bg: '#1e3a8a', accent: '#bfdbfe', sceneTa: 'Profile', sceneEn: 'Profile' },
+  15: { bg: '#581c87', accent: '#d8b4fe', sceneTa: 'Fantasy', sceneEn: 'Fantasy' },
+  16: { bg: '#166534', accent: '#bef264', sceneTa: 'Food', sceneEn: 'Food' },
+  17: { bg: '#9d174d', accent: '#f9a8d4', sceneTa: 'Saree', sceneEn: 'Saree' },
+  18: { bg: '#92400e', accent: '#fed7aa', sceneTa: 'Family', sceneEn: 'Family' },
+  19: { bg: '#111827', accent: '#a78bfa', sceneTa: 'Cyberpunk', sceneEn: 'Cyberpunk' },
+  20: { bg: '#334155', accent: '#e2e8f0', sceneTa: 'Catalog', sceneEn: 'Catalog' },
+  21: { bg: '#7e22ce', accent: '#f0abfc', sceneTa: 'Anime', sceneEn: 'Anime' },
+  22: { bg: '#18181b', accent: '#d4d4d8', sceneTa: 'Editorial', sceneEn: 'Editorial' },
+  23: { bg: '#0f172a', accent: '#38bdf8', sceneTa: 'Reveal', sceneEn: 'Reveal' },
+  24: { bg: '#0f766e', accent: '#99f6e4', sceneTa: 'Travel', sceneEn: 'Travel' },
+  25: { bg: '#713f12', accent: '#fef08a', sceneTa: 'Cooking', sceneEn: 'Cooking' },
+  26: { bg: '#4c1d95', accent: '#c4b5fd', sceneTa: 'Motion', sceneEn: 'Motion' },
+  27: { bg: '#374151', accent: '#f3f4f6', sceneTa: 'Property', sceneEn: 'Property' },
+  28: { bg: '#9a3412', accent: '#fdba74', sceneTa: 'Festival', sceneEn: 'Festival' },
+  29: { bg: '#0f766e', accent: '#5eead4', sceneTa: 'Shop Ad', sceneEn: 'Shop Ad' },
+  30: { bg: '#1d4ed8', accent: '#dbeafe', sceneTa: 'ID Photo', sceneEn: 'ID Photo' },
+  31: { bg: '#7c2d12', accent: '#fdba74', sceneTa: 'Pet', sceneEn: 'Pet' },
+  32: { bg: '#831843', accent: '#f9a8d4', sceneTa: 'Album', sceneEn: 'Album' },
+};
 
 const aiTips = [
   {
@@ -1179,39 +1187,14 @@ export default function HomePage() {
             {visibleTrends.map((item) => {
               const copied = copiedId === item.id;
               const saved = savedIds.includes(item.id);
-              const visual = visualStyles[item.image as keyof typeof visualStyles] ?? visualStyles.portrait;
-              const VisualIcon = item.category === 'video' ? Play : item.category === 'business' ? Megaphone : ImageIcon;
               return (
                 <article key={item.id} className={`group overflow-hidden rounded-3xl border border-border bg-card shadow-[0_10px_36px_-24px_oklch(0.25_0.08_300/.45)] transition-[border-color,box-shadow] duration-200 hover:border-primary/30 hover:shadow-[0_20px_55px_-28px_oklch(0.45_0.18_305/.48)] ${item.featured ? 'md:col-span-2 xl:col-span-2' : ''}`}>
-                  <div
-                    className={`relative overflow-hidden bg-gradient-to-br ${visual.className} ${item.featured ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}
-                    aria-hidden="true"
-                  >
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,white/.55,transparent_26%),radial-gradient(circle_at_80%_70%,black/.24,transparent_35%)]" />
-                    <div className="absolute inset-5 rounded-[2rem] border border-white/35 bg-white/12 shadow-2xl backdrop-blur-[2px] transition-transform duration-500 motion-safe:group-hover:scale-[1.02]" />
-                    <div className="absolute inset-0 grid place-items-center p-6 text-center text-white">
-                      <div>
-                        <span className="mx-auto grid size-16 place-items-center rounded-2xl border border-white/35 bg-black/25 shadow-lg backdrop-blur">
-                          <VisualIcon className="size-8" aria-hidden="true" />
-                        </span>
-                        <p className="mt-4 font-heading text-2xl font-extrabold tracking-tight drop-shadow-sm">
-                          {language === 'ta' ? visual.labelTa : visual.labelEn}
-                        </p>
-                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-white/80">
-                          TamilAI Prompt
-                        </p>
-                      </div>
-                    </div>
-                    <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
-                      <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-foreground/88 px-3 text-xs font-bold text-background shadow-sm backdrop-blur">
-                        {item.category === 'video' ? <Play className="size-3.5 fill-current" aria-hidden="true" /> : <Flame className="size-3.5" aria-hidden="true" />}
-                        {item.category === 'video' ? 'Video prompt' : language === 'ta' ? 'ட்ரெண்டிங்' : 'Trending'}
-                      </span>
-                      <button type="button" onClick={() => toggleSaved(item.id)} aria-label={saved ? 'Remove saved prompt' : 'Save prompt'} aria-pressed={saved} className={`grid size-11 cursor-pointer place-items-center rounded-full border border-white/30 bg-foreground/72 text-white shadow-sm backdrop-blur transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/70 ${saved ? 'bg-primary' : 'hover:bg-foreground/90'}`}>
-                        <Bookmark className={`size-4 ${saved ? 'fill-current' : ''}`} aria-hidden="true" />
-                      </button>
-                    </div>
-                  </div>
+                  <TrendPreview
+                    item={item}
+                    language={language}
+                    saved={saved}
+                    onToggleSaved={() => toggleSaved(item.id)}
+                  />
 
                   <div className="flex min-h-[260px] flex-col p-5">
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -1421,5 +1404,120 @@ export default function HomePage() {
         </div>
       </nav>
     </main>
+  );
+}
+
+function TrendPreview({
+  item,
+  language,
+  saved,
+  onToggleSaved,
+}: {
+  item: TrendPrompt;
+  language: Language;
+  saved: boolean;
+  onToggleSaved: () => void;
+}) {
+  const theme = trendVisualThemes[item.id] ?? {
+    bg: '#4c1d95',
+    accent: '#c4b5fd',
+    sceneTa: 'AI Trend',
+    sceneEn: 'AI Trend',
+  };
+  const VisualIcon = item.category === 'video' ? Play : item.category === 'business' ? Megaphone : ImageIcon;
+  const sceneLabel = language === 'ta' ? theme.sceneTa : theme.sceneEn;
+  const title = language === 'ta' ? item.titleTa : item.titleEn;
+
+  return (
+    <div
+      className={`relative overflow-hidden bg-slate-950 ${item.featured ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}
+      aria-label={item.imageAlt}
+    >
+      <svg className="absolute inset-0 size-full" viewBox="0 0 640 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id={`trend-bg-${item.id}`} x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor={theme.bg} />
+            <stop offset="55%" stopColor={theme.accent} stopOpacity="0.82" />
+            <stop offset="100%" stopColor="#fff7ed" />
+          </linearGradient>
+          <radialGradient id={`trend-glow-${item.id}`} cx="25%" cy="20%" r="70%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.62" />
+            <stop offset="42%" stopColor="#ffffff" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+          </radialGradient>
+          <filter id={`trend-shadow-${item.id}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="18" stdDeviation="20" floodColor="#000000" floodOpacity="0.28" />
+          </filter>
+        </defs>
+        <rect width="640" height="420" fill={`url(#trend-bg-${item.id})`} />
+        <rect width="640" height="420" fill={`url(#trend-glow-${item.id})`} />
+        <circle cx="560" cy="58" r="82" fill="#ffffff" opacity="0.16" />
+        <circle cx="74" cy="350" r="120" fill="#000000" opacity="0.14" />
+        <path d="M0 302 C125 244 197 346 320 286 C452 222 515 280 640 218 L640 420 L0 420 Z" fill="#020617" opacity="0.18" />
+        <g filter={`url(#trend-shadow-${item.id})`}>
+          <rect x="96" y="72" width="448" height="272" rx="34" fill="#ffffff" opacity="0.16" />
+          <rect x="116" y="94" width="408" height="228" rx="28" fill="#111827" opacity="0.2" />
+          {item.image === 'product' ? (
+            <>
+              <ellipse cx="320" cy="292" rx="124" ry="24" fill="#000000" opacity="0.22" />
+              <rect x="260" y="154" width="120" height="132" rx="22" fill="#ffffff" opacity="0.76" />
+              <rect x="282" y="184" width="76" height="48" rx="12" fill={theme.bg} opacity="0.78" />
+              <path d="M236 152 C268 112 356 112 404 152" stroke="#ffffff" strokeWidth="12" strokeLinecap="round" opacity="0.5" fill="none" />
+            </>
+          ) : item.image === 'video' ? (
+            <>
+              <rect x="168" y="132" width="304" height="172" rx="26" fill="#020617" opacity="0.5" />
+              <polygon points="292,178 292,258 368,218" fill="#ffffff" opacity="0.82" />
+              <path d="M158 312 L482 312" stroke="#ffffff" strokeWidth="10" strokeLinecap="round" opacity="0.35" />
+            </>
+          ) : item.image === 'memory' ? (
+            <>
+              <rect x="186" y="112" width="196" height="220" rx="16" fill="#ffffff" opacity="0.86" transform="rotate(-7 284 222)" />
+              <rect x="258" y="94" width="196" height="220" rx="16" fill="#ffffff" opacity="0.76" transform="rotate(8 356 204)" />
+              <circle cx="283" cy="190" r="38" fill={theme.bg} opacity="0.62" />
+              <circle cx="348" cy="188" r="38" fill={theme.accent} opacity="0.68" />
+              <rect x="228" y="252" width="170" height="16" rx="8" fill="#020617" opacity="0.18" />
+            </>
+          ) : (
+            <>
+              <circle cx="320" cy="172" r="58" fill="#ffffff" opacity="0.78" />
+              <path d="M218 316 C236 244 404 244 422 316 Z" fill="#ffffff" opacity="0.64" />
+              <path d="M254 138 C286 74 388 92 399 162 C368 130 314 118 254 138 Z" fill="#020617" opacity="0.22" />
+              <circle cx="296" cy="170" r="8" fill="#020617" opacity="0.4" />
+              <circle cx="344" cy="170" r="8" fill="#020617" opacity="0.4" />
+            </>
+          )}
+        </g>
+        <text x="320" y="372" textAnchor="middle" fill="#ffffff" opacity="0.92" fontSize="28" fontWeight="800" fontFamily="Arial, sans-serif">
+          {sceneLabel}
+        </text>
+        <text x="320" y="397" textAnchor="middle" fill="#ffffff" opacity="0.76" fontSize="14" fontWeight="700" letterSpacing="3" fontFamily="Arial, sans-serif">
+          TAMILAI PROMPT
+        </text>
+        <text x="616" y="397" textAnchor="end" fill="#ffffff" opacity="0.76" fontSize="13" fontWeight="700" fontFamily="Arial, sans-serif">
+          tamilaiprompt.com
+        </text>
+      </svg>
+
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,white/.18,transparent_24%),linear-gradient(to_bottom,black/.08,transparent_45%,black/.34)]" aria-hidden="true" />
+      <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
+        <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-foreground/88 px-3 text-xs font-bold text-background shadow-sm backdrop-blur">
+          {item.category === 'video' ? <Play className="size-3.5 fill-current" aria-hidden="true" /> : <Flame className="size-3.5" aria-hidden="true" />}
+          {item.category === 'video' ? 'Video prompt' : language === 'ta' ? 'ட்ரெண்டிங்' : 'Trending'}
+        </span>
+        <button type="button" onClick={onToggleSaved} aria-label={saved ? 'Remove saved prompt' : 'Save prompt'} aria-pressed={saved} className={`grid size-11 cursor-pointer place-items-center rounded-full border border-white/30 bg-foreground/72 text-white shadow-sm backdrop-blur transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/70 ${saved ? 'bg-primary' : 'hover:bg-foreground/90'}`}>
+          <Bookmark className={`size-4 ${saved ? 'fill-current' : ''}`} aria-hidden="true" />
+        </button>
+      </div>
+      <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
+        <div className="min-w-0 rounded-2xl border border-white/20 bg-black/28 px-3 py-2 text-white shadow-sm backdrop-blur">
+          <p className="truncate text-sm font-extrabold">{title}</p>
+          <p className="mt-0.5 text-[11px] font-semibold text-white/78">{item.models.slice(0, 2).join(' + ')}</p>
+        </div>
+        <span className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/25 bg-white/18 text-white backdrop-blur">
+          <VisualIcon className="size-5" aria-hidden="true" />
+        </span>
+      </div>
+    </div>
   );
 }
