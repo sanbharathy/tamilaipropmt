@@ -926,6 +926,48 @@ const sectorPrompts = [
   },
 ];
 
+const englishPromptById: Record<number, string> = {
+  1: `Use my uploaded photo as an accurate face reference. Transform it into an authentic 1980s Tamil Nadu studio portrait with period-appropriate clothing, natural hairstyle, warm tungsten lighting, faded 35mm film grain, and a soft vignette. Keep the face structure and natural expression unchanged. Add the exact text “tamilaiprompt.com” as a small, clean, readable white watermark at 70% opacity in the bottom-right corner with safe padding. Do not add any other text, logo, or watermark.`,
+  2: `Use my current photo and childhood photo as identity references. Create a natural black-and-white editorial portrait where my present self warmly meets my childhood self in a calm South Indian home courtyard. Keep face identity, age, and body proportions accurate. Use natural light and soft film grain. Add the exact text “tamilaiprompt.com” as a small, clean, readable white watermark at 70% opacity in the bottom-right corner with safe padding. Do not add any other text, logo, or watermark.`,
+  3: `9:16 vertical cinematic video. A motorcycle rides through rain-soaked Chennai streets at night. Low-angle tracking camera, neon reflections on wet asphalt, realistic wheel spray, subtle handheld energy, smooth subject motion, dramatic blue and amber lighting. 8 seconds, consistent rider and motorcycle. Add the exact text “tamilaiprompt.com” as a small, clean, readable white watermark in the bottom-right corner with safe padding, white at 70% opacity, visible throughout the entire video. Do not add any other text, logo, or watermark.`,
+  5: `Act as a Tamil social media copywriter. Write an Instagram sales caption for [product]. Include an attention-grabbing first-line hook, 3 clear benefits, a trustworthy conversational tone for Tamil customers, a soft call-to-action, and 5 relevant hashtags. Do not use exaggerated promises.`,
+  6: `Explain [lesson/concept] in simple English so even a 12-year-old student can understand it. Start with a real-life analogy, then give a step-by-step explanation, one small example, and 3 self-check questions at the end.`,
+  7: `Write a 30-second Instagram Reel script about [topic]. Include a 2-second spoken hook, 3 fast scenes, visual direction and on-screen text for each scene, natural narration, and a clear CTA at the end. Give it in table format.`,
+  8: `Act as a senior software engineer. Review the code and error message below. First explain the root cause in simple English. Then provide the smallest possible fix, corrected code, edge cases, and verification steps. Code: [paste code] Error: [paste error]`,
+  33: `Write a short WhatsApp offer message for [product/service]. Include a first-line hook, offer details, who it is for, one trust reason, a soft CTA, and keep it under 70 words.`,
+  34: `Give 25 brand name ideas for [business type]. Make them easy to pronounce for Tamil-speaking audiences, memorable, premium-feeling, and suitable for social media handles. Add a short meaning for each name.`,
+  35: `Write 5 Facebook ad copy variations for [offer]. Use five different angles: savings, trust, urgency, local pride, and problem-solution. Provide headline, primary text, and CTA separately.`,
+  36: `Write a professional reply to this customer review. Include thanks, empathy, a clear next step, and a friendly brand voice. Do not sound defensive. Review: [paste review]`,
+  37: `Write an SEO-friendly product description for [product]. Include one short intro, 5 benefits, who it is useful for, care/use instructions, natural keywords, and a final CTA.`,
+  38: `Create a 30-day Instagram content calendar for [business type]. Mix Reels, carousels, stories, customer proof, education, and offer posts. Include a caption idea and visual idea for each day.`,
+  39: `Write conversion-focused landing page copy for [service/product]. Include H1, subheading, 3 core benefits, proof points, process, pricing note, and CTA sections. Use a clear, simple, credible tone.`,
+  40: `Create a [number]-day study plan for [exam/subject]. Include daily topics, revision blocks, practice questions, weak-area review, and a final 2-day strategy.`,
+  41: `Turn the notes below into flashcards. Each card should include a question, short answer, and memory clue. Highlight important formulas or definitions separately. Notes: [paste notes]`,
+  42: `Teach [English grammar/topic] to a Tamil-speaking student in easy English. Include a simple rule, Tamil comparison if useful, 10 examples, common mistakes, and 5 practice questions.`,
+  43: `Summarize this transcript/lesson notes into clear revision notes. Include key ideas, definitions, examples, timeline/process, exam-important points, and 5 quiz questions. Content: [paste transcript]`,
+  44: `Write a bedtime story for children aged 6–9 about [theme]. Use simple words, friendly characters, gentle humour, a clear moral, and keep it under 700 words.`,
+  45: `Help me prepare for a [job role] interview. Give 15 common questions, strong sample answers, simple explanations, the STAR method, 5 questions I can ask the interviewer, and a final checklist.`,
+  46: `Write 25 YouTube Shorts hooks for [topic]. Mix curiosity, mistake, myth, checklist, story, and challenge angles. Keep every hook under 12 words.`,
+  47: `Write a 45-second voiceover script for [video topic]. Use a warm spoken tone, short sentences, scene-by-scene pacing, an emotional ending, and a clear CTA.`,
+  48: `Give 30 faceless Instagram Reel ideas for [niche]. For each idea, include a hook, visual footage idea, voiceover angle, and CTA. Make it relatable for a Tamil audience.`,
+  49: `Write a 60-second podcast clip script for [podcast topic]. Include a strong opening opinion, one story/example, a crisp insight, a share-worthy closing line, and a caption suggestion.`,
+  50: `Explain this code line by line. Start with the overall purpose, then explain important functions, data flow, possible bugs, and a beginner-friendly summary. Code: [paste code]`,
+  51: `Create a technical build plan for [app idea]. Include user flows, screens, database tables, API endpoints, MVP scope, tech stack, and a 2-week execution plan.`,
+  52: `Write a SQL query for this requirement. Include table assumptions, expected output, edge cases, performance/index suggestions, and a simple explanation. Requirement: [describe] Schema: [paste schema]`,
+  53: `Turn this website/app bug into a developer-ready bug report. Include title, steps to reproduce, expected result, actual result, device/browser, severity, screenshots needed, and possible cause. Bug: [describe]`,
+  54: `Write documentation for this API endpoint. Include purpose, method, URL, headers, request body, response example, error cases, curl example, and a developer-friendly explanation. API: [paste details]`,
+  55: `Create an SEO blog outline for [keyword/topic]. Include search intent, title options, meta description, H2/H3 structure, FAQs as plain Q&A, internal link ideas, and CTA.`,
+  56: `Create a comparison table for [our product] and [competitor]. Include features, pricing angle, ideal customer, strengths, weaknesses, positioning message, and a short sales summary. Avoid fake claims.`,
+  57: `Create 20 multiple-choice quiz questions about [topic]. Each question should include 4 options, the correct answer, a short explanation, and difficulty level.`,
+  58: `Create a 15-second video ad storyboard for [product/service]. Give it in table format with scene time, visual, voiceover, on-screen text, sound cue, and CTA.`,
+  59: `Give 20 marketing campaign ideas for [business type] during [festival]. Include offer angle, social post idea, WhatsApp message, reel idea, and customer engagement activity.`,
+  60: `Write a founder bio based on [founder details] in both English and Tamil. Include a short version, website version, LinkedIn version, warm professional tone, and credibility points.`,
+};
+
+function getPromptText(id: number, prompt: string, language: Language) {
+  return language === 'en' ? englishPromptById[id] ?? prompt : prompt;
+}
+
 const text = {
   ta: {
     navTrending: 'ட்ரெண்டிங்',
@@ -1023,7 +1065,7 @@ export default function HomePage() {
       const savedMatch = !showSaved || savedIds.includes(item.id);
       const searchMatch =
         !term ||
-        `${item.titleTa} ${item.titleEn} ${item.descriptionTa} ${item.descriptionEn} ${item.prompt} ${item.models.join(' ')}`
+        `${item.titleTa} ${item.titleEn} ${item.descriptionTa} ${item.descriptionEn} ${item.prompt} ${englishPromptById[item.id] ?? ''} ${item.models.join(' ')}`
           .toLocaleLowerCase()
           .includes(term);
       return categoryMatch && savedMatch && searchMatch;
@@ -1035,7 +1077,7 @@ export default function HomePage() {
     return sectorPrompts.filter((item) => {
       const categoryMatch = activeCategory === 'all' || item.category === activeCategory;
       const savedMatch = !showSaved || savedIds.includes(item.id);
-      const searchMatch = !term || `${item.titleTa} ${item.titleEn} ${item.descriptionTa} ${item.descriptionEn} ${item.prompt}`.toLocaleLowerCase().includes(term);
+      const searchMatch = !term || `${item.titleTa} ${item.titleEn} ${item.descriptionTa} ${item.descriptionEn} ${item.prompt} ${englishPromptById[item.id] ?? ''}`.toLocaleLowerCase().includes(term);
       return categoryMatch && savedMatch && searchMatch;
     });
   }, [activeCategory, query, savedIds, showSaved]);
@@ -1210,7 +1252,7 @@ export default function HomePage() {
                     <div className="mt-4 flex flex-wrap gap-1.5">
                       {item.models.map((model) => <span key={model} className="rounded-md border border-border bg-muted px-2 py-1 text-[11px] font-semibold text-muted-foreground">{model}</span>)}
                     </div>
-                    <Button className="mt-auto h-11 w-full cursor-pointer rounded-xl" onClick={() => copyPrompt(item.id, item.prompt)} aria-live="polite">
+                    <Button className="mt-auto h-11 w-full cursor-pointer rounded-xl" onClick={() => copyPrompt(item.id, getPromptText(item.id, item.prompt, language))} aria-live="polite">
                       {copied ? <Check className="size-4" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
                       {copied ? t.copied : t.copy}
                     </Button>
@@ -1252,7 +1294,7 @@ export default function HomePage() {
                     </div>
                     <h3 className="mt-5 font-heading text-lg font-bold leading-snug">{language === 'ta' ? item.titleTa : item.titleEn}</h3>
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">{language === 'ta' ? item.descriptionTa : item.descriptionEn}</p>
-                    <Button variant="outline" className="mt-auto h-11 w-full cursor-pointer rounded-xl border-primary/20 text-primary hover:bg-secondary" onClick={() => copyPrompt(item.id, item.prompt)}>
+                    <Button variant="outline" className="mt-auto h-11 w-full cursor-pointer rounded-xl border-primary/20 text-primary hover:bg-secondary" onClick={() => copyPrompt(item.id, getPromptText(item.id, item.prompt, language))}>
                       {copied ? <Check className="size-4" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
                       {copied ? t.copied : t.copy}
                     </Button>
