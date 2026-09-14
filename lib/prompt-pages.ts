@@ -51,6 +51,35 @@ export const promptLandingPages: PromptLandingPage[] = [
     hashtags: ['80sPhotoTrend', '80sTrend', 'AIPhotoEditing', 'ChatGPTPrompt', 'RetroAI'],
   },
   {
+    slug: 'favorite-actor-style-ai-poster-prompt',
+    title: 'Favorite Actor-Style AI Poster Prompt',
+    shortTitle: 'Actor-Style Poster',
+    metaTitle: 'Favorite Actor-Style AI Poster Prompt for Tamil Fan Edits',
+    metaDescription:
+      'Copy a safe Tamil cinema fan poster prompt for your own photo or a fictional character. Create mass actor-style AI posters without copying real celebrities, party logos, or movie posters.',
+    h1: 'Favorite actor-style AI poster prompt for Tamil fan edits',
+    intro:
+      'Tamil cinema fan posters work well on Instagram because they feel bold, emotional, and instantly shareable. Use this prompt to turn your own photo into a mass-style cinema poster, or create a fictional actor-like character, while avoiding real celebrity face-copying, copyrighted movie posters, political-party symbols, and campaign visuals.',
+    audience: ['Tamil cinema fans', 'Fan poster creators', 'Instagram editors', 'AI photo beginners'],
+    promptTa:
+      'நான் upload செய்யும் என் சொந்த photo-வை reference ஆக பயன்படுத்தி mass Tamil cinema fan poster style உருவாக்கவும். Dramatic theatre-banner lighting, red and gold color grade, heroic but natural pose, painted poster texture, film grain, crowd celebration energy, clean cinematic composition. Real actor முகத்தை copy செய்ய வேண்டாம், எந்த political party logo/symbol/flag/slogan-ஐ சேர்க்க வேண்டாம், copyrighted movie poster-ஐ copy செய்ய வேண்டாம். முக அடையாளம் இயல்பாகவும் மரியாதையாகவும் இருக்கட்டும். படத்தின் கீழ்-வலது மூலையில் “tamilaiprompt.com” watermark சேர்க்கவும்.',
+    promptEn:
+      'Use my uploaded personal photo as the reference and create a mass Tamil cinema fan-poster style image. Use dramatic theatre-banner lighting, red and gold color grading, a heroic but natural pose, painted poster texture, film grain, crowd celebration energy, and a clean cinematic composition. Do not copy any real actor’s face, do not include any political party logo, symbol, flag, or slogan, and do not copy a copyrighted movie poster. Keep my identity natural and respectful. Add “tamilaiprompt.com” as a bottom-right watermark.',
+    tools: ['ChatGPT Images', 'Gemini', 'Midjourney'],
+    tips: [
+      'Use your own clear portrait for the safest and most realistic result.',
+      'Ask for “fan-poster style” instead of a real actor name.',
+      'Use red/gold lighting, theatre-banner energy, and film grain for a Tamil mass look.',
+    ],
+    mistakes: [
+      'Do not ask the AI to make you look exactly like a real actor.',
+      'Do not use political party logos, flags, symbols, slogans, or vote/campaign messages.',
+      'Do not copy exact movie posters, costumes, titles, or copyrighted stills.',
+    ],
+    related: ['80s-tamil-photo-prompt', 'midjourney-prompts-tamil', 'gemini-ai-image-prompts-tamil'],
+    hashtags: ['TamilCinema', 'FanPoster', 'AIPhotoEditing', 'MassPoster', 'TamilAI'],
+  },
+  {
     slug: 'ai-saree-photo-prompt',
     title: 'AI Saree Photo Prompt',
     shortTitle: 'AI Saree Photo',

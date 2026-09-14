@@ -113,6 +113,7 @@ const structuredData = {
       name: 'Tamil AI Prompt Library',
       itemListElement: [
         '80s Tamil cinema look',
+        'Favorite actor-style AI poster',
         'Tamil temple wedding portrait',
         'Chennai night ride reel',
         'Tamil Nadu travel reel',
