@@ -1585,6 +1585,11 @@ function TrendPreview({
           <Bookmark className={`size-4 ${saved ? 'fill-current' : ''}`} aria-hidden="true" />
         </button>
       </div>
+      <div className="absolute bottom-3 left-3">
+        <span className="inline-flex min-h-8 items-center rounded-full border border-white/25 bg-black/52 px-3 text-xs font-extrabold text-white shadow-sm backdrop-blur">
+          🔥 {getTrendHeat(item.id)}
+        </span>
+      </div>
     </div>
   );
 }
