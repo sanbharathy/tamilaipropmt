@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
   ArrowRight,
   Bookmark,
@@ -1363,6 +1364,12 @@ export default function HomePage() {
 
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         <p>© 2026 TamilAI Prompt · தமிழர்களால், தமிழர்களுக்காக.</p>
+        <nav className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-2" aria-label="Footer navigation">
+          <Link href="/about" className="hover:text-primary hover:underline">About</Link>
+          <Link href="/contact" className="hover:text-primary hover:underline">Contact</Link>
+          <Link href="/privacy" className="hover:text-primary hover:underline">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-primary hover:underline">Terms</Link>
+        </nav>
       </footer>
 
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl md:hidden" aria-label="Mobile navigation">
