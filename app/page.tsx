@@ -1587,14 +1587,11 @@ function TrendPreview({
         priority={item.featured}
       />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,white/.18,transparent_24%),linear-gradient(to_bottom,black/.08,transparent_45%,black/.34)]" aria-hidden="true" />
-      <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
-        <div className="flex flex-wrap gap-2">
-          <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-foreground/88 px-3 text-xs font-bold text-background shadow-sm backdrop-blur">
+      <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-3">
+        <div className="min-w-0 max-w-[calc(100%-3.5rem)]">
+          <span className="inline-flex min-h-8 max-w-full items-center gap-1.5 truncate rounded-full bg-foreground/88 px-3 text-xs font-bold text-background shadow-sm backdrop-blur">
             {item.category === 'video' ? <Play className="size-3.5 fill-current" aria-hidden="true" /> : <Flame className="size-3.5" aria-hidden="true" />}
             {item.category === 'video' ? 'Video prompt' : language === 'ta' ? 'ட்ரெண்டிங்' : 'Trending'}
-          </span>
-          <span className="inline-flex min-h-8 items-center rounded-full border border-white/25 bg-white/88 px-3 text-xs font-extrabold text-foreground shadow-sm backdrop-blur">
-            🔥 {getTrendHeat(item.id)}
           </span>
         </div>
         <button type="button" onClick={onToggleSaved} aria-label={saved ? 'Remove saved prompt' : 'Save prompt'} aria-pressed={saved} className={`grid size-11 cursor-pointer place-items-center rounded-full border border-white/30 bg-foreground/72 text-white shadow-sm backdrop-blur transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/70 ${saved ? 'bg-primary' : 'hover:bg-foreground/90'}`}>
