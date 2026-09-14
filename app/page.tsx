@@ -19,11 +19,13 @@ import {
   Languages,
   Lightbulb,
   Megaphone,
+  Menu,
   Play,
   Search,
   Sparkles,
   TrendingUp,
   Video,
+  X,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -1032,6 +1034,7 @@ export default function HomePage() {
   const [savedIds, setSavedIds] = useState<number[]>([]);
   const [savedLoaded, setSavedLoaded] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const t = text[language];
 
   useEffect(() => {
@@ -1100,6 +1103,7 @@ export default function HomePage() {
   function selectCategory(category: Category) {
     setActiveCategory(category);
     setShowSaved(false);
+    setMobileMenuOpen(false);
     document.querySelector('#library')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -1107,10 +1111,11 @@ export default function HomePage() {
     setActiveCategory('all');
     setShowSaved(false);
     setQuery('');
+    setMobileMenuOpen(false);
   }
 
   return (
-    <main className="min-h-screen bg-background pb-24 text-foreground md:pb-0">
+    <main className="min-h-screen bg-background text-foreground">
       <a href="#library" className="sr-only z-[100] bg-primary px-4 py-3 text-primary-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         Skip to prompts
       </a>
@@ -1132,17 +1137,29 @@ export default function HomePage() {
             <a href="#tips" className="transition-colors hover:text-foreground">{t.navTips}</a>
           </nav>
 
-          <Button
-            variant="outline"
-            className="h-11 cursor-pointer rounded-xl px-3 text-sm"
-            onClick={() => setLanguage(language === 'ta' ? 'en' : 'ta')}
-            aria-label={language === 'ta' ? 'Switch to English' : 'தமிழுக்கு மாற்றவும்'}
-          >
-            <Languages className="size-4" aria-hidden="true" />
-            {language === 'ta' ? 'தமிழ்' : 'EN'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="h-11 cursor-pointer rounded-xl px-3 text-sm"
+              onClick={() => setLanguage(language === 'ta' ? 'en' : 'ta')}
+              aria-label={language === 'ta' ? 'Switch to English' : 'தமிழுக்கு மாற்றவும்'}
+            >
+              <Languages className="size-4" aria-hidden="true" />
+              {language === 'ta' ? 'தமிழ்' : 'EN'}
+            </Button>
+            <Button
+              variant="outline"
+              className="h-11 cursor-pointer rounded-xl px-3 lg:hidden"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {mobileMenuOpen ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
+            </Button>
+          </div>
         </div>
-        <div className="border-t border-border/60">
+        <div className="hidden border-t border-border/60 md:block">
           <div className="mx-auto flex max-w-7xl snap-x gap-2 overflow-x-auto px-4 py-2 sm:px-6" aria-label="Prompt category tabs">
             {filters.map((filter) => {
               const Icon = filter.icon;
@@ -1171,6 +1188,42 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
+        {mobileMenuOpen ? (
+          <div id="mobile-menu" className="border-t border-border bg-background/98 px-4 py-3 shadow-[0_18px_40px_-30px_oklch(0.2_0.04_300/.6)] lg:hidden">
+            <div className="grid gap-2">
+              {filters.map((filter) => {
+                const Icon = filter.icon;
+                const selected = activeCategory === filter.id && !showSaved;
+                return (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    onClick={() => selectCategory(filter.id)}
+                    aria-pressed={selected}
+                    className={`flex min-h-12 items-center gap-3 rounded-2xl border px-4 text-left text-sm font-bold transition-colors ${
+                      selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground'
+                    }`}
+                  >
+                    <Icon className="size-4" aria-hidden="true" />
+                    {filter[language]}
+                  </button>
+                );
+              })}
+              <Link
+                href="/hashtags"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex min-h-12 items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 text-sm font-bold text-primary"
+              >
+                <Hash className="size-4" aria-hidden="true" />
+                Hashtags
+              </Link>
+              <a href="#tips" onClick={() => setMobileMenuOpen(false)} className="flex min-h-12 items-center gap-3 rounded-2xl border border-border bg-card px-4 text-sm font-bold text-muted-foreground">
+                <Lightbulb className="size-4" aria-hidden="true" />
+                {t.navTips}
+              </a>
+            </div>
+          </div>
+        ) : null}
       </header>
 
       <section className="relative overflow-hidden border-b border-border/70">
@@ -1460,21 +1513,6 @@ export default function HomePage() {
         </nav>
       </footer>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl md:hidden" aria-label="Mobile navigation">
-        <div className="mx-auto grid max-w-md grid-cols-4">
-          {[
-            { label: t.home, icon: Flame, active: activeCategory === 'all' && !showSaved, action: () => selectCategory('all') },
-            { label: language === 'ta' ? 'படங்கள்' : 'Images', icon: ImageIcon, active: activeCategory === 'image' && !showSaved, action: () => selectCategory('image') },
-            { label: language === 'ta' ? 'வீடியோ' : 'Video', icon: Video, active: activeCategory === 'video' && !showSaved, action: () => selectCategory('video') },
-            { label: t.saved, icon: Bookmark, active: showSaved, action: () => { setShowSaved(true); setActiveCategory('all'); setQuery(''); document.querySelector('#library')?.scrollIntoView({ behavior: 'smooth' }); } },
-          ].map(({ label, icon: Icon, active, action }) => (
-            <button key={label} type="button" onClick={action} className={`flex min-h-12 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-semibold transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
-              <Icon className={`size-5 ${active && Icon === Bookmark ? 'fill-current' : ''}`} strokeWidth={active ? 2.4 : 2} aria-hidden="true" />
-              {label}
-            </button>
-          ))}
-        </div>
-      </nav>
     </main>
   );
 }
