@@ -31,7 +31,7 @@ import { Input } from '@/components/ui/input';
 import { promptLandingPages } from '@/lib/prompt-pages';
 
 type Language = 'ta' | 'en';
-type Category = 'all' | 'image' | 'video' | 'business' | 'education' | 'coding';
+type Category = 'all' | 'image' | 'video' | 'business';
 
 type TrendPrompt = {
   id: number;
@@ -55,8 +55,6 @@ const filters: { id: Category; ta: string; en: string; icon: typeof Flame }[] = 
   { id: 'image', ta: 'படங்கள்', en: 'Pictures', icon: ImageIcon },
   { id: 'video', ta: 'வீடியோக்கள்', en: 'Videos', icon: Video },
   { id: 'business', ta: 'வணிகம்', en: 'Business', icon: BriefcaseBusiness },
-  { id: 'education', ta: 'கல்வி', en: 'Education', icon: GraduationCap },
-  { id: 'coding', ta: 'கோடிங்', en: 'Coding', icon: Code2 },
 ];
 
 const popularSearches = [
@@ -974,20 +972,20 @@ const text = {
     navTrending: 'ட்ரெண்டிங்',
     navImages: 'படங்கள்',
     navVideos: 'வீடியோக்கள்',
-    navSectors: 'அனைத்து துறைகள்',
+    navSectors: 'Business & Creators',
     navHashtags: 'Hashtags',
     navTips: 'AI Tips',
     kicker: 'தமிழர்களுக்கான AI Trend Hub',
     heading: 'ட்ரெண்ட் ஆகும் முன்பே உருவாக்குங்கள்.',
-    subheading: 'வைரல் படங்கள், வீடியோக்கள், AI tips, useful tools மற்றும் தினசரி வேலைகளுக்கான 50+ copy-ready prompts — அனைத்தும் தமிழில்.',
+    subheading: 'வைரல் படங்கள், வீடியோக்கள், AI tips, useful tools மற்றும் creator/business வேலைகளுக்கான 40+ copy-ready prompts — அனைத்தும் தமிழில்.',
     search: '80s படம், cinematic video என தேடுங்கள்…',
     trending: 'இப்போது ட்ரெண்டிங்கில்',
     updated: 'தினமும் புதுப்பிக்கப்படுகிறது',
     copy: 'Prompt-ஐ நகலெடு',
     copied: 'நகலெடுக்கப்பட்டது',
     photo: 'உங்கள் படம் தேவை',
-    sectors: 'உங்கள் துறைக்கான Prompt',
-    sectorsDesc: 'படைப்பாற்றல் மட்டுமல்ல — தினசரி வேலைக்கும் நேரத்தை சேமியுங்கள்.',
+    sectors: 'Business & Creator Prompts',
+    sectorsDesc: 'உங்கள் content, captions, reels, ads, offers மற்றும் brand வேலைகளுக்கு நேரத்தை சேமியுங்கள்.',
     tips: 'AI Tips & Tricks',
     tipsDesc: 'ஒரே prompt-ஐ copy செய்வதற்குப் பதிலாக, நல்ல output வர எப்படி மாற்றுவது என்பதை கற்றுக்கொள்ளுங்கள்.',
     tools: 'Popular AI tools',
@@ -1001,20 +999,20 @@ const text = {
     navTrending: 'Trending',
     navImages: 'Images',
     navVideos: 'Videos',
-    navSectors: 'All sectors',
+    navSectors: 'Business & Creators',
     navHashtags: 'Hashtags',
     navTips: 'AI Tips',
     kicker: 'The AI trend hub for Tamil creators',
     heading: 'Create it before the trend moves on.',
-    subheading: '50+ copy-ready Tamil prompts plus AI tips and useful tools for viral images, videos, and everyday work.',
+    subheading: '40+ copy-ready Tamil prompts plus AI tips and useful tools for viral images, videos, creators, and business work.',
     search: 'Search 80s photo, cinematic video…',
     trending: 'Trending right now',
     updated: 'Updated every day',
     copy: 'Copy prompt',
     copied: 'Copied',
     photo: 'Your photo needed',
-    sectors: 'Prompts for every sector',
-    sectorsDesc: 'Not just creativity—save time on useful everyday work.',
+    sectors: 'Business and creator prompts',
+    sectorsDesc: 'Save time on content, captions, reels, ads, offers, and brand work.',
     tips: 'AI tips & tricks',
     tipsDesc: 'Go beyond copy-paste prompts and learn how to adjust them for better results.',
     tools: 'Popular AI tools',
@@ -1076,6 +1074,10 @@ export default function HomePage() {
   const visibleSectors = useMemo(() => {
     const term = query.trim().toLocaleLowerCase();
     return sectorPrompts.filter((item) => {
+      if (item.category === 'education' || item.category === 'coding') {
+        return false;
+      }
+
       const categoryMatch = activeCategory === 'all' || item.category === activeCategory;
       const savedMatch = !showSaved || savedIds.includes(item.id);
       const searchMatch = !term || `${item.titleTa} ${item.titleEn} ${item.descriptionTa} ${item.descriptionEn} ${item.prompt} ${englishPromptById[item.id] ?? ''}`.toLocaleLowerCase().includes(term);

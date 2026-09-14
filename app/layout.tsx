@@ -17,9 +17,9 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://tamilaiprompt.com'),
-  title: 'TamilAI Prompt - 50+ Tamil AI Prompts, Tips & AI Tools',
+  title: 'TamilAI Prompt - 40+ Tamil AI Prompts, Tips & AI Tools',
   description:
-    'தமிழர்களுக்கான 50+ copy-ready AI prompts, AI tips and useful AI tool links. Trending image prompts, video prompts, business prompts, education prompts, coding prompts, and creator ideas in Tamil.',
+    'தமிழர்களுக்கான 40+ copy-ready AI prompts, AI tips and useful AI tool links. Trending image prompts, video prompts, business prompts, and creator ideas in Tamil.',
   applicationName: 'TamilAI Prompt',
   authors: [{ name: 'TamilAI Prompt' }],
   creator: 'TamilAI Prompt',
@@ -44,9 +44,9 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: 'TamilAI Prompt - 50+ Tamil AI Prompts, Tips & Tools',
+    title: 'TamilAI Prompt - 40+ Tamil AI Prompts, Tips & Tools',
     description:
-      'Copy-ready Tamil prompts, AI tips, and useful AI tool links for viral images, videos, business, education, coding, and creator workflows.',
+      'Copy-ready Tamil prompts, AI tips, and useful AI tool links for viral images, videos, business, and creator workflows.',
     type: 'website',
     locale: 'ta_IN',
     url: 'https://tamilaiprompt.com',
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'TamilAI Prompt - Tamil AI Prompts, Tips & Tools',
-    description: '50+ trending AI prompts, practical AI tips, and useful AI tool links for Tamil creators.',
+    description: '40+ trending AI prompts, practical AI tips, and useful AI tool links for Tamil creators.',
     images: ['/og.jpg'],
   },
   robots: {
@@ -100,9 +100,9 @@ const structuredData = {
       '@type': 'WebPage',
       '@id': 'https://tamilaiprompt.com/#webpage',
       url: 'https://tamilaiprompt.com',
-      name: 'TamilAI Prompt - 50+ Trending Tamil AI Image & Video Prompts',
+      name: 'TamilAI Prompt - 40+ Trending Tamil AI Image & Video Prompts',
       description:
-        'A Tamil AI prompt library with copy-ready prompts, practical AI tips, and useful AI tool links for image generation, video generation, business, education, coding, and creator workflows.',
+        'A Tamil AI prompt library with copy-ready prompts, practical AI tips, and useful AI tool links for image generation, video generation, business, and creator workflows.',
       isPartOf: { '@id': 'https://tamilaiprompt.com/#website' },
       about: { '@id': 'https://tamilaiprompt.com/#organization' },
       inLanguage: 'ta-IN',
@@ -118,8 +118,6 @@ const structuredData = {
         'Tamil Nadu travel reel',
         'Product reveal video',
         'Tamil business captions',
-        'Tamil education prompts',
-        'Tamil coding prompts',
         'AI prompt tips and tricks',
         'Kling AI',
         'Midjourney',
