@@ -17,9 +17,9 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://tamilaiprompt.com'),
-  title: 'TamilAI Prompt - 50+ Trending Tamil AI Image & Video Prompts',
+  title: 'TamilAI Prompt - 50+ Tamil AI Prompts, Tips & AI Tools',
   description:
-    'தமிழர்களுக்கான 50+ copy-ready AI prompts. Trending image prompts, video prompts, business prompts, education prompts, coding prompts, and creator ideas in Tamil.',
+    'தமிழர்களுக்கான 50+ copy-ready AI prompts, AI tips and useful AI tool links. Trending image prompts, video prompts, business prompts, education prompts, coding prompts, and creator ideas in Tamil.',
   applicationName: 'TamilAI Prompt',
   authors: [{ name: 'TamilAI Prompt' }],
   creator: 'TamilAI Prompt',
@@ -35,14 +35,18 @@ export const metadata: Metadata = {
     'Midjourney prompts Tamil',
     '80s Tamil photo prompt',
     'Tamil creator prompts',
+    'AI tips Tamil',
+    'AI tools Tamil',
+    'Kling AI Tamil prompts',
+    'Midjourney Tamil prompts',
   ],
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'TamilAI Prompt - 50+ Trending Tamil AI Prompts',
+    title: 'TamilAI Prompt - 50+ Tamil AI Prompts, Tips & Tools',
     description:
-      'Copy-ready Tamil prompts for viral AI images, videos, business, education, coding, and creator workflows.',
+      'Copy-ready Tamil prompts, AI tips, and useful AI tool links for viral images, videos, business, education, coding, and creator workflows.',
     type: 'website',
     locale: 'ta_IN',
     url: 'https://tamilaiprompt.com',
@@ -51,8 +55,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TamilAI Prompt - Tamil AI Prompt Library',
-    description: '50+ trending AI image, video, business, education, and coding prompts for Tamil creators.',
+    title: 'TamilAI Prompt - Tamil AI Prompts, Tips & Tools',
+    description: '50+ trending AI prompts, practical AI tips, and useful AI tool links for Tamil creators.',
     images: ['/og.jpg'],
   },
   robots: {
@@ -98,7 +102,7 @@ const structuredData = {
       url: 'https://tamilaiprompt.com',
       name: 'TamilAI Prompt - 50+ Trending Tamil AI Image & Video Prompts',
       description:
-        'A Tamil AI prompt library with copy-ready prompts for image generation, video generation, business, education, coding, and creator workflows.',
+        'A Tamil AI prompt library with copy-ready prompts, practical AI tips, and useful AI tool links for image generation, video generation, business, education, coding, and creator workflows.',
       isPartOf: { '@id': 'https://tamilaiprompt.com/#website' },
       about: { '@id': 'https://tamilaiprompt.com/#organization' },
       inLanguage: 'ta-IN',
@@ -116,6 +120,10 @@ const structuredData = {
         'Tamil business captions',
         'Tamil education prompts',
         'Tamil coding prompts',
+        'AI prompt tips and tricks',
+        'Kling AI',
+        'Midjourney',
+        'Runway',
       ].map((name, index) => ({
         '@type': 'ListItem',
         position: index + 1,

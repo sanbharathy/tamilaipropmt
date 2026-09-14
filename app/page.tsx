@@ -10,10 +10,12 @@ import {
   Clapperboard,
   Code2,
   Copy,
+  ExternalLink,
   Flame,
   GraduationCap,
   Image as ImageIcon,
   Languages,
+  Lightbulb,
   Megaphone,
   Play,
   Search,
@@ -68,11 +70,106 @@ const popularSearches = [
 const watermarkEn =
   'Add the exact text “tamilaiprompt.com” as a small, clean, readable watermark in the bottom-right corner with safe padding, white at 70% opacity. Do not add any other text, logo, or watermark.';
 
+const promptImages = {
+  portrait:
+    'https://images.pexels.com/photos/3379943/pexels-photo-3379943.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200&h=900',
+  memory:
+    'https://images.pexels.com/photos/36023869/pexels-photo-36023869.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200&h=900',
+  video:
+    'https://images.pexels.com/photos/7552358/pexels-photo-7552358.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200&h=900',
+  product:
+    'https://images.pexels.com/photos/30703810/pexels-photo-30703810.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200&h=900',
+} as const;
+
+const aiTips = [
+  {
+    titleTa: 'Prompt-ல் subject-ஐ முதலில் எழுதுங்கள்',
+    titleEn: 'Start with the subject',
+    bodyTa: 'முதலில் யார்/எது முக்கியம் என்பதை தெளிவாக எழுதுங்கள். அதன் பிறகு style, lighting, camera, background சேர்க்கலாம்.',
+    bodyEn: 'Write who or what matters first. Then add style, lighting, camera, and background details.',
+  },
+  {
+    titleTa: 'Reference photo இருந்தால் சொல்லுங்கள்',
+    titleEn: 'Mention reference photos',
+    bodyTa: 'முக அடையாளம் முக்கியமானால் “keep identity accurate” என்று சேர்க்கவும். இதனால் over-stylized முடிவுகள் குறையும்.',
+    bodyEn: 'When identity matters, add “keep identity accurate.” It reduces over-stylized results.',
+  },
+  {
+    titleTa: 'Video-க்கு duration மற்றும் ratio சேர்க்கவும்',
+    titleEn: 'Add duration and ratio for video',
+    bodyTa: 'Kling, Veo, Runway போன்ற tools-க்கு 9:16, 16:9, 6 seconds, 8 seconds போன்ற விவரங்கள் உதவும்.',
+    bodyEn: 'Tools like Kling, Veo, and Runway work better when you include 9:16, 16:9, 6 seconds, or 8 seconds.',
+  },
+  {
+    titleTa: 'Negative instruction பயன்படுத்துங்கள்',
+    titleEn: 'Use negative instructions',
+    bodyTa: '“no random text, no distorted hands, no extra logo” போன்ற வரிகள் unwanted mistakes-ஐ குறைக்க உதவும்.',
+    bodyEn: 'Lines like “no random text, no distorted hands, no extra logo” help reduce unwanted mistakes.',
+  },
+  {
+    titleTa: 'Watermark-ஐ prompt-லேயே சேர்க்கவும்',
+    titleEn: 'Add watermark inside the prompt',
+    bodyTa: 'Marketing-க்காக “tamilaiprompt.com bottom-right watermark” என்று தெளிவாக எழுதுங்கள்.',
+    bodyEn: 'For marketing, clearly ask for a “tamilaiprompt.com bottom-right watermark.”',
+  },
+  {
+    titleTa: 'ஒரே prompt-ஐ 3 முறை test செய்யுங்கள்',
+    titleEn: 'Test one prompt three times',
+    bodyTa: 'AI முடிவுகள் மாறக்கூடும். Best result கிடைக்க 2-3 variations உருவாக்கி நல்லதை தேர்ந்தெடுக்கவும்.',
+    bodyEn: 'AI results can vary. Generate 2–3 variations and pick the strongest one.',
+  },
+];
+
+const aiTools = [
+  {
+    name: 'Kling AI',
+    url: 'https://kling.ai/',
+    category: 'AI video & image',
+    descriptionTa: 'Text-to-video, image-to-video, motion control போன்ற cinematic video generation.',
+    descriptionEn: 'Cinematic text-to-video, image-to-video, and motion-control generation.',
+  },
+  {
+    name: 'Midjourney',
+    url: 'https://www.midjourney.com/',
+    category: 'AI image',
+    descriptionTa: 'Stylized, cinematic, poster, fashion, product visuals உருவாக்க popular tool.',
+    descriptionEn: 'Popular for stylized, cinematic, poster, fashion, and product visuals.',
+  },
+  {
+    name: 'ChatGPT Images',
+    url: 'https://chatgpt.com/',
+    category: 'AI image & writing',
+    descriptionTa: 'Prompt எழுத, image edit செய்ய, Tamil content உருவாக்க பயன்படும்.',
+    descriptionEn: 'Useful for prompt writing, image editing, and Tamil content creation.',
+  },
+  {
+    name: 'Google Gemini',
+    url: 'https://gemini.google.com/',
+    category: 'AI image & assistant',
+    descriptionTa: 'Image ideas, Tamil explanations, captions, visual prompt refinement.',
+    descriptionEn: 'Good for image ideas, Tamil explanations, captions, and prompt refinement.',
+  },
+  {
+    name: 'Runway',
+    url: 'https://runwayml.com/',
+    category: 'AI video',
+    descriptionTa: 'Creators மற்றும் brands-க்கு AI video generation, editing workflows.',
+    descriptionEn: 'AI video generation and editing workflows for creators and brands.',
+  },
+  {
+    name: 'Canva AI',
+    url: 'https://www.canva.com/ai/',
+    category: 'Design & ads',
+    descriptionTa: 'Posters, social ads, thumbnails, brand creatives உருவாக்க easy design tool.',
+    descriptionEn: 'Easy design tool for posters, social ads, thumbnails, and brand creatives.',
+  },
+];
+
 const trends: TrendPrompt[] = [
   {
     id: 1,
     category: 'image',
-    image: '/trends/80s-tamil-portrait.jpg',
+    image: promptImages.portrait,
     imageAlt: 'Fictional couple in an authentic 1980s Tamil studio portrait',
     titleTa: '80s தமிழ் சினிமா லுக்',
     titleEn: '80s Tamil cinema look',
@@ -89,7 +186,7 @@ const trends: TrendPrompt[] = [
   {
     id: 2,
     category: 'image',
-    image: '/trends/childhood-meeting.jpg',
+    image: promptImages.memory,
     imageAlt: 'Fictional adult meeting their childhood self in a South Indian courtyard',
     titleTa: 'குழந்தைப் பருவத்தை சந்திக்கும் நீங்கள்',
     titleEn: 'Meet your childhood self',
@@ -105,7 +202,7 @@ const trends: TrendPrompt[] = [
   {
     id: 3,
     category: 'video',
-    image: '/trends/chennai-night-ride.jpg',
+    image: promptImages.video,
     imageAlt: 'Cinematic motorcycle ride through rainy neon-lit Chennai',
     titleTa: 'சென்னை Night Ride Reel',
     titleEn: 'Chennai night ride reel',
@@ -120,7 +217,7 @@ const trends: TrendPrompt[] = [
   {
     id: 4,
     category: 'business',
-    image: '/trends/filter-coffee-ad.jpg',
+    image: promptImages.product,
     imageAlt: 'Premium South Indian filter coffee advertisement scene',
     titleTa: 'Filter Coffee Product Ad',
     titleEn: 'Filter coffee product ad',
@@ -135,7 +232,7 @@ const trends: TrendPrompt[] = [
   {
     id: 9,
     category: 'image',
-    image: '/trends/80s-tamil-portrait.jpg',
+    image: promptImages.portrait,
     imageAlt: 'Cinematic Tamil wedding portrait with temple lights',
     titleTa: 'Temple Wedding Portrait',
     titleEn: 'Temple wedding portrait',
@@ -150,7 +247,7 @@ const trends: TrendPrompt[] = [
   {
     id: 10,
     category: 'image',
-    image: '/trends/childhood-meeting.jpg',
+    image: promptImages.memory,
     imageAlt: 'Polaroid style friends memory photograph',
     titleTa: 'Polaroid Memory Photo',
     titleEn: 'Polaroid memory photo',
@@ -165,7 +262,7 @@ const trends: TrendPrompt[] = [
   {
     id: 11,
     category: 'image',
-    image: '/trends/80s-tamil-portrait.jpg',
+    image: promptImages.portrait,
     imageAlt: 'Vintage Tamil hero poster visual',
     titleTa: 'Vintage Hero Poster',
     titleEn: 'Vintage hero poster',
@@ -180,7 +277,7 @@ const trends: TrendPrompt[] = [
   {
     id: 12,
     category: 'image',
-    image: '/trends/filter-coffee-ad.jpg',
+    image: promptImages.product,
     imageAlt: 'Luxury product photography with Tamil cultural styling',
     titleTa: 'Luxury Product Shot',
     titleEn: 'Luxury product shot',
@@ -194,7 +291,7 @@ const trends: TrendPrompt[] = [
   {
     id: 13,
     category: 'image',
-    image: '/trends/chennai-night-ride.jpg',
+    image: promptImages.video,
     imageAlt: 'Rainy cinematic street fashion portrait',
     titleTa: 'Rainy Street Portrait',
     titleEn: 'Rainy street portrait',
@@ -209,7 +306,7 @@ const trends: TrendPrompt[] = [
   {
     id: 14,
     category: 'image',
-    image: '/trends/80s-tamil-portrait.jpg',
+    image: promptImages.portrait,
     imageAlt: 'LinkedIn profile photo with modern office background',
     titleTa: 'Professional Profile Photo',
     titleEn: 'Professional profile photo',
@@ -224,7 +321,7 @@ const trends: TrendPrompt[] = [
   {
     id: 15,
     category: 'image',
-    image: '/trends/childhood-meeting.jpg',
+    image: promptImages.memory,
     imageAlt: 'AI avatar in Tamil fantasy kingdom style',
     titleTa: 'Tamil Fantasy Avatar',
     titleEn: 'Tamil fantasy avatar',
@@ -239,7 +336,7 @@ const trends: TrendPrompt[] = [
   {
     id: 16,
     category: 'image',
-    image: '/trends/filter-coffee-ad.jpg',
+    image: promptImages.product,
     imageAlt: 'Food photography banana leaf meal',
     titleTa: 'Banana Leaf Food Photo',
     titleEn: 'Banana leaf food photo',
@@ -253,7 +350,7 @@ const trends: TrendPrompt[] = [
   {
     id: 17,
     category: 'image',
-    image: '/trends/80s-tamil-portrait.jpg',
+    image: promptImages.portrait,
     imageAlt: 'Studio saree portrait with soft lighting',
     titleTa: 'Elegant Saree Portrait',
     titleEn: 'Elegant saree portrait',
@@ -268,7 +365,7 @@ const trends: TrendPrompt[] = [
   {
     id: 18,
     category: 'image',
-    image: '/trends/childhood-meeting.jpg',
+    image: promptImages.memory,
     imageAlt: 'Newborn announcement style family photo',
     titleTa: 'Family Portrait Style',
     titleEn: 'Family portrait style',
@@ -283,7 +380,7 @@ const trends: TrendPrompt[] = [
   {
     id: 19,
     category: 'image',
-    image: '/trends/chennai-night-ride.jpg',
+    image: promptImages.video,
     imageAlt: 'Cyberpunk Chennai portrait',
     titleTa: 'Cyberpunk Chennai',
     titleEn: 'Cyberpunk Chennai',
@@ -298,7 +395,7 @@ const trends: TrendPrompt[] = [
   {
     id: 20,
     category: 'image',
-    image: '/trends/filter-coffee-ad.jpg',
+    image: promptImages.product,
     imageAlt: 'Ecommerce product photo on white background',
     titleTa: 'Ecommerce White Background',
     titleEn: 'Ecommerce white background',
@@ -312,7 +409,7 @@ const trends: TrendPrompt[] = [
   {
     id: 21,
     category: 'image',
-    image: '/trends/80s-tamil-portrait.jpg',
+    image: promptImages.portrait,
     imageAlt: 'Anime inspired Tamil portrait',
     titleTa: 'Anime Tamil Avatar',
     titleEn: 'Anime Tamil avatar',
@@ -327,7 +424,7 @@ const trends: TrendPrompt[] = [
   {
     id: 22,
     category: 'image',
-    image: '/trends/childhood-meeting.jpg',
+    image: promptImages.memory,
     imageAlt: 'Black and white editorial portrait',
     titleTa: 'Black & White Editorial',
     titleEn: 'Black and white editorial',
@@ -342,7 +439,7 @@ const trends: TrendPrompt[] = [
   {
     id: 23,
     category: 'video',
-    image: '/trends/chennai-night-ride.jpg',
+    image: promptImages.video,
     imageAlt: 'Product reveal video with cinematic lighting',
     titleTa: 'Product Reveal Video',
     titleEn: 'Product reveal video',
@@ -356,7 +453,7 @@ const trends: TrendPrompt[] = [
   {
     id: 24,
     category: 'video',
-    image: '/trends/chennai-night-ride.jpg',
+    image: promptImages.video,
     imageAlt: 'Travel reel of Tamil Nadu locations',
     titleTa: 'Tamil Nadu Travel Reel',
     titleEn: 'Tamil Nadu travel reel',
@@ -370,7 +467,7 @@ const trends: TrendPrompt[] = [
   {
     id: 25,
     category: 'video',
-    image: '/trends/filter-coffee-ad.jpg',
+    image: promptImages.product,
     imageAlt: 'Food preparation cinematic reel',
     titleTa: 'Food Making Reel',
     titleEn: 'Food making reel',
@@ -384,7 +481,7 @@ const trends: TrendPrompt[] = [
   {
     id: 26,
     category: 'video',
-    image: '/trends/80s-tamil-portrait.jpg',
+    image: promptImages.portrait,
     imageAlt: 'Cinematic portrait motion video',
     titleTa: 'Photo To Motion Reel',
     titleEn: 'Photo to motion reel',
@@ -399,7 +496,7 @@ const trends: TrendPrompt[] = [
   {
     id: 27,
     category: 'video',
-    image: '/trends/chennai-night-ride.jpg',
+    image: promptImages.video,
     imageAlt: 'Real estate walk-through video',
     titleTa: 'Real Estate Walkthrough',
     titleEn: 'Real estate walkthrough',
@@ -413,7 +510,7 @@ const trends: TrendPrompt[] = [
   {
     id: 28,
     category: 'video',
-    image: '/trends/filter-coffee-ad.jpg',
+    image: promptImages.product,
     imageAlt: 'Festival greeting animation',
     titleTa: 'Festival Greeting Video',
     titleEn: 'Festival greeting video',
@@ -427,7 +524,7 @@ const trends: TrendPrompt[] = [
   {
     id: 29,
     category: 'business',
-    image: '/trends/filter-coffee-ad.jpg',
+    image: promptImages.product,
     imageAlt: 'Local business ad creative prompt',
     titleTa: 'Local Shop Ad Creative',
     titleEn: 'Local shop ad creative',
@@ -441,7 +538,7 @@ const trends: TrendPrompt[] = [
   {
     id: 30,
     category: 'image',
-    image: '/trends/80s-tamil-portrait.jpg',
+    image: promptImages.portrait,
     imageAlt: 'Passport photo correction prompt',
     titleTa: 'Passport Photo Clean-Up',
     titleEn: 'Passport photo clean-up',
@@ -456,7 +553,7 @@ const trends: TrendPrompt[] = [
   {
     id: 31,
     category: 'image',
-    image: '/trends/childhood-meeting.jpg',
+    image: promptImages.memory,
     imageAlt: 'Pet and owner portrait style',
     titleTa: 'Pet With Owner Portrait',
     titleEn: 'Pet with owner portrait',
@@ -471,7 +568,7 @@ const trends: TrendPrompt[] = [
   {
     id: 32,
     category: 'image',
-    image: '/trends/chennai-night-ride.jpg',
+    image: promptImages.video,
     imageAlt: 'Music album cover in Tamil indie style',
     titleTa: 'Indie Album Cover',
     titleEn: 'Indie album cover',
@@ -813,9 +910,10 @@ const text = {
     navImages: 'படங்கள்',
     navVideos: 'வீடியோக்கள்',
     navSectors: 'அனைத்து துறைகள்',
+    navTips: 'AI Tips',
     kicker: 'தமிழர்களுக்கான AI Trend Hub',
     heading: 'ட்ரெண்ட் ஆகும் முன்பே உருவாக்குங்கள்.',
-    subheading: 'வைரல் படங்கள், வீடியோக்கள் மற்றும் பயனுள்ள வேலைகளுக்கான 50+ copy-ready prompts — அனைத்தும் தமிழில்.',
+    subheading: 'வைரல் படங்கள், வீடியோக்கள், AI tips, useful tools மற்றும் தினசரி வேலைகளுக்கான 50+ copy-ready prompts — அனைத்தும் தமிழில்.',
     search: '80s படம், cinematic video என தேடுங்கள்…',
     trending: 'இப்போது ட்ரெண்டிங்கில்',
     updated: 'தினமும் புதுப்பிக்கப்படுகிறது',
@@ -824,6 +922,10 @@ const text = {
     photo: 'உங்கள் படம் தேவை',
     sectors: 'உங்கள் துறைக்கான Prompt',
     sectorsDesc: 'படைப்பாற்றல் மட்டுமல்ல — தினசரி வேலைக்கும் நேரத்தை சேமியுங்கள்.',
+    tips: 'AI Tips & Tricks',
+    tipsDesc: 'ஒரே prompt-ஐ copy செய்வதற்குப் பதிலாக, நல்ல output வர எப்படி மாற்றுவது என்பதை கற்றுக்கொள்ளுங்கள்.',
+    tools: 'Popular AI tools',
+    toolsDesc: 'Image, video, captions, design வேலைகளுக்கு creators அதிகம் பயன்படுத்தும் AI websites.',
     empty: 'இந்த தேடலுக்கு prompt கிடைக்கவில்லை.',
     clear: 'அனைத்தையும் பார்க்க',
     home: 'ட்ரெண்ட்',
@@ -834,9 +936,10 @@ const text = {
     navImages: 'Images',
     navVideos: 'Videos',
     navSectors: 'All sectors',
+    navTips: 'AI Tips',
     kicker: 'The AI trend hub for Tamil creators',
     heading: 'Create it before the trend moves on.',
-    subheading: '50+ copy-ready Tamil prompts for viral images, videos, and useful everyday work.',
+    subheading: '50+ copy-ready Tamil prompts plus AI tips and useful tools for viral images, videos, and everyday work.',
     search: 'Search 80s photo, cinematic video…',
     trending: 'Trending right now',
     updated: 'Updated every day',
@@ -845,6 +948,10 @@ const text = {
     photo: 'Your photo needed',
     sectors: 'Prompts for every sector',
     sectorsDesc: 'Not just creativity—save time on useful everyday work.',
+    tips: 'AI tips & tricks',
+    tipsDesc: 'Go beyond copy-paste prompts and learn how to adjust them for better results.',
+    tools: 'Popular AI tools',
+    toolsDesc: 'Useful AI websites creators use for image, video, captions, and design workflows.',
     empty: 'No prompt matches this search.',
     clear: 'View all',
     home: 'Trends',
@@ -952,6 +1059,7 @@ export default function HomePage() {
             <button type="button" onClick={() => selectCategory('image')} className="cursor-pointer transition-colors hover:text-foreground">{t.navImages}</button>
             <button type="button" onClick={() => selectCategory('video')} className="cursor-pointer transition-colors hover:text-foreground">{t.navVideos}</button>
             <a href="#sectors" className="transition-colors hover:text-foreground">{t.navSectors}</a>
+            <a href="#tips" className="transition-colors hover:text-foreground">{t.navTips}</a>
           </nav>
 
           <Button
@@ -1137,6 +1245,72 @@ export default function HomePage() {
         </section>
       )}
 
+      <section id="tips" className="scroll-mt-20 mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Prompt mastery</p>
+            <h2 className="mt-2 font-heading text-2xl font-bold tracking-tight sm:text-3xl">{t.tips}</h2>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">{t.tipsDesc}</p>
+            <div className="mt-5 rounded-2xl border border-primary/15 bg-secondary/75 p-5 text-sm leading-6 text-secondary-foreground">
+              {language === 'ta'
+                ? 'Tip: ஒரு நல்ல AI prompt = subject + action + style + camera/light + output ratio + avoid mistakes.'
+                : 'Tip: A strong AI prompt = subject + action + style + camera/light + output ratio + avoid mistakes.'}
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {aiTips.map((tip) => (
+              <article key={tip.titleEn} className="rounded-2xl border border-border bg-card p-5 shadow-[0_8px_28px_-24px_oklch(0.2_0.04_300/.35)]">
+                <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <Lightbulb className="size-5" aria-hidden="true" />
+                </span>
+                <h3 className="mt-4 font-heading text-lg font-bold leading-snug">
+                  {language === 'ta' ? tip.titleTa : tip.titleEn}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {language === 'ta' ? tip.bodyTa : tip.bodyEn}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="tools" className="border-y border-border bg-muted/45 py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="mb-7 max-w-3xl">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">AI websites</p>
+            <h2 className="mt-2 font-heading text-2xl font-bold tracking-tight sm:text-3xl">{t.tools}</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">{t.toolsDesc}</p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {aiTools.map((tool) => (
+              <a
+                key={tool.name}
+                href={tool.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group rounded-2xl border border-border bg-card p-5 shadow-[0_8px_28px_-24px_oklch(0.2_0.04_300/.35)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-primary/35 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.1em] text-primary">{tool.category}</p>
+                    <h3 className="mt-2 font-heading text-xl font-bold tracking-tight">{tool.name}</h3>
+                  </div>
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-secondary text-secondary-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                    <ExternalLink className="size-4" aria-hidden="true" />
+                  </span>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                  {language === 'ta' ? tool.descriptionTa : tool.descriptionEn}
+                </p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="rounded-3xl bg-foreground px-6 py-9 text-background sm:px-10 sm:py-11">
           <div className="grid items-center gap-7 md:grid-cols-[1fr_auto]">
@@ -1159,6 +1333,12 @@ export default function HomePage() {
 
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         <p>© 2026 TamilAI Prompt · தமிழர்களால், தமிழர்களுக்காக.</p>
+        <p className="mt-2">
+          {language === 'ta' ? 'பட உதவி: ' : 'Photos provided by '}
+          <a href="https://www.pexels.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
+            Pexels
+          </a>
+        </p>
       </footer>
 
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl md:hidden" aria-label="Mobile navigation">
