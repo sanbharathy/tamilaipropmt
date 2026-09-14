@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import NextImage from 'next/image';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -1425,80 +1426,22 @@ function TrendPreview({
     sceneEn: 'AI Trend',
   };
   const VisualIcon = item.category === 'video' ? Play : item.category === 'business' ? Megaphone : ImageIcon;
-  const sceneLabel = language === 'ta' ? theme.sceneTa : theme.sceneEn;
   const title = language === 'ta' ? item.titleTa : item.titleEn;
 
   return (
     <div
       className={`relative overflow-hidden bg-slate-950 ${item.featured ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}
       aria-label={item.imageAlt}
+      style={{ backgroundColor: theme.bg }}
     >
-      <svg className="absolute inset-0 size-full" viewBox="0 0 640 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs>
-          <linearGradient id={`trend-bg-${item.id}`} x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stopColor={theme.bg} />
-            <stop offset="55%" stopColor={theme.accent} stopOpacity="0.82" />
-            <stop offset="100%" stopColor="#fff7ed" />
-          </linearGradient>
-          <radialGradient id={`trend-glow-${item.id}`} cx="25%" cy="20%" r="70%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.62" />
-            <stop offset="42%" stopColor="#ffffff" stopOpacity="0.08" />
-            <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-          </radialGradient>
-          <filter id={`trend-shadow-${item.id}`} x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="18" stdDeviation="20" floodColor="#000000" floodOpacity="0.28" />
-          </filter>
-        </defs>
-        <rect width="640" height="420" fill={`url(#trend-bg-${item.id})`} />
-        <rect width="640" height="420" fill={`url(#trend-glow-${item.id})`} />
-        <circle cx="560" cy="58" r="82" fill="#ffffff" opacity="0.16" />
-        <circle cx="74" cy="350" r="120" fill="#000000" opacity="0.14" />
-        <path d="M0 302 C125 244 197 346 320 286 C452 222 515 280 640 218 L640 420 L0 420 Z" fill="#020617" opacity="0.18" />
-        <g filter={`url(#trend-shadow-${item.id})`}>
-          <rect x="96" y="72" width="448" height="272" rx="34" fill="#ffffff" opacity="0.16" />
-          <rect x="116" y="94" width="408" height="228" rx="28" fill="#111827" opacity="0.2" />
-          {item.image === 'product' ? (
-            <>
-              <ellipse cx="320" cy="292" rx="124" ry="24" fill="#000000" opacity="0.22" />
-              <rect x="260" y="154" width="120" height="132" rx="22" fill="#ffffff" opacity="0.76" />
-              <rect x="282" y="184" width="76" height="48" rx="12" fill={theme.bg} opacity="0.78" />
-              <path d="M236 152 C268 112 356 112 404 152" stroke="#ffffff" strokeWidth="12" strokeLinecap="round" opacity="0.5" fill="none" />
-            </>
-          ) : item.image === 'video' ? (
-            <>
-              <rect x="168" y="132" width="304" height="172" rx="26" fill="#020617" opacity="0.5" />
-              <polygon points="292,178 292,258 368,218" fill="#ffffff" opacity="0.82" />
-              <path d="M158 312 L482 312" stroke="#ffffff" strokeWidth="10" strokeLinecap="round" opacity="0.35" />
-            </>
-          ) : item.image === 'memory' ? (
-            <>
-              <rect x="186" y="112" width="196" height="220" rx="16" fill="#ffffff" opacity="0.86" transform="rotate(-7 284 222)" />
-              <rect x="258" y="94" width="196" height="220" rx="16" fill="#ffffff" opacity="0.76" transform="rotate(8 356 204)" />
-              <circle cx="283" cy="190" r="38" fill={theme.bg} opacity="0.62" />
-              <circle cx="348" cy="188" r="38" fill={theme.accent} opacity="0.68" />
-              <rect x="228" y="252" width="170" height="16" rx="8" fill="#020617" opacity="0.18" />
-            </>
-          ) : (
-            <>
-              <circle cx="320" cy="172" r="58" fill="#ffffff" opacity="0.78" />
-              <path d="M218 316 C236 244 404 244 422 316 Z" fill="#ffffff" opacity="0.64" />
-              <path d="M254 138 C286 74 388 92 399 162 C368 130 314 118 254 138 Z" fill="#020617" opacity="0.22" />
-              <circle cx="296" cy="170" r="8" fill="#020617" opacity="0.4" />
-              <circle cx="344" cy="170" r="8" fill="#020617" opacity="0.4" />
-            </>
-          )}
-        </g>
-        <text x="320" y="372" textAnchor="middle" fill="#ffffff" opacity="0.92" fontSize="28" fontWeight="800" fontFamily="Arial, sans-serif">
-          {sceneLabel}
-        </text>
-        <text x="320" y="397" textAnchor="middle" fill="#ffffff" opacity="0.76" fontSize="14" fontWeight="700" letterSpacing="3" fontFamily="Arial, sans-serif">
-          TAMILAI PROMPT
-        </text>
-        <text x="616" y="397" textAnchor="end" fill="#ffffff" opacity="0.76" fontSize="13" fontWeight="700" fontFamily="Arial, sans-serif">
-          tamilaiprompt.com
-        </text>
-      </svg>
-
+      <NextImage
+        src={`/trends/generated/trend-${item.id}.jpg`}
+        alt=""
+        fill
+        sizes={item.featured ? '(min-width: 1280px) 50vw, (min-width: 768px) 100vw, 100vw' : '(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw'}
+        className="object-cover transition-transform duration-700 motion-safe:group-hover:scale-105"
+        priority={item.featured}
+      />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,white/.18,transparent_24%),linear-gradient(to_bottom,black/.08,transparent_45%,black/.34)]" aria-hidden="true" />
       <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
         <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-foreground/88 px-3 text-xs font-bold text-background shadow-sm backdrop-blur">
