@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Check, Copy, Hash, Search, Sparkles } from 'lucide-react';
 
+import { AdsenseSlot } from '@/components/adsense-slot';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { hashtagSets, type HashtagSet } from '@/lib/hashtag-sets';
@@ -81,6 +82,8 @@ export function HashtagLibrary() {
           </div>
         </div>
       </section>
+
+      <AdsenseSlot name="hashtags-top" className="py-6" />
 
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
         <div className="flex snap-x gap-2 overflow-x-auto pb-3" aria-label="Hashtag categories">

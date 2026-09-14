@@ -28,6 +28,7 @@ import {
   X,
 } from 'lucide-react';
 
+import { AdsenseSlot } from '@/components/adsense-slot';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { promptLandingPages } from '@/lib/prompt-pages';
@@ -1269,6 +1270,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      <AdsenseSlot name="home-top" className="py-6" />
+
       <section id="library" className="scroll-mt-20 mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
@@ -1324,6 +1327,8 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+      <AdsenseSlot name="home-mid" className="pb-10" />
 
       {(visibleSectors.length > 0 || (!query && activeCategory === 'all' && !showSaved)) && (
         <section id="sectors" className="border-y border-border bg-card/55 py-12 sm:py-16">

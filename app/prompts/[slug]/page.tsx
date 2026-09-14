@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ExternalLink, Sparkles } from 'lucide-react';
 
+import { AdsenseSlot } from '@/components/adsense-slot';
 import { InstagramEmbed } from '@/components/instagram-embed';
 import { PromptCopyButton } from '@/components/prompt-copy-button';
 import { getPromptLandingPage, promptLandingPages } from '@/lib/prompt-pages';
@@ -117,6 +118,8 @@ export default async function PromptLandingPage({ params }: Props) {
             <p className="mt-5 rounded-2xl bg-muted p-4 text-sm leading-7 text-muted-foreground">{page.promptEn}</p>
           </div>
 
+          <AdsenseSlot name="prompt-inline" className="px-0" />
+
           <div className="grid gap-5 md:grid-cols-2">
             <InfoCard title="Tips to get better output" items={page.tips} />
             <InfoCard title="Mistakes to avoid" items={page.mistakes} />
@@ -177,6 +180,8 @@ export default async function PromptLandingPage({ params }: Props) {
         </article>
 
         <aside className="space-y-5">
+          <AdsenseSlot name="prompt-sidebar" className="px-0" />
+
           <div className="rounded-3xl border border-border bg-card p-5">
             <h2 className="font-heading text-xl font-bold">Best AI tools</h2>
             <div className="mt-4 flex flex-wrap gap-2">
