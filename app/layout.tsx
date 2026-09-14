@@ -17,23 +17,112 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://tamilaiprompt.com'),
-  title: 'TamilAI Prompt — தமிழர்களுக்கான Trending AI Prompts',
-  description: 'வைரல் படங்கள், வீடியோக்கள் மற்றும் பல துறைகளுக்கான trending AI prompts — அனைத்தும் தமிழில்.',
+  title: 'TamilAI Prompt - 50+ Trending Tamil AI Image & Video Prompts',
+  description:
+    'தமிழர்களுக்கான 50+ copy-ready AI prompts. Trending image prompts, video prompts, business prompts, education prompts, coding prompts, and creator ideas in Tamil.',
+  applicationName: 'TamilAI Prompt',
+  authors: [{ name: 'TamilAI Prompt' }],
+  creator: 'TamilAI Prompt',
+  publisher: 'TamilAI Prompt',
+  keywords: [
+    'Tamil AI prompts',
+    'AI prompts Tamil',
+    'Tamil image prompts',
+    'Tamil video prompts',
+    'ChatGPT image prompts Tamil',
+    'Gemini prompts Tamil',
+    'Veo prompts Tamil',
+    'Midjourney prompts Tamil',
+    '80s Tamil photo prompt',
+    'Tamil creator prompts',
+  ],
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: 'TamilAI Prompt — ட்ரெண்ட் ஆகும் முன்பே உருவாக்குங்கள்',
-    description: 'Copy-ready Tamil prompts for viral images, videos, and useful everyday work.',
+    title: 'TamilAI Prompt - 50+ Trending Tamil AI Prompts',
+    description:
+      'Copy-ready Tamil prompts for viral AI images, videos, business, education, coding, and creator workflows.',
     type: 'website',
     locale: 'ta_IN',
     url: 'https://tamilaiprompt.com',
+    siteName: 'TamilAI Prompt',
     images: [{ url: '/og.jpg', width: 800, height: 420, alt: 'TamilAI Prompt' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TamilAI Prompt',
-    description: 'Trending AI image and video prompts for Tamil creators.',
+    title: 'TamilAI Prompt - Tamil AI Prompt Library',
+    description: '50+ trending AI image, video, business, education, and coding prompts for Tamil creators.',
     images: ['/og.jpg'],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
   manifest: '/manifest.webmanifest',
+};
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://tamilaiprompt.com/#organization',
+      name: 'TamilAI Prompt',
+      url: 'https://tamilaiprompt.com',
+      logo: 'https://tamilaiprompt.com/og.jpg',
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://tamilaiprompt.com/#website',
+      name: 'TamilAI Prompt',
+      url: 'https://tamilaiprompt.com',
+      inLanguage: ['ta-IN', 'en'],
+      publisher: { '@id': 'https://tamilaiprompt.com/#organization' },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://tamilaiprompt.com/?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@type': 'WebPage',
+      '@id': 'https://tamilaiprompt.com/#webpage',
+      url: 'https://tamilaiprompt.com',
+      name: 'TamilAI Prompt - 50+ Trending Tamil AI Image & Video Prompts',
+      description:
+        'A Tamil AI prompt library with copy-ready prompts for image generation, video generation, business, education, coding, and creator workflows.',
+      isPartOf: { '@id': 'https://tamilaiprompt.com/#website' },
+      about: { '@id': 'https://tamilaiprompt.com/#organization' },
+      inLanguage: 'ta-IN',
+    },
+    {
+      '@type': 'ItemList',
+      '@id': 'https://tamilaiprompt.com/#prompt-library',
+      name: 'Tamil AI Prompt Library',
+      itemListElement: [
+        '80s Tamil cinema look',
+        'Tamil temple wedding portrait',
+        'Chennai night ride reel',
+        'Tamil Nadu travel reel',
+        'Product reveal video',
+        'Tamil business captions',
+        'Tamil education prompts',
+        'Tamil coding prompts',
+      ].map((name, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name,
+      })),
+    },
+  ],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -41,6 +130,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ta">
       <body className={`${tamil.variable} ${outfit.variable} antialiased`}>
         {children}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <Analytics />
       </body>
     </html>
