@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
@@ -70,15 +69,27 @@ const popularSearches = [
 const watermarkEn =
   'Add the exact text “tamilaiprompt.com” as a small, clean, readable watermark in the bottom-right corner with safe padding, white at 70% opacity. Do not add any other text, logo, or watermark.';
 
-const promptImages = {
-  portrait:
-    'https://images.pexels.com/photos/3379943/pexels-photo-3379943.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200&h=900',
-  memory:
-    'https://images.pexels.com/photos/36023869/pexels-photo-36023869.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200&h=900',
-  video:
-    'https://images.pexels.com/photos/7552358/pexels-photo-7552358.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200&h=900',
-  product:
-    'https://images.pexels.com/photos/30703810/pexels-photo-30703810.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200&h=900',
+const visualStyles = {
+  portrait: {
+    className: 'from-fuchsia-500 via-orange-300 to-amber-100',
+    labelTa: 'Portrait',
+    labelEn: 'Portrait',
+  },
+  memory: {
+    className: 'from-indigo-500 via-sky-300 to-emerald-100',
+    labelTa: 'Memory',
+    labelEn: 'Memory',
+  },
+  video: {
+    className: 'from-slate-950 via-violet-700 to-cyan-300',
+    labelTa: 'Video',
+    labelEn: 'Video',
+  },
+  product: {
+    className: 'from-amber-700 via-yellow-300 to-stone-100',
+    labelTa: 'Brand',
+    labelEn: 'Brand',
+  },
 } as const;
 
 const aiTips = [
@@ -169,7 +180,7 @@ const trends: TrendPrompt[] = [
   {
     id: 1,
     category: 'image',
-    image: promptImages.portrait,
+    image: 'portrait',
     imageAlt: 'Fictional couple in an authentic 1980s Tamil studio portrait',
     titleTa: '80s தமிழ் சினிமா லுக்',
     titleEn: '80s Tamil cinema look',
@@ -186,7 +197,7 @@ const trends: TrendPrompt[] = [
   {
     id: 2,
     category: 'image',
-    image: promptImages.memory,
+    image: 'memory',
     imageAlt: 'Fictional adult meeting their childhood self in a South Indian courtyard',
     titleTa: 'குழந்தைப் பருவத்தை சந்திக்கும் நீங்கள்',
     titleEn: 'Meet your childhood self',
@@ -202,7 +213,7 @@ const trends: TrendPrompt[] = [
   {
     id: 3,
     category: 'video',
-    image: promptImages.video,
+    image: 'video',
     imageAlt: 'Cinematic motorcycle ride through rainy neon-lit Chennai',
     titleTa: 'சென்னை Night Ride Reel',
     titleEn: 'Chennai night ride reel',
@@ -217,7 +228,7 @@ const trends: TrendPrompt[] = [
   {
     id: 4,
     category: 'business',
-    image: promptImages.product,
+    image: 'product',
     imageAlt: 'Premium South Indian filter coffee advertisement scene',
     titleTa: 'Filter Coffee Product Ad',
     titleEn: 'Filter coffee product ad',
@@ -232,7 +243,7 @@ const trends: TrendPrompt[] = [
   {
     id: 9,
     category: 'image',
-    image: promptImages.portrait,
+    image: 'portrait',
     imageAlt: 'Cinematic Tamil wedding portrait with temple lights',
     titleTa: 'Temple Wedding Portrait',
     titleEn: 'Temple wedding portrait',
@@ -247,7 +258,7 @@ const trends: TrendPrompt[] = [
   {
     id: 10,
     category: 'image',
-    image: promptImages.memory,
+    image: 'memory',
     imageAlt: 'Polaroid style friends memory photograph',
     titleTa: 'Polaroid Memory Photo',
     titleEn: 'Polaroid memory photo',
@@ -262,7 +273,7 @@ const trends: TrendPrompt[] = [
   {
     id: 11,
     category: 'image',
-    image: promptImages.portrait,
+    image: 'portrait',
     imageAlt: 'Vintage Tamil hero poster visual',
     titleTa: 'Vintage Hero Poster',
     titleEn: 'Vintage hero poster',
@@ -277,7 +288,7 @@ const trends: TrendPrompt[] = [
   {
     id: 12,
     category: 'image',
-    image: promptImages.product,
+    image: 'product',
     imageAlt: 'Luxury product photography with Tamil cultural styling',
     titleTa: 'Luxury Product Shot',
     titleEn: 'Luxury product shot',
@@ -291,7 +302,7 @@ const trends: TrendPrompt[] = [
   {
     id: 13,
     category: 'image',
-    image: promptImages.video,
+    image: 'video',
     imageAlt: 'Rainy cinematic street fashion portrait',
     titleTa: 'Rainy Street Portrait',
     titleEn: 'Rainy street portrait',
@@ -306,7 +317,7 @@ const trends: TrendPrompt[] = [
   {
     id: 14,
     category: 'image',
-    image: promptImages.portrait,
+    image: 'portrait',
     imageAlt: 'LinkedIn profile photo with modern office background',
     titleTa: 'Professional Profile Photo',
     titleEn: 'Professional profile photo',
@@ -321,7 +332,7 @@ const trends: TrendPrompt[] = [
   {
     id: 15,
     category: 'image',
-    image: promptImages.memory,
+    image: 'memory',
     imageAlt: 'AI avatar in Tamil fantasy kingdom style',
     titleTa: 'Tamil Fantasy Avatar',
     titleEn: 'Tamil fantasy avatar',
@@ -336,7 +347,7 @@ const trends: TrendPrompt[] = [
   {
     id: 16,
     category: 'image',
-    image: promptImages.product,
+    image: 'product',
     imageAlt: 'Food photography banana leaf meal',
     titleTa: 'Banana Leaf Food Photo',
     titleEn: 'Banana leaf food photo',
@@ -350,7 +361,7 @@ const trends: TrendPrompt[] = [
   {
     id: 17,
     category: 'image',
-    image: promptImages.portrait,
+    image: 'portrait',
     imageAlt: 'Studio saree portrait with soft lighting',
     titleTa: 'Elegant Saree Portrait',
     titleEn: 'Elegant saree portrait',
@@ -365,7 +376,7 @@ const trends: TrendPrompt[] = [
   {
     id: 18,
     category: 'image',
-    image: promptImages.memory,
+    image: 'memory',
     imageAlt: 'Newborn announcement style family photo',
     titleTa: 'Family Portrait Style',
     titleEn: 'Family portrait style',
@@ -380,7 +391,7 @@ const trends: TrendPrompt[] = [
   {
     id: 19,
     category: 'image',
-    image: promptImages.video,
+    image: 'video',
     imageAlt: 'Cyberpunk Chennai portrait',
     titleTa: 'Cyberpunk Chennai',
     titleEn: 'Cyberpunk Chennai',
@@ -395,7 +406,7 @@ const trends: TrendPrompt[] = [
   {
     id: 20,
     category: 'image',
-    image: promptImages.product,
+    image: 'product',
     imageAlt: 'Ecommerce product photo on white background',
     titleTa: 'Ecommerce White Background',
     titleEn: 'Ecommerce white background',
@@ -409,7 +420,7 @@ const trends: TrendPrompt[] = [
   {
     id: 21,
     category: 'image',
-    image: promptImages.portrait,
+    image: 'portrait',
     imageAlt: 'Anime inspired Tamil portrait',
     titleTa: 'Anime Tamil Avatar',
     titleEn: 'Anime Tamil avatar',
@@ -424,7 +435,7 @@ const trends: TrendPrompt[] = [
   {
     id: 22,
     category: 'image',
-    image: promptImages.memory,
+    image: 'memory',
     imageAlt: 'Black and white editorial portrait',
     titleTa: 'Black & White Editorial',
     titleEn: 'Black and white editorial',
@@ -439,7 +450,7 @@ const trends: TrendPrompt[] = [
   {
     id: 23,
     category: 'video',
-    image: promptImages.video,
+    image: 'video',
     imageAlt: 'Product reveal video with cinematic lighting',
     titleTa: 'Product Reveal Video',
     titleEn: 'Product reveal video',
@@ -453,7 +464,7 @@ const trends: TrendPrompt[] = [
   {
     id: 24,
     category: 'video',
-    image: promptImages.video,
+    image: 'video',
     imageAlt: 'Travel reel of Tamil Nadu locations',
     titleTa: 'Tamil Nadu Travel Reel',
     titleEn: 'Tamil Nadu travel reel',
@@ -467,7 +478,7 @@ const trends: TrendPrompt[] = [
   {
     id: 25,
     category: 'video',
-    image: promptImages.product,
+    image: 'product',
     imageAlt: 'Food preparation cinematic reel',
     titleTa: 'Food Making Reel',
     titleEn: 'Food making reel',
@@ -481,7 +492,7 @@ const trends: TrendPrompt[] = [
   {
     id: 26,
     category: 'video',
-    image: promptImages.portrait,
+    image: 'portrait',
     imageAlt: 'Cinematic portrait motion video',
     titleTa: 'Photo To Motion Reel',
     titleEn: 'Photo to motion reel',
@@ -496,7 +507,7 @@ const trends: TrendPrompt[] = [
   {
     id: 27,
     category: 'video',
-    image: promptImages.video,
+    image: 'video',
     imageAlt: 'Real estate walk-through video',
     titleTa: 'Real Estate Walkthrough',
     titleEn: 'Real estate walkthrough',
@@ -510,7 +521,7 @@ const trends: TrendPrompt[] = [
   {
     id: 28,
     category: 'video',
-    image: promptImages.product,
+    image: 'product',
     imageAlt: 'Festival greeting animation',
     titleTa: 'Festival Greeting Video',
     titleEn: 'Festival greeting video',
@@ -524,7 +535,7 @@ const trends: TrendPrompt[] = [
   {
     id: 29,
     category: 'business',
-    image: promptImages.product,
+    image: 'product',
     imageAlt: 'Local business ad creative prompt',
     titleTa: 'Local Shop Ad Creative',
     titleEn: 'Local shop ad creative',
@@ -538,7 +549,7 @@ const trends: TrendPrompt[] = [
   {
     id: 30,
     category: 'image',
-    image: promptImages.portrait,
+    image: 'portrait',
     imageAlt: 'Passport photo correction prompt',
     titleTa: 'Passport Photo Clean-Up',
     titleEn: 'Passport photo clean-up',
@@ -553,7 +564,7 @@ const trends: TrendPrompt[] = [
   {
     id: 31,
     category: 'image',
-    image: promptImages.memory,
+    image: 'memory',
     imageAlt: 'Pet and owner portrait style',
     titleTa: 'Pet With Owner Portrait',
     titleEn: 'Pet with owner portrait',
@@ -568,7 +579,7 @@ const trends: TrendPrompt[] = [
   {
     id: 32,
     category: 'image',
-    image: promptImages.video,
+    image: 'video',
     imageAlt: 'Music album cover in Tamil indie style',
     titleTa: 'Indie Album Cover',
     titleEn: 'Indie album cover',
@@ -1166,10 +1177,29 @@ export default function HomePage() {
             {visibleTrends.map((item) => {
               const copied = copiedId === item.id;
               const saved = savedIds.includes(item.id);
+              const visual = visualStyles[item.image as keyof typeof visualStyles] ?? visualStyles.portrait;
+              const VisualIcon = item.category === 'video' ? Play : item.category === 'business' ? Megaphone : ImageIcon;
               return (
                 <article key={item.id} className={`group overflow-hidden rounded-3xl border border-border bg-card shadow-[0_10px_36px_-24px_oklch(0.25_0.08_300/.45)] transition-[border-color,box-shadow] duration-200 hover:border-primary/30 hover:shadow-[0_20px_55px_-28px_oklch(0.45_0.18_305/.48)] ${item.featured ? 'md:col-span-2 xl:col-span-2' : ''}`}>
-                  <div className={`relative overflow-hidden bg-muted ${item.featured ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}>
-                    <Image src={item.image} alt={item.imageAlt} fill priority={item.featured} sizes={item.featured ? '(max-width: 768px) 100vw, 50vw' : '(max-width: 768px) 100vw, 25vw'} className="object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.02]" />
+                  <div
+                    className={`relative overflow-hidden bg-gradient-to-br ${visual.className} ${item.featured ? 'aspect-[16/9]' : 'aspect-[4/3]'}`}
+                    aria-hidden="true"
+                  >
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,white/.55,transparent_26%),radial-gradient(circle_at_80%_70%,black/.24,transparent_35%)]" />
+                    <div className="absolute inset-5 rounded-[2rem] border border-white/35 bg-white/12 shadow-2xl backdrop-blur-[2px] transition-transform duration-500 motion-safe:group-hover:scale-[1.02]" />
+                    <div className="absolute inset-0 grid place-items-center p-6 text-center text-white">
+                      <div>
+                        <span className="mx-auto grid size-16 place-items-center rounded-2xl border border-white/35 bg-black/25 shadow-lg backdrop-blur">
+                          <VisualIcon className="size-8" aria-hidden="true" />
+                        </span>
+                        <p className="mt-4 font-heading text-2xl font-extrabold tracking-tight drop-shadow-sm">
+                          {language === 'ta' ? visual.labelTa : visual.labelEn}
+                        </p>
+                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-white/80">
+                          TamilAI Prompt
+                        </p>
+                      </div>
+                    </div>
                     <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
                       <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-foreground/88 px-3 text-xs font-bold text-background shadow-sm backdrop-blur">
                         {item.category === 'video' ? <Play className="size-3.5 fill-current" aria-hidden="true" /> : <Flame className="size-3.5" aria-hidden="true" />}
@@ -1333,12 +1363,6 @@ export default function HomePage() {
 
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         <p>© 2026 TamilAI Prompt · தமிழர்களால், தமிழர்களுக்காக.</p>
-        <p className="mt-2">
-          {language === 'ta' ? 'பட உதவி: ' : 'Photos provided by '}
-          <a href="https://www.pexels.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
-            Pexels
-          </a>
-        </p>
       </footer>
 
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl md:hidden" aria-label="Mobile navigation">
