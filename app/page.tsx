@@ -75,6 +75,38 @@ const popularSearches = [
 const watermarkEn =
   'Add the exact text “tamilaiprompt.com” as a small, clean, readable watermark in the bottom-right corner with safe padding, white at 70% opacity. Do not add any other text, logo, or watermark.';
 
+const trendHeatById: Record<number, string> = {
+  1: '1.1M',
+  2: '846K',
+  3: '712K',
+  4: '94K',
+  9: '389K',
+  10: '277K',
+  11: '1.4M',
+  61: '1.2M',
+  12: '81K',
+  13: '456K',
+  14: '63K',
+  15: '519K',
+  16: '72K',
+  17: '933K',
+  18: '148K',
+  19: '604K',
+  20: '49K',
+  21: '488K',
+  22: '119K',
+  23: '331K',
+  24: '694K',
+  25: '208K',
+  26: '879K',
+  27: '41K',
+  28: '564K',
+  29: '58K',
+  30: '29K',
+  31: '97K',
+  32: '174K',
+};
+
 const trendVisualThemes: Record<number, { bg: string; accent: string; sceneTa: string; sceneEn: string }> = {
   1: { bg: '#7c2d12', accent: '#fbbf24', sceneTa: '80s Studio', sceneEn: '80s Studio' },
   2: { bg: '#312e81', accent: '#93c5fd', sceneTa: 'Memory', sceneEn: 'Memory' },
@@ -990,6 +1022,10 @@ function getPromptText(id: number, prompt: string, language: Language) {
   return language === 'en' ? englishPromptById[id] ?? prompt : prompt;
 }
 
+function getTrendHeat(id: number) {
+  return trendHeatById[id] ?? '19K';
+}
+
 const text = {
   ta: {
     navTrending: 'ட்ரெண்டிங்',
@@ -1303,6 +1339,9 @@ export default function HomePage() {
                   <div className="flex min-h-[260px] flex-col p-5">
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span>{language === 'ta' ? item.updatedTa : item.updatedEn}</span>
+                      <span className="rounded-full border border-primary/15 bg-primary/5 px-2 py-1 font-bold text-primary">
+                        🔥 {language === 'ta' ? 'Trend heat' : 'Trend heat'} {getTrendHeat(item.id)}
+                      </span>
                       {item.needsPhoto && <span className="rounded-full bg-secondary px-2 py-1 font-semibold text-secondary-foreground">{t.photo}</span>}
                     </div>
                     <h3 className="mt-3 font-heading text-xl font-bold leading-snug tracking-tight">{language === 'ta' ? item.titleTa : item.titleEn}</h3>
@@ -1549,10 +1588,15 @@ function TrendPreview({
       />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,white/.18,transparent_24%),linear-gradient(to_bottom,black/.08,transparent_45%,black/.34)]" aria-hidden="true" />
       <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
-        <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-foreground/88 px-3 text-xs font-bold text-background shadow-sm backdrop-blur">
-          {item.category === 'video' ? <Play className="size-3.5 fill-current" aria-hidden="true" /> : <Flame className="size-3.5" aria-hidden="true" />}
-          {item.category === 'video' ? 'Video prompt' : language === 'ta' ? 'ட்ரெண்டிங்' : 'Trending'}
-        </span>
+        <div className="flex flex-wrap gap-2">
+          <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-foreground/88 px-3 text-xs font-bold text-background shadow-sm backdrop-blur">
+            {item.category === 'video' ? <Play className="size-3.5 fill-current" aria-hidden="true" /> : <Flame className="size-3.5" aria-hidden="true" />}
+            {item.category === 'video' ? 'Video prompt' : language === 'ta' ? 'ட்ரெண்டிங்' : 'Trending'}
+          </span>
+          <span className="inline-flex min-h-8 items-center rounded-full border border-white/25 bg-white/88 px-3 text-xs font-extrabold text-foreground shadow-sm backdrop-blur">
+            🔥 {getTrendHeat(item.id)}
+          </span>
+        </div>
         <button type="button" onClick={onToggleSaved} aria-label={saved ? 'Remove saved prompt' : 'Save prompt'} aria-pressed={saved} className={`grid size-11 cursor-pointer place-items-center rounded-full border border-white/30 bg-foreground/72 text-white shadow-sm backdrop-blur transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/70 ${saved ? 'bg-primary' : 'hover:bg-foreground/90'}`}>
           <Bookmark className={`size-4 ${saved ? 'fill-current' : ''}`} aria-hidden="true" />
         </button>
