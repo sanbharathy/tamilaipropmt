@@ -65,7 +65,7 @@ const trends: TrendPrompt[] = [
     descriptionTa: 'உங்கள் selfie-ஐ 1980களின் தமிழ்நாட்டு ஸ்டூடியோ படமாக மாற்றுங்கள்.',
     descriptionEn: 'Turn your selfie into an authentic 1980s Tamil Nadu studio portrait.',
     prompt:
-      'நான் பதிவேற்றும் புகைப்படத்தை முக அடையாளத்திற்கான துல்லியமான reference ஆகப் பயன்படுத்தவும். 1980களின் தமிழ்நாட்டு ஸ்டூடியோ புகைப்படமாக மாற்றவும் — காலத்திற்கேற்ற உடை, இயல்பான சிகை அலங்காரம், warm tungsten lighting, faded 35mm film grain, soft vignette. முக அமைப்பையும் இயல்பான தோற்றத்தையும் மாற்ற வேண்டாம். படத்தில் எழுத்து அல்லது watermark வேண்டாம்.',
+      'நான் பதிவேற்றும் புகைப்படத்தை முக அடையாளத்திற்கான துல்லியமான reference ஆகப் பயன்படுத்தவும். 1980களின் தமிழ்நாட்டு ஸ்டூடியோ புகைப்படமாக மாற்றவும் — காலத்திற்கேற்ற உடை, இயல்பான சிகை அலங்காரம், warm tungsten lighting, faded 35mm film grain, soft vignette. முக அமைப்பையும் இயல்பான தோற்றத்தையும் மாற்ற வேண்டாம். படத்தின் கீழ்-வலது மூலையில் பாதுகாப்பான இடைவெளியுடன் “tamilaiprompt.com” என்ற சரியான எழுத்தை சிறிய, தெளிவான, 70% opacity கொண்ட வெள்ளை watermark ஆகச் சேர்க்கவும். வேறு எழுத்து, logo அல்லது watermark சேர்க்க வேண்டாம்.',
     models: ['Gemini', 'ChatGPT Images'],
     updatedTa: '2 மணி நேரம் முன்பு',
     updatedEn: '2 hours ago',
@@ -82,7 +82,7 @@ const trends: TrendPrompt[] = [
     descriptionTa: 'இன்றைய நீங்களும் குழந்தைப் பருவ நீங்களும் ஒரே உணர்ச்சிப்பூர்வமான படத்தில்.',
     descriptionEn: 'Place your present and childhood selves in one emotional portrait.',
     prompt:
-      'நான் பதிவேற்றும் தற்போதைய புகைப்படம் மற்றும் குழந்தைப் பருவ புகைப்படத்தை identity references ஆகப் பயன்படுத்தவும். இருவரும் அமைதியான தென்னிந்திய வீட்டுத் திண்ணையில் அன்புடன் ஒருவரை ஒருவர் சந்திப்பது போல இயல்பான black-and-white editorial portrait உருவாக்கவும். முக அடையாளம், வயது மற்றும் உடல் விகிதங்களை துல்லியமாக வைத்திருக்கவும். இயல்பான ஒளி, மென்மையான film grain, எழுத்து வேண்டாம்.',
+      'நான் பதிவேற்றும் தற்போதைய புகைப்படம் மற்றும் குழந்தைப் பருவ புகைப்படத்தை identity references ஆகப் பயன்படுத்தவும். இருவரும் அமைதியான தென்னிந்திய வீட்டுத் திண்ணையில் அன்புடன் ஒருவரை ஒருவர் சந்திப்பது போல இயல்பான black-and-white editorial portrait உருவாக்கவும். முக அடையாளம், வயது மற்றும் உடல் விகிதங்களை துல்லியமாக வைத்திருக்கவும். இயல்பான ஒளி, மென்மையான film grain. படத்தின் கீழ்-வலது மூலையில் பாதுகாப்பான இடைவெளியுடன் “tamilaiprompt.com” என்ற சரியான எழுத்தை சிறிய, தெளிவான, 70% opacity கொண்ட வெள்ளை watermark ஆகச் சேர்க்கவும். வேறு எழுத்து, logo அல்லது watermark சேர்க்க வேண்டாம்.',
     models: ['ChatGPT Images', 'Gemini'],
     updatedTa: 'நேற்று',
     updatedEn: 'Yesterday',
@@ -98,7 +98,7 @@ const trends: TrendPrompt[] = [
     descriptionTa: 'மழை இரவில் வேகமான cinematic tracking shot — Reels மற்றும் Shorts-க்கு.',
     descriptionEn: 'A rainy-night cinematic tracking shot for Reels and Shorts.',
     prompt:
-      '9:16 vertical cinematic video. A motorcycle rides through rain-soaked Chennai streets at night. Low-angle tracking camera, neon reflections on wet asphalt, realistic wheel spray, subtle handheld energy, smooth subject motion, dramatic blue and amber lighting. 8 seconds, consistent rider and motorcycle, no text, no logo, no watermark.',
+      '9:16 vertical cinematic video. A motorcycle rides through rain-soaked Chennai streets at night. Low-angle tracking camera, neon reflections on wet asphalt, realistic wheel spray, subtle handheld energy, smooth subject motion, dramatic blue and amber lighting. 8 seconds, consistent rider and motorcycle. Add the exact text “tamilaiprompt.com” as a small, clean, readable watermark in the bottom-right corner with safe padding, white at 70% opacity, visible throughout the entire video. Do not add any other text, logo, or watermark.',
     models: ['Veo', 'Kling', 'Runway'],
     updatedTa: 'இன்று',
     updatedEn: 'Today',
@@ -113,7 +113,7 @@ const trends: TrendPrompt[] = [
     descriptionTa: 'சிறு வணிகத்திற்கான premium product photo மற்றும் video opening shot.',
     descriptionEn: 'A premium product visual and video opening shot for a local business.',
     prompt:
-      'Premium South Indian filter coffee advertisement. A polished brass davara-tumbler on a dark stone counter, delicate steam rising, early-morning sunlight cutting through a traditional kitchen window, rich coffee texture, realistic condensation, cinematic 50mm product photography, warm brown and brass palette, negative space for later copy, no text, no logo, no watermark.',
+      'Premium South Indian filter coffee advertisement. A polished brass davara-tumbler on a dark stone counter, delicate steam rising, early-morning sunlight cutting through a traditional kitchen window, rich coffee texture, realistic condensation, cinematic 50mm product photography, warm brown and brass palette, negative space for later copy. Add the exact text “tamilaiprompt.com” as a small, clean, readable watermark in the bottom-right corner with safe padding, white at 70% opacity. Do not add any other text, logo, or watermark.',
     models: ['Gemini', 'Midjourney', 'ChatGPT Images'],
     updatedTa: 'இந்த வாரம்',
     updatedEn: 'This week',
