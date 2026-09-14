@@ -1025,6 +1025,18 @@ function getTrendHeat(id: number) {
   return trendHeatById[id] ?? '19K';
 }
 
+function getTrendType(category: Exclude<Category, 'all'>, language: Language) {
+  if (category === 'image') {
+    return language === 'ta' ? 'படம்' : 'Image';
+  }
+
+  if (category === 'video') {
+    return language === 'ta' ? 'வீடியோ' : 'Video';
+  }
+
+  return language === 'ta' ? 'வணிகம்' : 'Business';
+}
+
 const text = {
   ta: {
     navTrending: 'ட்ரெண்டிங்',
@@ -1330,6 +1342,7 @@ export default function HomePage() {
                 <article key={item.id} className={`group overflow-hidden rounded-3xl border border-border bg-card shadow-[0_10px_36px_-24px_oklch(0.25_0.08_300/.45)] transition-[border-color,box-shadow] duration-200 hover:border-primary/30 hover:shadow-[0_20px_55px_-28px_oklch(0.45_0.18_305/.48)] ${item.featured ? 'md:col-span-2 xl:col-span-2' : ''}`}>
                   <TrendPreview
                     item={item}
+                    language={language}
                     saved={saved}
                     onToggleSaved={() => toggleSaved(item.id)}
                   />
@@ -1337,9 +1350,6 @@ export default function HomePage() {
                   <div className="flex min-h-[260px] flex-col p-5">
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span>{language === 'ta' ? item.updatedTa : item.updatedEn}</span>
-                      <span className="rounded-full border border-primary/15 bg-primary/5 px-2 py-1 font-bold text-primary">
-                        🔥 {language === 'ta' ? 'Trend heat' : 'Trend heat'} {getTrendHeat(item.id)}
-                      </span>
                       {item.needsPhoto && <span className="rounded-full bg-secondary px-2 py-1 font-semibold text-secondary-foreground">{t.photo}</span>}
                     </div>
                     <h3 className="mt-3 font-heading text-xl font-bold leading-snug tracking-tight">{language === 'ta' ? item.titleTa : item.titleEn}</h3>
@@ -1552,10 +1562,12 @@ export default function HomePage() {
 
 function TrendPreview({
   item,
+  language,
   saved,
   onToggleSaved,
 }: {
   item: TrendPrompt;
+  language: Language;
   saved: boolean;
   onToggleSaved: () => void;
 }) {
@@ -1587,7 +1599,7 @@ function TrendPreview({
       </div>
       <div className="absolute bottom-3 left-3">
         <span className="inline-flex min-h-8 items-center rounded-full border border-white/25 bg-black/52 px-3 text-xs font-extrabold text-white shadow-sm backdrop-blur">
-          🔥 {getTrendHeat(item.id)}
+          🔥 {getTrendHeat(item.id)} · {getTrendType(item.category, language)}
         </span>
       </div>
     </div>
