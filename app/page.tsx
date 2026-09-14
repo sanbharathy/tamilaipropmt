@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Flame,
   GraduationCap,
+  Hash,
   Image as ImageIcon,
   Languages,
   Lightbulb,
@@ -51,7 +52,7 @@ type TrendPrompt = {
 
 const filters: { id: Category; ta: string; en: string; icon: typeof Flame }[] = [
   { id: 'all', ta: 'ட்ரெண்டிங்', en: 'Trending', icon: Flame },
-  { id: 'image', ta: 'படங்கள்', en: 'Images', icon: ImageIcon },
+  { id: 'image', ta: 'படங்கள்', en: 'Pictures', icon: ImageIcon },
   { id: 'video', ta: 'வீடியோக்கள்', en: 'Videos', icon: Video },
   { id: 'business', ta: 'வணிகம்', en: 'Business', icon: BriefcaseBusiness },
   { id: 'education', ta: 'கல்வி', en: 'Education', icon: GraduationCap },
@@ -1139,6 +1140,35 @@ export default function HomePage() {
             {language === 'ta' ? 'தமிழ்' : 'EN'}
           </Button>
         </div>
+        <div className="border-t border-border/60">
+          <div className="mx-auto flex max-w-7xl snap-x gap-2 overflow-x-auto px-4 py-2 sm:px-6" aria-label="Prompt category tabs">
+            {filters.map((filter) => {
+              const Icon = filter.icon;
+              const selected = activeCategory === filter.id && !showSaved;
+              return (
+                <button
+                  key={filter.id}
+                  type="button"
+                  onClick={() => selectCategory(filter.id)}
+                  aria-pressed={selected}
+                  className={`flex min-h-10 shrink-0 snap-start cursor-pointer items-center gap-2 rounded-full border px-3.5 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/40 sm:min-h-11 sm:px-4 sm:text-sm ${
+                    selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground'
+                  }`}
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                  {filter[language]}
+                </button>
+              );
+            })}
+            <Link
+              href="/hashtags"
+              className="flex min-h-10 shrink-0 snap-start items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 text-xs font-bold text-primary transition-colors hover:border-primary/40 hover:bg-primary/10 sm:min-h-11 sm:px-4 sm:text-sm"
+            >
+              <Hash className="size-4" aria-hidden="true" />
+              Hashtags
+            </Link>
+          </div>
+        </div>
       </header>
 
       <section className="relative overflow-hidden border-b border-border/70">
@@ -1172,27 +1202,6 @@ export default function HomePage() {
                 {language === 'ta' ? 'தேடுக' : 'Search'}
               </Button>
             </div>
-          </div>
-
-          <div className="mt-5 flex snap-x gap-2 overflow-x-auto pb-2 sm:justify-center" aria-label="Prompt filters">
-            {filters.map((filter) => {
-              const Icon = filter.icon;
-              const selected = activeCategory === filter.id && !showSaved;
-              return (
-                <button
-                  key={filter.id}
-                  type="button"
-                  onClick={() => selectCategory(filter.id)}
-                  aria-pressed={selected}
-                  className={`flex min-h-11 shrink-0 snap-start cursor-pointer items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/40 ${
-                    selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground'
-                  }`}
-                >
-                  <Icon className="size-4" aria-hidden="true" />
-                  {filter[language]}
-                </button>
-              );
-            })}
           </div>
 
           <div className="mx-auto mt-3 flex max-w-4xl snap-x gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:justify-center" aria-label="Popular Tamil AI prompt searches">
