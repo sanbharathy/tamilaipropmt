@@ -1159,35 +1159,6 @@ export default function HomePage() {
             </Button>
           </div>
         </div>
-        <div className="hidden border-t border-border/60 md:block">
-          <div className="mx-auto flex max-w-7xl snap-x gap-2 overflow-x-auto px-4 py-2 sm:px-6" aria-label="Prompt category tabs">
-            {filters.map((filter) => {
-              const Icon = filter.icon;
-              const selected = activeCategory === filter.id && !showSaved;
-              return (
-                <button
-                  key={filter.id}
-                  type="button"
-                  onClick={() => selectCategory(filter.id)}
-                  aria-pressed={selected}
-                  className={`flex min-h-10 shrink-0 snap-start cursor-pointer items-center gap-2 rounded-full border px-3.5 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/40 sm:min-h-11 sm:px-4 sm:text-sm ${
-                    selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground'
-                  }`}
-                >
-                  <Icon className="size-4" aria-hidden="true" />
-                  {filter[language]}
-                </button>
-              );
-            })}
-            <Link
-              href="/hashtags"
-              className="flex min-h-10 shrink-0 snap-start items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 text-xs font-bold text-primary transition-colors hover:border-primary/40 hover:bg-primary/10 sm:min-h-11 sm:px-4 sm:text-sm"
-            >
-              <Hash className="size-4" aria-hidden="true" />
-              Hashtags
-            </Link>
-          </div>
-        </div>
         {mobileMenuOpen ? (
           <div id="mobile-menu" className="border-t border-border bg-background/98 px-4 py-3 shadow-[0_18px_40px_-30px_oklch(0.2_0.04_300/.6)] lg:hidden">
             <div className="grid gap-2">
