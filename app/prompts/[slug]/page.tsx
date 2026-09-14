@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ExternalLink, Sparkles } from 'lucide-react';
 
+import { InstagramEmbed } from '@/components/instagram-embed';
 import { PromptCopyButton } from '@/components/prompt-copy-button';
 import { getPromptLandingPage, promptLandingPages } from '@/lib/prompt-pages';
 
@@ -131,6 +132,48 @@ export default async function PromptLandingPage({ params }: Props) {
               ))}
             </div>
           </div>
+
+          {(page.instagramExamples?.length || page.hashtags?.length) ? (
+            <section className="rounded-3xl border border-border bg-card p-5 sm:p-6">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Trend discovery</p>
+              <h2 className="mt-2 font-heading text-2xl font-bold">Instagram trend examples</h2>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                These are public Instagram references and hashtag links for trend research. We embed or link to the original posts instead of copying creator images.
+              </p>
+
+              {page.instagramExamples?.length ? (
+                <div className="mt-5 grid gap-5">
+                  {page.instagramExamples.map((example) => (
+                    <InstagramEmbed
+                      key={example.url}
+                      url={example.url}
+                      caption={example.caption}
+                      source={example.source}
+                    />
+                  ))}
+                </div>
+              ) : null}
+
+              {page.hashtags?.length ? (
+                <div className="mt-5">
+                  <h3 className="text-sm font-bold text-foreground">Explore related hashtags</h3>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {page.hashtags.map((tag) => (
+                      <a
+                        key={tag}
+                        href={`https://www.instagram.com/explore/tags/${tag.toLowerCase()}/`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:border-primary/35 hover:bg-primary/10"
+                      >
+                        #{tag}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </section>
+          ) : null}
         </article>
 
         <aside className="space-y-5">

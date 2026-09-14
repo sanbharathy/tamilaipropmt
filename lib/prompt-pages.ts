@@ -13,6 +13,12 @@ export type PromptLandingPage = {
   tips: string[];
   mistakes: string[];
   related: string[];
+  instagramExamples?: {
+    url: string;
+    caption: string;
+    source: string;
+  }[];
+  hashtags?: string[];
 };
 
 export const promptLandingPages: PromptLandingPage[] = [
@@ -35,6 +41,14 @@ export const promptLandingPages: PromptLandingPage[] = [
     tips: ['Use a clear front-facing selfie.', 'Ask for “natural skin texture” to avoid plastic faces.', 'Generate 2–3 versions and choose the most realistic one.'],
     mistakes: ['Do not use celebrity faces.', 'Avoid too much text in the image.', 'Do not ask for copyrighted movie poster copies.'],
     related: ['ai-saree-photo-prompt', 'tamil-wedding-ai-photo-prompt', 'gemini-ai-image-prompts-tamil'],
+    instagramExamples: [
+      {
+        url: 'https://www.instagram.com/p/DdCFW6JB4L-/',
+        caption: 'A public Instagram example of the viral 80s AI photo trend, embedded for reference.',
+        source: '@dharanayogic',
+      },
+    ],
+    hashtags: ['80sPhotoTrend', '80sTrend', 'AIPhotoEditing', 'ChatGPTPrompt', 'RetroAI'],
   },
   {
     slug: 'ai-saree-photo-prompt',
@@ -55,6 +69,7 @@ export const promptLandingPages: PromptLandingPage[] = [
     tips: ['Mention saree color if you want control.', 'Use “realistic body proportions.”', 'Ask for “simple jewelry” for a premium look.'],
     mistakes: ['Avoid over-smoothing skin.', 'Avoid extra random text.', 'Do not use images without permission.'],
     related: ['80s-tamil-photo-prompt', 'tamil-wedding-ai-photo-prompt', 'gemini-ai-image-prompts-tamil'],
+    hashtags: ['AISaree', 'SareePortrait', 'AIPhotoEditing', 'GeminiPrompt', 'TamilReels'],
   },
   {
     slug: 'tamil-wedding-ai-photo-prompt',
@@ -75,6 +90,7 @@ export const promptLandingPages: PromptLandingPage[] = [
     tips: ['Upload clear photos of both people.', 'Specify temple, studio, or outdoor style.', 'Use “respectful traditional mood.”'],
     mistakes: ['Do not change identity.', 'Avoid unrealistic hands.', 'Avoid random invitation text inside AI output.'],
     related: ['ai-saree-photo-prompt', '80s-tamil-photo-prompt', 'product-ad-prompts-tamil'],
+    hashtags: ['TamilWedding', 'WeddingAI', 'CouplePortrait', 'AIPhotoEditing', 'WeddingReels'],
   },
   {
     slug: 'kling-ai-video-prompts-tamil',
@@ -95,6 +111,7 @@ export const promptLandingPages: PromptLandingPage[] = [
     tips: ['Always mention 9:16 for reels.', 'Use one main camera movement.', 'Keep videos 6–10 seconds for cleaner results.'],
     mistakes: ['Do not overload with many scenes.', 'Avoid readable random text.', 'Avoid fast motion if identity matters.'],
     related: ['tamil-youtube-shorts-prompts', 'product-ad-prompts-tamil', 'tamil-festival-greeting-prompts'],
+    hashtags: ['KlingAI', 'AIVideo', 'ImageToVideo', 'TamilReels', 'AIVideoGenerator'],
   },
   {
     slug: 'midjourney-prompts-tamil',
@@ -115,6 +132,7 @@ export const promptLandingPages: PromptLandingPage[] = [
     tips: ['Mention aspect ratio like 4:5 or 16:9.', 'Use style words: editorial, cinematic, realistic.', 'Keep one visual concept per prompt.'],
     mistakes: ['Avoid direct movie poster copies.', 'Avoid celebrity likeness requests.', 'Avoid too many style references.'],
     related: ['80s-tamil-photo-prompt', 'gemini-ai-image-prompts-tamil', 'product-ad-prompts-tamil'],
+    hashtags: ['MidjourneyPrompt', 'AIPoster', 'TamilDesign', 'AIArtPrompt', 'CinematicPoster'],
   },
   {
     slug: 'gemini-ai-image-prompts-tamil',
@@ -135,6 +153,7 @@ export const promptLandingPages: PromptLandingPage[] = [
     tips: ['Tamil prompts work, but add camera/style words in English if needed.', 'Use “do not change identity.”', 'Mention no random text.'],
     mistakes: ['Do not leave the style vague.', 'Avoid changing age/body shape unintentionally.', 'Avoid uploading private photos without consent.'],
     related: ['80s-tamil-photo-prompt', 'ai-saree-photo-prompt', 'midjourney-prompts-tamil'],
+    hashtags: ['GeminiAI', 'GeminiPrompt', 'AIPhotoEditing', 'TamilAI', 'PhotoPrompt'],
   },
   {
     slug: 'tamil-instagram-caption-prompts',
@@ -155,6 +174,7 @@ export const promptLandingPages: PromptLandingPage[] = [
     tips: ['Use the first line as the hook.', 'Keep captions short for reels.', 'Add local Tamil words for relatability.'],
     mistakes: ['Avoid fake urgency.', 'Avoid too many hashtags.', 'Avoid robotic translation.'],
     related: ['product-ad-prompts-tamil', 'tamil-festival-greeting-prompts', 'tamil-youtube-shorts-prompts'],
+    hashtags: ['TamilCaption', 'InstagramCaption', 'TamilReels', 'ContentCreator', 'SocialMediaTips'],
   },
   {
     slug: 'product-ad-prompts-tamil',
@@ -175,6 +195,7 @@ export const promptLandingPages: PromptLandingPage[] = [
     tips: ['Show the product clearly.', 'Use one offer only.', 'Keep CTA simple: Call, WhatsApp, Order now.'],
     mistakes: ['Avoid fake claims.', 'Avoid too many fonts/text.', 'Do not hide product details behind decoration.'],
     related: ['tamil-instagram-caption-prompts', 'kling-ai-video-prompts-tamil', 'tamil-festival-greeting-prompts'],
+    hashtags: ['ProductAd', 'TamilBusiness', 'SmallBusinessMarketing', 'AIAds', 'InstagramMarketing'],
   },
   {
     slug: 'tamil-youtube-shorts-prompts',
@@ -195,6 +216,7 @@ export const promptLandingPages: PromptLandingPage[] = [
     tips: ['Write 10 hooks before choosing one.', 'Use one idea per short.', 'Add visual direction for every scene.'],
     mistakes: ['Avoid long intros.', 'Avoid too many facts in 30 seconds.', 'Avoid weak endings.'],
     related: ['kling-ai-video-prompts-tamil', 'tamil-instagram-caption-prompts', 'tamil-festival-greeting-prompts'],
+    hashtags: ['YouTubeShorts', 'TamilShorts', 'TamilReels', 'CreatorTips', 'ShortsScript'],
   },
   {
     slug: 'tamil-festival-greeting-prompts',
@@ -215,6 +237,7 @@ export const promptLandingPages: PromptLandingPage[] = [
     tips: ['Create seasonal pages before the festival month.', 'Add business-specific versions.', 'Keep text minimal and add final copy in Canva.'],
     mistakes: ['Avoid wrong festival symbols.', 'Avoid cluttered designs.', 'Avoid unreadable AI-generated Tamil text.'],
     related: ['product-ad-prompts-tamil', 'tamil-instagram-caption-prompts', 'kling-ai-video-prompts-tamil'],
+    hashtags: ['TamilFestival', 'FestivalGreeting', 'PongalDesign', 'DiwaliDesign', 'TamilNewYear'],
   },
 ];
 
