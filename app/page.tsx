@@ -58,7 +58,7 @@ const trends: TrendPrompt[] = [
   {
     id: 1,
     category: 'image',
-    image: '/trends/80s-tamil-portrait.png',
+    image: '/trends/80s-tamil-portrait.jpg',
     imageAlt: 'Fictional couple in an authentic 1980s Tamil studio portrait',
     titleTa: '80s தமிழ் சினிமா லுக்',
     titleEn: '80s Tamil cinema look',
@@ -75,7 +75,7 @@ const trends: TrendPrompt[] = [
   {
     id: 2,
     category: 'image',
-    image: '/trends/childhood-meeting.png',
+    image: '/trends/childhood-meeting.jpg',
     imageAlt: 'Fictional adult meeting their childhood self in a South Indian courtyard',
     titleTa: 'குழந்தைப் பருவத்தை சந்திக்கும் நீங்கள்',
     titleEn: 'Meet your childhood self',
@@ -91,7 +91,7 @@ const trends: TrendPrompt[] = [
   {
     id: 3,
     category: 'video',
-    image: '/trends/chennai-night-ride.png',
+    image: '/trends/chennai-night-ride.jpg',
     imageAlt: 'Cinematic motorcycle ride through rainy neon-lit Chennai',
     titleTa: 'சென்னை Night Ride Reel',
     titleEn: 'Chennai night ride reel',
@@ -106,7 +106,7 @@ const trends: TrendPrompt[] = [
   {
     id: 4,
     category: 'business',
-    image: '/trends/filter-coffee-ad.png',
+    image: '/trends/filter-coffee-ad.jpg',
     imageAlt: 'Premium South Indian filter coffee advertisement scene',
     titleTa: 'Filter Coffee Product Ad',
     titleEn: 'Filter coffee product ad',
