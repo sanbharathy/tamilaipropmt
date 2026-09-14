@@ -26,6 +26,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { promptLandingPages } from '@/lib/prompt-pages';
 
 type Language = 'ta' | 'en';
 type Category = 'all' | 'image' | 'video' | 'business' | 'education' | 'coding';
@@ -1275,6 +1276,38 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      <section id="seo-guides" className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mb-7 max-w-3xl">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">SEO prompt guides</p>
+          <h2 className="mt-2 font-heading text-2xl font-bold tracking-tight sm:text-3xl">
+            {language === 'ta' ? 'ட்ரெண்டிங் Prompt Guides' : 'Trending prompt guides'}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
+            {language === 'ta'
+              ? 'ஒவ்வொரு trend-க்கும் தனி page: Tamil prompt, English prompt, tips, mistakes, tools.'
+              : 'Dedicated pages for each trend: Tamil prompt, English prompt, tips, mistakes, and tools.'}
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {promptLandingPages.map((page) => (
+            <Link
+              key={page.slug}
+              href={`/prompts/${page.slug}`}
+              className="group rounded-2xl border border-border bg-card p-4 shadow-[0_8px_28px_-24px_oklch(0.2_0.04_300/.35)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-primary/35"
+            >
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-primary">Guide</p>
+              <h3 className="mt-2 font-heading text-base font-bold leading-snug">{page.shortTitle}</h3>
+              <p className="mt-2 line-clamp-3 text-xs leading-5 text-muted-foreground">{page.metaDescription}</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary">
+                {language === 'ta' ? 'பார்க்க' : 'Read guide'}
+                <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <section id="tips" className="scroll-mt-20 mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">

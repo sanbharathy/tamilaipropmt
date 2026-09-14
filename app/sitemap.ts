@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { promptLandingPages } from '@/lib/prompt-pages';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date('2026-09-14');
@@ -9,5 +10,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: 'https://tamilaiprompt.com/contact', lastModified, changeFrequency: 'monthly', priority: 0.7 },
     { url: 'https://tamilaiprompt.com/privacy', lastModified, changeFrequency: 'yearly', priority: 0.5 },
     { url: 'https://tamilaiprompt.com/terms', lastModified, changeFrequency: 'yearly', priority: 0.5 },
+    ...promptLandingPages.map((page) => ({
+      url: `https://tamilaiprompt.com/prompts/${page.slug}`,
+      lastModified,
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
+    })),
   ];
 }
