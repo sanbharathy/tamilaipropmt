@@ -1045,6 +1045,7 @@ const text = {
     navSectors: 'Business & Creators',
     navHashtags: 'Hashtags',
     navProfile: 'Profile Check',
+    navYouTube: 'YouTube Revenue',
     navTips: 'AI Tips',
     kicker: 'தமிழர்களுக்கான AI Trend Hub',
     heading: 'ட்ரெண்ட் ஆகும் முன்பே உருவாக்குங்கள்.',
@@ -1073,6 +1074,7 @@ const text = {
     navSectors: 'Business & Creators',
     navHashtags: 'Hashtags',
     navProfile: 'Profile Check',
+    navYouTube: 'YouTube Revenue',
     navTips: 'AI Tips',
     kicker: 'The AI trend hub for Tamil creators',
     heading: 'Create it before the trend moves on.',
@@ -1205,6 +1207,7 @@ export default function HomePage() {
             <a href="#sectors" className="transition-colors hover:text-foreground">{t.navSectors}</a>
             <Link href="/hashtags" className="transition-colors hover:text-foreground">{t.navHashtags}</Link>
             <Link href="/instagram-profile-checker" className="transition-colors hover:text-foreground">{t.navProfile}</Link>
+            <Link href="/youtube-channel-checker" className="transition-colors hover:text-foreground">{t.navYouTube}</Link>
             <a href="#tips" className="transition-colors hover:text-foreground">{t.navTips}</a>
           </nav>
 
@@ -1266,6 +1269,14 @@ export default function HomePage() {
               >
                 <TrendingUp className="size-4" aria-hidden="true" />
                 {t.navProfile}
+              </Link>
+              <Link
+                href="/youtube-channel-checker"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex min-h-12 items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 text-sm font-bold text-primary"
+              >
+                <Video className="size-4" aria-hidden="true" />
+                {t.navYouTube}
               </Link>
               <a href="#tips" onClick={() => setMobileMenuOpen(false)} className="flex min-h-12 items-center gap-3 rounded-2xl border border-border bg-card px-4 text-sm font-bold text-muted-foreground">
                 <Lightbulb className="size-4" aria-hidden="true" />
@@ -1466,6 +1477,20 @@ export default function HomePage() {
               <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </span>
           </Link>
+          <Link
+            href="/youtube-channel-checker"
+            className="group rounded-2xl border border-primary/25 bg-primary/5 p-4 shadow-[0_8px_28px_-24px_oklch(0.2_0.04_300/.35)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-primary/45"
+          >
+            <p className="text-xs font-bold uppercase tracking-[0.1em] text-primary">Creator tool</p>
+            <h3 className="mt-2 font-heading text-base font-bold leading-snug">YouTube Revenue Checker</h3>
+            <p className="mt-2 line-clamp-3 text-xs leading-5 text-muted-foreground">
+              Estimate monthly revenue, channel strength, title SEO, hashtags and next video ideas.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary">
+              {language === 'ta' ? 'Revenue check செய்ய' : 'Estimate revenue'}
+              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </span>
+          </Link>
           {promptLandingPages.map((page) => (
             <Link
               key={page.slug}
@@ -1576,6 +1601,7 @@ export default function HomePage() {
           <Link href="/about" className="hover:text-primary hover:underline">About</Link>
           <Link href="/hashtags" className="hover:text-primary hover:underline">Hashtags</Link>
           <Link href="/instagram-profile-checker" className="hover:text-primary hover:underline">Profile Checker</Link>
+          <Link href="/youtube-channel-checker" className="hover:text-primary hover:underline">YouTube Revenue</Link>
           <Link href="/contact" className="hover:text-primary hover:underline">Contact</Link>
           <Link href="/privacy" className="hover:text-primary hover:underline">Privacy Policy</Link>
           <Link href="/terms" className="hover:text-primary hover:underline">Terms</Link>

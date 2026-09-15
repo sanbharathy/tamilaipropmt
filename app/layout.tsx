@@ -43,6 +43,9 @@ export const metadata: Metadata = {
     'Instagram bio checker Tamil',
     'Tamil creator growth',
     'Tamil Instagram hashtags',
+    'YouTube revenue calculator Tamil',
+    'YouTube channel checker Tamil',
+    'Tamil YouTube growth',
   ],
   alternates: {
     canonical: '/',
@@ -126,6 +129,8 @@ const structuredData = {
         'AI prompt tips and tricks',
         'Instagram profile strength checker',
         'Tamil Instagram hashtag sets',
+        'YouTube channel revenue checker',
+        'Tamil YouTube growth ideas',
         'Kling AI',
         'Midjourney',
         'Runway',
