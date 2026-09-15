@@ -34,6 +34,8 @@ export const metadata: Metadata = {
     'Veo prompts Tamil',
     'Midjourney prompts Tamil',
     '80s Tamil photo prompt',
+    '90s saree AI photo prompt',
+    'Nano Banana saree prompt',
     'Tamil creator prompts',
     'AI tips Tamil',
     'AI tools Tamil',
@@ -120,6 +122,7 @@ const structuredData = {
       name: 'Tamil AI Prompt Library',
       itemListElement: [
         '80s Tamil cinema look',
+        '90s saree shadow portrait',
         'Favorite actor-style AI poster',
         'Tamil temple wedding portrait',
         'Chennai night ride reel',

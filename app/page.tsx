@@ -69,12 +69,14 @@ const popularSearches = [
   'favorite actor AI poster',
   'Veo prompts Tamil',
   'Tamil business captions',
+  '90s saree AI photo prompt',
 ];
 
 const watermarkEn =
   'Add the exact text “tamilaiprompt.com” as a small, clean, readable watermark in the bottom-right corner with safe padding, white at 70% opacity. Do not add any other text, logo, or watermark.';
 
 const trendHeatById: Record<number, string> = {
+  62: '1.6M',
   1: '1.1M',
   2: '846K',
   3: '712K',
@@ -107,6 +109,7 @@ const trendHeatById: Record<number, string> = {
 };
 
 const trendVisualThemes: Record<number, { bg: string; accent: string; sceneTa: string; sceneEn: string }> = {
+  62: { bg: '#831843', accent: '#f9a8d4', sceneTa: '90s Saree', sceneEn: '90s Saree' },
   1: { bg: '#7c2d12', accent: '#fbbf24', sceneTa: '80s Studio', sceneEn: '80s Studio' },
   2: { bg: '#312e81', accent: '#93c5fd', sceneTa: 'Memory', sceneEn: 'Memory' },
   3: { bg: '#020617', accent: '#22d3ee', sceneTa: 'Night Ride', sceneEn: 'Night Ride' },
@@ -223,6 +226,23 @@ const aiTools = [
 ];
 
 const trends: TrendPrompt[] = [
+  {
+    id: 62,
+    category: 'image',
+    image: 'portrait',
+    imageAlt: '90s retro South Indian saree portrait with warm wall shadow',
+    titleTa: '90s Saree Shadow Portrait',
+    titleEn: '90s saree shadow portrait',
+    descriptionTa: 'Gemini Nano Banana style-ல் warm wall shadow, jasmine, retro saree portrait.',
+    descriptionEn: 'A warm 90s-style saree portrait with wall shadow, jasmine, and nostalgic cinema mood.',
+    prompt:
+      'நான் upload செய்யும் portrait photo-வை accurate face reference ஆக பயன்படுத்தவும். 1990களின் South Indian retro saree shadow portrait ஆக மாற்றவும்: elegant saree, jasmine flowers, soft warm wall background, right-side golden light, தெளிவான hair-and-face shadow on the wall, natural skin texture, calm cinematic expression, realistic body proportions, subtle film grain, premium Instagram portrait look. முக அடையாளம் 100% மாறக்கூடாது. படத்தின் கீழ்-வலது மூலையில் பாதுகாப்பான இடைவெளியுடன் “tamilaiprompt.com” என்ற சரியான எழுத்தை சிறிய, தெளிவான, 70% opacity கொண்ட வெள்ளை watermark ஆகச் சேர்க்கவும். வேறு எழுத்து, logo அல்லது watermark சேர்க்க வேண்டாம்.',
+    models: ['Gemini', 'ChatGPT Images'],
+    updatedTa: 'இப்போது புது ட்ரெண்ட்',
+    updatedEn: 'Just popped',
+    featured: true,
+    needsPhoto: true,
+  },
   {
     id: 1,
     category: 'image',
@@ -979,6 +999,7 @@ const sectorPrompts = [
 ];
 
 const englishPromptById: Record<number, string> = {
+  62: `Use my uploaded portrait photo as an accurate face reference. Transform it into a 1990s South Indian retro saree shadow portrait: elegant saree, jasmine flowers, soft warm wall background, golden light from the right side, a clear hair-and-face shadow on the wall, natural skin texture, calm cinematic expression, realistic body proportions, subtle film grain, and a premium Instagram portrait look. Keep my face identity 100% unchanged. Add the exact text “tamilaiprompt.com” as a small, clean, readable white watermark at 70% opacity in the bottom-right corner with safe padding. Do not add any other text, logo, or watermark.`,
   1: `Use my uploaded photo as an accurate face reference. Transform it into an authentic 1980s Tamil Nadu studio portrait with period-appropriate clothing, natural hairstyle, warm tungsten lighting, faded 35mm film grain, and a soft vignette. Keep the face structure and natural expression unchanged. Add the exact text “tamilaiprompt.com” as a small, clean, readable white watermark at 70% opacity in the bottom-right corner with safe padding. Do not add any other text, logo, or watermark.`,
   2: `Use my current photo and childhood photo as identity references. Create a natural black-and-white editorial portrait where my present self warmly meets my childhood self in a calm South Indian home courtyard. Keep face identity, age, and body proportions accurate. Use natural light and soft film grain. Add the exact text “tamilaiprompt.com” as a small, clean, readable white watermark at 70% opacity in the bottom-right corner with safe padding. Do not add any other text, logo, or watermark.`,
   3: `9:16 vertical cinematic video. A motorcycle rides through rain-soaked Chennai streets at night. Low-angle tracking camera, neon reflections on wet asphalt, realistic wheel spray, subtle handheld energy, smooth subject motion, dramatic blue and amber lighting. 8 seconds, consistent rider and motorcycle. Add the exact text “tamilaiprompt.com” as a small, clean, readable white watermark in the bottom-right corner with safe padding, white at 70% opacity, visible throughout the entire video. Do not add any other text, logo, or watermark.`,

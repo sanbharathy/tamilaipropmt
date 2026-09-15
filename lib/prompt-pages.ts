@@ -23,6 +23,35 @@ export type PromptLandingPage = {
 
 export const promptLandingPages: PromptLandingPage[] = [
   {
+    slug: '90s-saree-shadow-portrait-prompt',
+    title: '90s Saree Shadow Portrait Prompt',
+    shortTitle: '90s Saree Shadow',
+    metaTitle: '90s Saree Shadow Portrait Prompt for Gemini AI Photo Editing',
+    metaDescription:
+      'Copy a ready 90s retro saree shadow portrait prompt for Gemini and ChatGPT Images. Create warm South Indian AI portraits with jasmine, wall shadow, film grain, and watermark guidance.',
+    h1: '90s saree shadow portrait prompt for AI photo editing',
+    intro:
+      'The 90s saree shadow portrait is a strong nostalgia trend for Tamil and South Indian creators. It gives a simple selfie a warm cinema-photo mood: saree styling, jasmine flowers, golden side light, a clear wall shadow, soft grain, and a premium Instagram-ready portrait look.',
+    audience: ['Tamil Instagram creators', 'Women creators', 'Fashion pages', 'Photo editors', 'Boutiques'],
+    promptTa:
+      'நான் upload செய்யும் portrait photo-வை accurate face reference ஆக பயன்படுத்தவும். 1990களின் South Indian retro saree shadow portrait ஆக மாற்றவும்: elegant saree, jasmine flowers, soft warm wall background, right-side golden light, தெளிவான hair-and-face shadow on the wall, natural skin texture, calm cinematic expression, realistic body proportions, subtle film grain, premium Instagram portrait look. முக அடையாளம் 100% மாறக்கூடாது. படத்தின் கீழ்-வலது மூலையில் பாதுகாப்பான இடைவெளியுடன் “tamilaiprompt.com” என்ற சரியான எழுத்தை சிறிய, தெளிவான, 70% opacity கொண்ட வெள்ளை watermark ஆகச் சேர்க்கவும்.',
+    promptEn:
+      'Use my uploaded portrait photo as an accurate face reference. Transform it into a 1990s South Indian retro saree shadow portrait: elegant saree, jasmine flowers, soft warm wall background, golden light from the right side, a clear hair-and-face shadow on the wall, natural skin texture, calm cinematic expression, realistic body proportions, subtle film grain, and a premium Instagram portrait look. Keep my face identity 100% unchanged. Add the exact text “tamilaiprompt.com” as a small, clean, readable white watermark at 70% opacity in the bottom-right corner with safe padding.',
+    tools: ['Gemini', 'ChatGPT Images', 'Midjourney'],
+    tips: [
+      'Use a clear portrait with good face visibility.',
+      'Mention saree color if you want control over the final look.',
+      'Keep “clear wall shadow” in the prompt because that is the main trend signal.',
+    ],
+    mistakes: [
+      'Do not use someone else’s photo without permission.',
+      'Do not ask for a real celebrity face copy.',
+      'Avoid adding AI-generated Tamil text inside the image.',
+    ],
+    related: ['80s-tamil-photo-prompt', 'ai-saree-photo-prompt', 'gemini-ai-image-prompts-tamil'],
+    hashtags: ['90sSaree', 'SareeTrend', 'NanoBananaPrompt', 'AIPhotoEditing', 'TamilReels'],
+  },
+  {
     slug: '80s-tamil-photo-prompt',
     title: '80s Tamil Photo Prompt',
     shortTitle: '80s Tamil Photo',
