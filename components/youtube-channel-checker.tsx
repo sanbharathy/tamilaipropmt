@@ -12,6 +12,7 @@ import {
   Hash,
   Lightbulb,
   Link2,
+  LoaderCircle,
   PlayCircle,
   Sparkles,
   Target,
@@ -45,6 +46,21 @@ const uploadOptions = [
   { label: 'Not consistent', score: 1 },
 ];
 
+type YouTubeApiData = {
+  title: string;
+  description: string;
+  subscriberCount: number;
+  viewCount: number;
+  videoCount: number;
+  recentVideos: {
+    title: string;
+    publishedAt: string;
+    viewCount: number;
+    likeCount: number;
+    commentCount: number;
+  }[];
+};
+
 function parseMetric(value: string) {
   const clean = value.trim().toLowerCase().replace(/,/g, '');
   if (!clean) return 0;
@@ -67,6 +83,12 @@ function formatNumber(value: number) {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value);
 }
 
+function formatCompactNumber(value: number) {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(value >= 10_000_000 ? 0 : 1)}M`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(value >= 10_000 ? 0 : 1)}K`;
+  return Math.round(value).toString();
+}
+
 function clampScore(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
@@ -76,6 +98,39 @@ function getGrade(score: number) {
   if (score >= 70) return { label: 'Good growth base', ta: 'நல்ல வளர்ச்சி வாய்ப்பு', color: 'text-lime-600' };
   if (score >= 50) return { label: 'Needs optimization', ta: 'மேம்படுத்த வேண்டும்', color: 'text-amber-600' };
   return { label: 'Needs stronger basics', ta: 'அடிப்படை மாற்றம் தேவை', color: 'text-rose-600' };
+}
+
+function guessUploadFrequency(videos: YouTubeApiData['recentVideos']) {
+  const dates = videos
+    .map((video) => new Date(video.publishedAt).getTime())
+    .filter((time) => Number.isFinite(time))
+    .sort((a, b) => b - a);
+
+  if (dates.length < 2) return uploadOptions[2].label;
+
+  const daysCovered = Math.max(1, (dates[0] - dates[dates.length - 1]) / 86_400_000);
+  const averageGap = daysCovered / (dates.length - 1);
+
+  if (averageGap <= 1.5) return uploadOptions[0].label;
+  if (averageGap <= 2.5) return uploadOptions[1].label;
+  if (averageGap <= 7) return uploadOptions[2].label;
+  if (averageGap <= 16) return uploadOptions[3].label;
+  return uploadOptions[4].label;
+}
+
+function estimateMonthlyViewsFromRecentVideos(videos: YouTubeApiData['recentVideos'], frequency: string) {
+  if (!videos.length) return 0;
+
+  const averageViews = videos.reduce((sum, video) => sum + video.viewCount, 0) / videos.length;
+  const videosPerMonthByFrequency: Record<string, number> = {
+    Daily: 26,
+    '3–4 videos/week': 14,
+    '1–2 videos/week': 6,
+    'Few videos/month': 3,
+    'Not consistent': 1.5,
+  };
+
+  return averageViews * (videosPerMonthByFrequency[frequency] ?? 6);
 }
 
 export function YouTubeChannelChecker() {
@@ -90,6 +145,9 @@ export function YouTubeChannelChecker() {
   const [uploadFrequency, setUploadFrequency] = useState(uploadOptions[2].label);
   const [titles, setTitles] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
+  const [apiStatus, setApiStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [apiMessage, setApiMessage] = useState('');
+  const [lastFetchedChannel, setLastFetchedChannel] = useState<YouTubeApiData | null>(null);
 
   const analysis = useMemo(() => {
     const nicheData = niches.find((item) => item.name === niche) ?? niches[0];
@@ -171,6 +229,46 @@ export function YouTubeChannelChecker() {
     await navigator.clipboard.writeText(text);
     setCopied(key);
     window.setTimeout(() => setCopied(null), 1600);
+  }
+
+  async function fetchChannelData() {
+    const input = channelUrl.trim();
+
+    if (!input) {
+      setApiStatus('error');
+      setApiMessage('Paste a YouTube channel URL or @handle first.');
+      return;
+    }
+
+    setApiStatus('loading');
+    setApiMessage('Fetching public YouTube data…');
+
+    try {
+      const response = await fetch(`/api/youtube-channel?url=${encodeURIComponent(input)}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Could not fetch YouTube data.');
+      }
+
+      const channel = data as YouTubeApiData;
+      const frequency = guessUploadFrequency(channel.recentVideos);
+      const estimatedMonthlyViews = estimateMonthlyViewsFromRecentVideos(channel.recentVideos, frequency);
+
+      setChannelName(channel.title);
+      setAbout(channel.description);
+      setSubscribers(formatCompactNumber(channel.subscriberCount));
+      setUploadFrequency(frequency);
+      setMonthlyViews(estimatedMonthlyViews ? formatCompactNumber(estimatedMonthlyViews) : '');
+      setTitles(channel.recentVideos.map((video) => video.title).join('\n'));
+      setLastFetchedChannel(channel);
+      setApiStatus('success');
+      setApiMessage(`Fetched ${channel.recentVideos.length} recent videos. Monthly views are estimated from recent public video performance.`);
+    } catch (error) {
+      setApiStatus('error');
+      setApiMessage(error instanceof Error ? error.message : 'Could not fetch YouTube data.');
+      setLastFetchedChannel(null);
+    }
   }
 
   const fullReport = [
@@ -273,9 +371,22 @@ export function YouTubeChannelChecker() {
             </p>
           </div>
 
-          <Field label="YouTube channel link" icon={<Link2 className="size-4" aria-hidden="true" />}>
-            <Input value={channelUrl} onChange={(event) => setChannelUrl(event.target.value)} placeholder="https://youtube.com/@channel" className="h-12 rounded-2xl" />
-          </Field>
+          <div>
+            <Field label="YouTube channel link" icon={<Link2 className="size-4" aria-hidden="true" />}>
+              <Input value={channelUrl} onChange={(event) => setChannelUrl(event.target.value)} placeholder="https://youtube.com/@channel" className="h-12 rounded-2xl" />
+            </Field>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Button type="button" className="h-11 rounded-xl" onClick={fetchChannelData} disabled={apiStatus === 'loading'}>
+                {apiStatus === 'loading' ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <Sparkles className="size-4" aria-hidden="true" />}
+                {apiStatus === 'loading' ? 'Fetching…' : 'Fetch from YouTube API'}
+              </Button>
+              {apiMessage ? (
+                <p className={`text-xs font-semibold ${apiStatus === 'error' ? 'text-rose-600' : apiStatus === 'success' ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                  {apiMessage}
+                </p>
+              ) : null}
+            </div>
+          </div>
 
           <Field label="Channel name" icon={<UserRound className="size-4" aria-hidden="true" />}>
             <Input value={channelName} onChange={(event) => setChannelName(event.target.value)} placeholder="Your channel name" className="h-12 rounded-2xl" />
@@ -336,6 +447,14 @@ export function YouTubeChannelChecker() {
               <MetricCard label="Yearly middle" value={formatMoney(analysis.yearlyEstimate)} />
               <MetricCard label="Views/subscribers" value={`${analysis.viewToSubscriberRate.toFixed(0)}%`} />
             </div>
+
+            {lastFetchedChannel ? (
+              <div className="mt-5 grid gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm sm:grid-cols-3">
+                <MetricCard label="API subscribers" value={formatCompactNumber(lastFetchedChannel.subscriberCount)} />
+                <MetricCard label="Total channel views" value={formatCompactNumber(lastFetchedChannel.viewCount)} />
+                <MetricCard label="Total videos" value={formatNumber(lastFetchedChannel.videoCount)} />
+              </div>
+            ) : null}
 
             <div className="mt-5 grid gap-3">
               {(analysis.issues.length ? analysis.issues.slice(0, 5) : ['Channel looks balanced. Keep improving title hooks, thumbnails, audience retention and upload consistency.']).map((item) => (
