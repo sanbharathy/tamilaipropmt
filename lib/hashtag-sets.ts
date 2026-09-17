@@ -13,6 +13,18 @@ export type HashtagSet = {
 
 export const hashtagSets: HashtagSet[] = [
   {
+    id: 31,
+    category: 'festival',
+    titleTa: 'Meenakshi Kumbabishekam',
+    titleEn: 'Meenakshi kumbabishekam',
+    descriptionTa: 'Madurai temple festival, devotional AI photo, blessing portrait posts.',
+    descriptionEn: 'Madurai temple festival, devotional AI photo, and blessing portrait posts.',
+    factTa: 'Same-day festival trend-ல் hashtags மட்டும் போதாது; caption-ல் “Meenakshi Amman kumbabishekam AI prompt” போன்ற exact keywords சேர்க்கவும்.',
+    factEn: 'For same-day festival trends, hashtags alone are not enough; add exact keywords like “Meenakshi Amman kumbabishekam AI prompt” in the caption.',
+    bestFor: ['Instagram', 'Facebook', 'YouTube Shorts'],
+    tags: ['MeenakshiAmman', 'Kumbabishekam', 'MaduraiTemple', 'TamilDevotional', 'AIPhotoEditing', 'TamilReels'],
+  },
+  {
     id: 1,
     category: 'ai-image',
     titleTa: '80s AI Photo Trend',

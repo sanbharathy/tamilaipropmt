@@ -36,6 +36,8 @@ export const metadata: Metadata = {
     '80s Tamil photo prompt',
     '90s saree AI photo prompt',
     'Nano Banana saree prompt',
+    'Meenakshi Amman kumbabishekam AI prompt',
+    'Madurai temple AI photo prompt',
     'Tamil creator prompts',
     'AI tips Tamil',
     'AI tools Tamil',
@@ -122,6 +124,7 @@ const structuredData = {
       name: 'Tamil AI Prompt Library',
       itemListElement: [
         '80s Tamil cinema look',
+        'Meenakshi Amman kumbabishekam portrait',
         '90s saree shadow portrait',
         'Favorite actor-style AI poster',
         'Tamil temple wedding portrait',

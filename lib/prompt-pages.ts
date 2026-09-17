@@ -23,6 +23,35 @@ export type PromptLandingPage = {
 
 export const promptLandingPages: PromptLandingPage[] = [
   {
+    slug: 'meenakshi-amman-kumbabishekam-ai-photo-prompt',
+    title: 'Meenakshi Amman Kumbabishekam AI Photo Prompt',
+    shortTitle: 'Meenakshi Kumbabishekam',
+    metaTitle: 'Meenakshi Amman Kumbabishekam AI Photo Prompt Today',
+    metaDescription:
+      'Copy three respectful Meenakshi Amman Temple kumbabishekam AI photo prompts. Replace yourself into a devotional celebration portrait, blessing scene, or cinematic festival poster.',
+    h1: 'Meenakshi Amman kumbabishekam AI photo prompt',
+    intro:
+      'Madurai Meenakshi Sundareswarar Temple Maha Kumbabishekam is a major same-day cultural and devotional trend. These prompts are designed for users who want to upload their own photo and create a respectful celebration-style AI image without copying real devotees, restricted temple interiors, deity faces, or news photographs.',
+    audience: ['Tamil creators', 'Madurai devotees', 'Instagram editors', 'Festival content pages', 'AI photo beginners'],
+    promptTa:
+      'Draft 1 — Person standing in celebration: நான் upload செய்யும் என் portrait photo-வை accurate face reference ஆக பயன்படுத்தவும். மதுரை மீனாட்சி அம்மன் கோவில் மகா கும்பாபிஷேகம் celebration vibe-ல், கோவில் கோபுரம் தொலைவில் தெரியும் வெளிப்புற பகுதியில் நான் பக்தர்களுடன் மரியாதையாக நிற்பது போல realistic devotional portrait உருவாக்கவும். Festive crowd, மஞ்சள்-குங்கும நிறங்கள், temple flags, soft morning golden light, spiritual celebration mood, natural face identity, realistic hands, no deity face recreation, no inside-sanctum scene, no real crowd face copying. கீழ்-வலது மூலையில் “tamilaiprompt.com” watermark சேர்க்கவும்.\n\nDraft 2 — People getting blessing: நான் upload செய்யும் photo-வை reference ஆக கொண்டு, கோவில் வெளிப்புற விழா சூழலில் ஆசீர்வாதம் பெறும் பக்தர் போல் அமைக்கவும். Sacred water sprinkle atmosphere, flower petals, priests shown only as respectful distant silhouettes, crowd blurred, Meenakshi temple gopuram background, calm devotional expression, documentary realism, natural skin texture, no political symbols, no misleading real-news claim. “tamilaiprompt.com” watermark bottom-right.\n\nDraft 3 — Cinematic festival poster: என் uploaded portrait-ஐ வைத்து Madurai festival poster style உருவாக்கவும்: golden gopuram lights, kolam pattern foreground, garland colors, warm cinematic glow, respectful Tamil devotional celebration mood, premium social media thumbnail composition, identity unchanged, no random text. “tamilaiprompt.com” watermark bottom-right.',
+    promptEn:
+      'Draft 1 — Person standing in celebration: Use my uploaded portrait photo as an accurate face reference. Create a realistic devotional portrait where I am respectfully standing with devotees in an outdoor Madurai Meenakshi Amman Temple maha kumbabishekam celebration atmosphere. Show the temple gopuram in the distance, festive crowd energy, turmeric and kumkum color palette, temple flags, soft morning golden light, spiritual celebration mood, natural face identity, realistic hands, no deity face recreation, no inside-sanctum scene, and no copying of real crowd faces. Add “tamilaiprompt.com” as a bottom-right watermark.\n\nDraft 2 — People getting blessing: Use my uploaded photo as the identity reference and place me as a devotee receiving blessings in an outdoor festival setting. Include sacred-water-sprinkle atmosphere, flower petals, priests only as respectful distant silhouettes, softly blurred devotees, Meenakshi temple gopuram background, calm devotional expression, documentary realism, natural skin texture, no political symbols, and no misleading real-news claim. Add “tamilaiprompt.com” as a bottom-right watermark.\n\nDraft 3 — Cinematic festival poster: Use my uploaded portrait to create a respectful Madurai festival poster style: golden gopuram lights, kolam pattern foreground, garland colors, warm cinematic glow, Tamil devotional celebration mood, premium social media thumbnail composition, identity unchanged, no random text. Add “tamilaiprompt.com” as a bottom-right watermark.',
+    tools: ['Gemini', 'ChatGPT Images', 'Midjourney'],
+    tips: [
+      'Use your own photo as the reference and keep identity unchanged.',
+      'Ask for an outdoor symbolic celebration scene, not a restricted sanctum scene.',
+      'Use “no real crowd face copying” to keep the output respectful and original.',
+    ],
+    mistakes: [
+      'Do not use real devotees’ photos without permission.',
+      'Do not create misleading news-style images claiming you were actually there.',
+      'Avoid political symbols, slogans, party colors, or deity face recreation.',
+    ],
+    related: ['tamil-festival-greeting-prompts', 'gemini-ai-image-prompts-tamil', '80s-tamil-photo-prompt'],
+    hashtags: ['MeenakshiAmman', 'Kumbabishekam', 'MaduraiTemple', 'TamilDevotional', 'AIPhotoEditing', 'TamilReels'],
+  },
+  {
     slug: '90s-saree-shadow-portrait-prompt',
     title: '90s Saree Shadow Portrait Prompt',
     shortTitle: '90s Saree Shadow',
