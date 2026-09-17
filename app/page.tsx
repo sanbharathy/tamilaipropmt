@@ -1090,6 +1090,7 @@ const text = {
     navVideos: 'வீடியோக்கள்',
     navSectors: 'Business & Creators',
     navHashtags: 'Hashtags',
+    navPhotoMaker: 'AI Photo Maker',
     navProfile: 'Profile Check',
     navYouTube: 'YouTube Revenue',
     navTips: 'AI Tips',
@@ -1119,6 +1120,7 @@ const text = {
     navVideos: 'Videos',
     navSectors: 'Business & Creators',
     navHashtags: 'Hashtags',
+    navPhotoMaker: 'AI Photo Maker',
     navProfile: 'Profile Check',
     navYouTube: 'YouTube Revenue',
     navTips: 'AI Tips',
@@ -1252,6 +1254,7 @@ export default function HomePage() {
             <button type="button" onClick={() => selectCategory('video')} className="cursor-pointer transition-colors hover:text-foreground">{t.navVideos}</button>
             <a href="#sectors" className="transition-colors hover:text-foreground">{t.navSectors}</a>
             <Link href="/hashtags" className="transition-colors hover:text-foreground">{t.navHashtags}</Link>
+            <Link href="/realtime-photo-generator" className="transition-colors hover:text-foreground">{t.navPhotoMaker}</Link>
             <Link href="/instagram-profile-checker" className="transition-colors hover:text-foreground">{t.navProfile}</Link>
             <Link href="/youtube-channel-checker" className="transition-colors hover:text-foreground">{t.navYouTube}</Link>
             <a href="#tips" className="transition-colors hover:text-foreground">{t.navTips}</a>
@@ -1307,6 +1310,14 @@ export default function HomePage() {
               >
                 <Hash className="size-4" aria-hidden="true" />
                 Hashtags
+              </Link>
+              <Link
+                href="/realtime-photo-generator"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex min-h-12 items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 text-sm font-bold text-primary"
+              >
+                <ImageIcon className="size-4" aria-hidden="true" />
+                {t.navPhotoMaker}
               </Link>
               <Link
                 href="/instagram-profile-checker"
@@ -1425,6 +1436,15 @@ export default function HomePage() {
                     <div className="mt-4 flex flex-wrap gap-1.5">
                       {item.models.map((model) => <span key={model} className="rounded-md border border-border bg-muted px-2 py-1 text-[11px] font-semibold text-muted-foreground">{model}</span>)}
                     </div>
+                    {item.category === 'image' ? (
+                      <Link
+                        href={`/realtime-photo-generator?prompt=${encodeURIComponent(getPromptText(item.id, item.prompt, language).slice(0, 1200))}`}
+                        className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-primary/20 bg-background px-4 text-sm font-bold text-primary transition-colors hover:bg-secondary"
+                      >
+                        <ImageIcon className="size-4" aria-hidden="true" />
+                        {language === 'ta' ? 'Realtime photo உருவாக்க' : 'Generate realtime photo'}
+                      </Link>
+                    ) : null}
                     <Button className="mt-auto h-11 w-full cursor-pointer rounded-xl" onClick={() => copyPrompt(item.id, getPromptText(item.id, item.prompt, language))} aria-live="polite">
                       {copied ? <Check className="size-4" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
                       {copied ? t.copied : t.copy}
@@ -1495,6 +1515,20 @@ export default function HomePage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <Link
+            href="/realtime-photo-generator"
+            className="group rounded-2xl border border-primary/25 bg-primary/5 p-4 shadow-[0_8px_28px_-24px_oklch(0.2_0.04_300/.35)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-primary/45"
+          >
+            <p className="text-xs font-bold uppercase tracking-[0.1em] text-primary">AI Photo Maker</p>
+            <h3 className="mt-2 font-heading text-base font-bold leading-snug">Realtime Photo Generator</h3>
+            <p className="mt-2 line-clamp-3 text-xs leading-5 text-muted-foreground">
+              Generate instant AI photo previews from trending Tamil prompts for thumbnails, posts and reel covers.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary">
+              {language === 'ta' ? 'Photo உருவாக்க' : 'Generate photo'}
+              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </span>
+          </Link>
           <Link
             href="/hashtags"
             className="group rounded-2xl border border-primary/25 bg-primary/5 p-4 shadow-[0_8px_28px_-24px_oklch(0.2_0.04_300/.35)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-primary/45"
@@ -1646,6 +1680,7 @@ export default function HomePage() {
         <nav className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-2" aria-label="Footer navigation">
           <Link href="/about" className="hover:text-primary hover:underline">About</Link>
           <Link href="/hashtags" className="hover:text-primary hover:underline">Hashtags</Link>
+          <Link href="/realtime-photo-generator" className="hover:text-primary hover:underline">AI Photo Maker</Link>
           <Link href="/instagram-profile-checker" className="hover:text-primary hover:underline">Profile Checker</Link>
           <Link href="/youtube-channel-checker" className="hover:text-primary hover:underline">YouTube Revenue</Link>
           <Link href="/contact" className="hover:text-primary hover:underline">Contact</Link>

@@ -38,6 +38,8 @@ export const metadata: Metadata = {
     'Nano Banana saree prompt',
     'Meenakshi Amman kumbabishekam AI prompt',
     'Madurai temple AI photo prompt',
+    'realtime AI photo generator Tamil',
+    'Tamil AI photo maker',
     'Tamil creator prompts',
     'AI tips Tamil',
     'AI tools Tamil',
