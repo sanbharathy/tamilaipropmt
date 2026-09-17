@@ -26,7 +26,7 @@ const starterPrompts = [
   {
     label: 'Meenakshi Kumbabishekam',
     prompt:
-      'Respectful devotional festival portrait concept at Madurai Meenakshi Amman Temple kumbabishekam celebration, temple gopuram in the distance, festive crowd energy, turmeric and kumkum colors, flower petals, soft morning golden light, cinematic Tamil cultural mood, no deity face recreation, no real crowd face copying, add small clean “tamilaiprompt.com” watermark bottom-right',
+      'Ultra realistic real camera photo of a respectful devotional festival portrait at Madurai Meenakshi Amman Temple kumbabishekam celebration, temple gopuram in the distance, softly blurred festive crowd, turmeric and kumkum colors, flower petals, temple flags, soft morning golden light, natural skin texture, documentary photography, real lens depth of field, cinematic Tamil cultural mood, no cartoon, no illustration, no deity face recreation, no real crowd face copying, add small clean “tamilaiprompt.com” watermark bottom-right',
   },
   {
     label: '90s Saree Portrait',
