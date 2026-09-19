@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-type AdsenseSlotName = 'home-top' | 'home-mid' | 'prompt-inline' | 'prompt-sidebar' | 'hashtags-top';
+type AdsenseSlotName = 'home-top' | 'home-mid' | 'prompt-inline' | 'prompt-sidebar' | 'hashtags-top' | 'daily-top';
 
 type AdsenseSlotProps = {
   name: AdsenseSlotName;
@@ -18,6 +18,7 @@ const adSlots: Record<AdsenseSlotName, string | undefined> = {
   'prompt-inline': process.env.NEXT_PUBLIC_ADSENSE_SLOT_PROMPT_INLINE,
   'prompt-sidebar': process.env.NEXT_PUBLIC_ADSENSE_SLOT_PROMPT_SIDEBAR,
   'hashtags-top': process.env.NEXT_PUBLIC_ADSENSE_SLOT_HASHTAGS_TOP,
+  'daily-top': process.env.NEXT_PUBLIC_ADSENSE_SLOT_HASHTAGS_TOP ?? process.env.NEXT_PUBLIC_ADSENSE_SLOT_HOME_TOP,
 };
 
 declare global {

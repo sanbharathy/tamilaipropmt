@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Bookmark,
   BriefcaseBusiness,
+  CalendarDays,
   Check,
   Clapperboard,
   Code2,
@@ -1089,6 +1090,7 @@ const text = {
     navImages: 'படங்கள்',
     navVideos: 'வீடியோக்கள்',
     navSectors: 'Business & Creators',
+    navDaily: 'Daily Ideas',
     navHashtags: 'Hashtags',
     navPhotoMaker: 'AI Photo Maker',
     navProfile: 'Profile Check',
@@ -1119,6 +1121,7 @@ const text = {
     navImages: 'Images',
     navVideos: 'Videos',
     navSectors: 'Business & Creators',
+    navDaily: 'Daily Ideas',
     navHashtags: 'Hashtags',
     navPhotoMaker: 'AI Photo Maker',
     navProfile: 'Profile Check',
@@ -1253,6 +1256,7 @@ export default function HomePage() {
             <button type="button" onClick={() => selectCategory('image')} className="cursor-pointer transition-colors hover:text-foreground">{t.navImages}</button>
             <button type="button" onClick={() => selectCategory('video')} className="cursor-pointer transition-colors hover:text-foreground">{t.navVideos}</button>
             <a href="#sectors" className="transition-colors hover:text-foreground">{t.navSectors}</a>
+            <Link href="/daily-creator-ideas" className="transition-colors hover:text-foreground">{t.navDaily}</Link>
             <Link href="/hashtags" className="transition-colors hover:text-foreground">{t.navHashtags}</Link>
             <Link href="/realtime-photo-generator" className="transition-colors hover:text-foreground">{t.navPhotoMaker}</Link>
             <Link href="/instagram-profile-checker" className="transition-colors hover:text-foreground">{t.navProfile}</Link>
@@ -1303,6 +1307,14 @@ export default function HomePage() {
                   </button>
                 );
               })}
+              <Link
+                href="/daily-creator-ideas"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex min-h-12 items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 text-sm font-bold text-primary"
+              >
+                <CalendarDays className="size-4" aria-hidden="true" />
+                {t.navDaily}
+              </Link>
               <Link
                 href="/hashtags"
                 onClick={() => setMobileMenuOpen(false)}
@@ -1516,6 +1528,20 @@ export default function HomePage() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <Link
+            href="/daily-creator-ideas"
+            className="group rounded-2xl border border-primary/25 bg-primary/5 p-4 shadow-[0_8px_28px_-24px_oklch(0.2_0.04_300/.35)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-primary/45"
+          >
+            <p className="text-xs font-bold uppercase tracking-[0.1em] text-primary">Daily tool</p>
+            <h3 className="mt-2 font-heading text-base font-bold leading-snug">Daily Creator Ideas</h3>
+            <p className="mt-2 line-clamp-3 text-xs leading-5 text-muted-foreground">
+              Check today’s Tamil creator prompts, captions, hashtags, weather hooks and Shorts ideas.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary">
+              {language === 'ta' ? 'இன்றைய ideas பார்க்க' : 'Open daily ideas'}
+              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </span>
+          </Link>
+          <Link
             href="/realtime-photo-generator"
             className="group rounded-2xl border border-primary/25 bg-primary/5 p-4 shadow-[0_8px_28px_-24px_oklch(0.2_0.04_300/.35)] transition-[border-color,transform] hover:-translate-y-0.5 hover:border-primary/45"
           >
@@ -1679,6 +1705,7 @@ export default function HomePage() {
         <p>© 2026 TamilAI Prompt · தமிழர்களால், தமிழர்களுக்காக.</p>
         <nav className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-2" aria-label="Footer navigation">
           <Link href="/about" className="hover:text-primary hover:underline">About</Link>
+          <Link href="/daily-creator-ideas" className="hover:text-primary hover:underline">Daily Ideas</Link>
           <Link href="/hashtags" className="hover:text-primary hover:underline">Hashtags</Link>
           <Link href="/realtime-photo-generator" className="hover:text-primary hover:underline">AI Photo Maker</Link>
           <Link href="/instagram-profile-checker" className="hover:text-primary hover:underline">Profile Checker</Link>
