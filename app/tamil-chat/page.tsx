@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/tamil-chat' },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'தமிழில் பேசலாம் — Private Chat, Stickers & Memes',
+    title: 'Private Chat, Stickers & Memes | TamilAI Prompt',
     description: 'One private link. Two friends. A little Tamil chat energy.',
     url: '/tamil-chat',
     images: [
@@ -88,7 +88,7 @@ const data = {
 
 export default function TamilChatLanding() {
   return (
-    <main className="min-h-screen bg-[#fbfcf7] text-[#183c32]">
+    <main lang="en" className="min-h-screen bg-[#fbfcf7] text-[#183c32]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
@@ -123,13 +123,14 @@ export default function TamilChatLanding() {
             FREE TAMIL PRIVATE CHAT
           </p>
           <h1 className="text-3xl font-bold leading-[1.65] sm:text-5xl sm:leading-[1.55]">
-            தமிழில் பேசலாம்.
+            A private link.
             <br />
-            <span className="text-[#28836a]">கொஞ்சம் சிரிக்கலாம்.</span>
+            <span className="text-[#28836a]">A good conversation.</span>
           </h1>
           <p className="mt-5 max-w-lg text-sm leading-8 text-[#60745f] sm:text-base">
-            நண்பருக்கு ஒரு private link. பேச, படம் பகிர, தமிழ் stickers அனுப்ப—ஒரே
-            இடம். உங்கள் அனுமதியுடன் தொடங்கும், உங்கள் விருப்பப்படி முடியும் உரையாடல்.
+            Invite a friend to chat, share pictures and send Tamil stickers.
+            Start with mutual consent and end the conversation whenever you
+            choose.
           </p>
           <h2 className="mt-5 text-sm font-bold text-[#426d52]">
             Private link chat for Tamil-speaking friends & creators
@@ -142,7 +143,7 @@ export default function TamilChatLanding() {
             href="/community-chat"
             className="mt-7 inline-flex min-h-14 items-center gap-3 rounded-full bg-[#1c765f] px-7 text-sm font-bold text-white shadow-[0_8px_25px_#1c765f25] transition hover:bg-[#155c4b]"
           >
-            {`Let's chat · பேசலாம்`}
+            Let’s chat
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
           <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[11px] font-semibold text-[#64765b]">
@@ -200,7 +201,7 @@ export default function TamilChatLanding() {
             <div className="flex items-center gap-2 bg-white p-3">
               <Smile size={21} className="text-[#8daa8c]" aria-hidden="true" />
               <span className="flex-1 rounded-full bg-[#f0f5eb] px-4 py-3 text-[10px] text-[#a0ae94]">
-                ஒரு வணக்கம் சொல்லுங்கள்…
+                Say hello…
               </span>
               <span className="grid size-9 place-items-center rounded-full bg-[#328068] text-white">
                 <ArrowRight size={16} aria-hidden="true" />
@@ -217,23 +218,20 @@ export default function TamilChatLanding() {
           {[
             [
               Link2,
-              'ஒரு link போதும்',
               'Invite your friend',
               'Create a private two-person invitation. Your friend accepts before any message or image can be sent.',
             ],
             [
               Smile,
-              'சிரிப்புக்கு stickers',
               'Tamil stickers & meme cards',
               'Send original Tamil reactions, funny chat-life cards and emojis. No third-party sticker account needed.',
             ],
             [
               ImagePlus,
-              'படம் பகிரலாம்',
               'Photo sharing with clear retention',
               'Tap to view and zoom. Chat image links stop at the end; new chats retain smaller copies in an admin-only security PDF for 30 days.',
             ],
-          ].map(([Icon, ta, en, description]) => {
+          ].map(([Icon, en, description]) => {
             const I = Icon as typeof Link2;
             return (
               <article
@@ -245,10 +243,7 @@ export default function TamilChatLanding() {
                   className="mb-5 text-[#679772]"
                   aria-hidden="true"
                 />
-                <h2 className="text-base font-bold leading-8">{String(ta)}</h2>
-                <h3 className="mt-2 text-xs font-bold text-[#69906f]">
-                  {String(en)}
-                </h3>
+                <h2 className="text-base font-bold leading-8">{String(en)}</h2>
                 <p className="mt-3 text-xs leading-7 text-[#64765b]">
                   {String(description)}
                 </p>
@@ -265,7 +260,7 @@ export default function TamilChatLanding() {
               className="text-[#6b9566]"
               aria-hidden="true"
             />
-            <h2 className="text-xl font-bold">உங்கள் chat. உங்கள் கட்டுப்பாடு.</h2>
+            <h2 className="text-xl font-bold">Your chat. Your control.</h2>
           </div>
           <p className="mt-4 max-w-3xl text-sm leading-8 text-[#70856a]">
             Destroy your invite anytime, end a conversation, block a guest or
@@ -317,7 +312,7 @@ export default function TamilChatLanding() {
         </div>
       </section>
       <footer className="mx-auto mt-8 flex max-w-6xl flex-wrap items-center justify-between gap-5 border-t border-[#e2eadc] px-4 py-7 text-xs text-[#64765b] sm:px-6">
-        <span>TamilAI Prompt · தமிழில் connect ஆகலாம்.</span>
+        <span>TamilAI Prompt · Connect with friends.</span>
         <nav aria-label="Footer" className="flex gap-5">
           <Link href="/">Prompts</Link>
           <Link href="/privacy">Privacy</Link>

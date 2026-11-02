@@ -49,6 +49,12 @@ try {
       throw new Error(
         'Host database grants inherited PUBLIC table access; refusing to reuse it.',
       );
+    await tx.unsafe(
+      await readFile(
+        new URL('../database/chat-read-receipts.sql', import.meta.url),
+        'utf8',
+      ),
+    );
   });
   const connection = new URL(adminUrl);
   // Supavisor usernames have the role.project-ref form.

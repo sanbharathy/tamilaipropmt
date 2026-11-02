@@ -22,7 +22,11 @@ Local previews are revoked on remove, send, end and unmount. The viewer unmounts
 
 ## Security archive
 
-Privacy policy, chat rules and privacy/retention notices always remain in English, independently of the chat language toggle. Policy containers declare lang=en and translate=no. Notice body text is 13px; acknowledgement and inline retention summaries are 12px with readable line spacing.
+Privacy policy, chat rules and privacy/retention notices always remain in English, independently of the chat language toggle. Policy containers declare lang=en and translate=no. Notice body text is 13px; acknowledgement text is 8px as requested. Inline retention summaries are 12px.
+
+Chat and lobby default to English, with Tamil available through the toggle. Message bubbles contain only content; timestamps, single Sent ticks, blue double Seen ticks and the info-icon report action sit outside. Report dialogs quote the selected message and timestamp before asking for a reason.
+
+Seen flags use private TTL records in tamil_chat.limits (seen:room:message keys), with a monotonic latest-seen cursor on the room. This uses only the existing restricted chat role. Incoming-message bottom markers are observed within the scrollable thread. Only visible, focused screens without an open modal acknowledge those exact IDs, in batches of at most 100. A normal background poll does not acknowledge messages. The server validates incoming messages in that room and excludes removed messages. Seeing one message does not mark earlier, unobserved messages as seen. These are display acknowledgements, not proof of attention. TTL records expire with the live room, are purged by existing maintenance and are shared only with participants.
 
 New rooms require acknowledgement of the updated archive notice. Existing guest sessions see a blocking notice before continuing; new join forms disclose the policy. Backend consent checks prevent older clients from joining or sending into a new archived room without acknowledgement.
 

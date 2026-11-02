@@ -7,6 +7,10 @@ export const metadata: Metadata = {
 };
 const rules = [
   [
+    'Seen receipts',
+    'A blue double tick means the recipient’s browser displayed the message in a visible, focused chat screen. A single tick means the message was sent. Seen receipts are shared only between accepted participants and are retained with the live room until it expires. They do not prove that a person read or understood the message. Opening a background tab alone does not send a seen receipt.',
+  ],
+  [
     'Screen presence',
     'In an accepted chat, the other participant can see whether your chat screen is visible and focused, or the last time you were there. Presence updates every few seconds and can take up to 20 seconds to expire after a disconnect. It does not prove that you read a message or are looking at the screen. Activity elsewhere on the website does not count. Presence records are private to this room and are removed when its live room record expires; they are not a permanent activity history.',
   ],

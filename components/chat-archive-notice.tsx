@@ -33,7 +33,7 @@ export function ChatArchiveNotice({
             Full details
           </Link>
         </p>
-        <label className="mt-4 flex items-start gap-3 text-xs leading-6">
+        <label className="mt-4 flex items-start gap-3 text-[8px] leading-4">
           <input
             type="checkbox"
             checked={accepted}

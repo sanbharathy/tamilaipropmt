@@ -44,6 +44,8 @@ export async function GET(request: Request) {
     const rooms =
       await sql`select r.id,r.host_id,r.guest_id,r.source,r.status,r.created_at,r.expires_at,
       case when r.host_id=${me.id} then g.name else h.name end as peer_name,
+      case when r.host_id=${me.id} then r.guest_read_id else r.host_read_id end::text as peer_read_id,
+      case when r.host_id=${me.id} then r.guest_read_at else r.host_read_at end as peer_read_at,
       case when r.host_id=${me.id} then r.guest_id else r.host_id end as peer_id
       from tamil_chat.rooms r join tamil_chat.sessions h on h.id=r.host_id left join tamil_chat.sessions g on g.id=r.guest_id
       where (r.host_id=${me.id} or r.guest_id=${me.id}) and r.expires_at>now() and (${roomId}::uuid is null or r.id=${roomId}::uuid) order by r.created_at desc limit 30`;
@@ -60,6 +62,7 @@ export async function GET(request: Request) {
           validId(screen),
           screenSequence(query.get('sequence')),
           true,
+          query.get('read'),
         );
       const [presence] = await sql`select max(last_seen) as peer_last_seen,
         coalesce(bool_or(present and last_seen>now()-interval '20 seconds'),false) as peer_viewing,
@@ -69,7 +72,9 @@ export async function GET(request: Request) {
     }
     const messages =
       room?.status === 'active'
-        ? await sql`select id::text,sender_id,body,created_at,has_image from (select id,sender_id,body,created_at,image_type is not null as has_image from tamil_chat.messages where room_id=${room.id} and removed_at is null order by id desc limit 100) m order by id`
+        ? await sql`select id::text,sender_id,body,created_at,has_image,
+          exists(select 1 from tamil_chat.limits l where l.key=${'seen:' + room.id + ':'}||m.id::text and l.expires_at>now()) as seen
+          from (select id,sender_id,body,created_at,image_type is not null as has_image from tamil_chat.messages where room_id=${room.id} and removed_at is null order by id desc limit 100) m order by id`
         : [];
     const people = me.available
       ? await sql`select s.id,s.name,s.topic from tamil_chat.sessions s where s.available=true and s.suspended=false

@@ -7,6 +7,8 @@ import Link from 'next/link';
 import {
   ArrowLeft,
   Check,
+  CheckCheck,
+  Info,
   Copy,
   ImagePlus,
   LoaderCircle,
@@ -17,7 +19,6 @@ import {
   Expand,
   MessageCircle,
   ShieldCheck,
-  Flag,
   Smile,
 } from 'lucide-react';
 import type { ChatMessage, ChatState } from '@/lib/chat-types';
@@ -87,8 +88,11 @@ function ChatImage({
 export function PrivateChat({ roomId }: { roomId: string }) {
   const presenceScreen = useRef<string | null>(null);
   const presenceSequence = useRef(0);
+  const observedReads = useRef(new Set<string>());
+  const pendingReads = useRef(new Set<string>());
+  const thread = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<ChatState>(blank);
-  const [tamil, setTamil] = useState(true);
+  const [tamil, setTamil] = useState(false);
   const [ready, setReady] = useState(false);
   const [connected, setConnected] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -129,12 +133,44 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   const status = room?.status;
   const txt = (ta: string, en: string) => (tamil ? ta : en);
 
+  const readVisible = useCallback(() => {
+    if (
+      document.visibilityState !== 'visible' ||
+      !document.hasFocus() ||
+      document.querySelector('dialog[open]') ||
+      !thread.current
+    )
+      return false;
+    const viewport = thread.current.getBoundingClientRect();
+    let changed = false;
+    for (const marker of thread.current.querySelectorAll<HTMLElement>(
+      '[data-read-message]',
+    )) {
+      const box = marker.getBoundingClientRect(),
+        id = marker.dataset.readMessage;
+      if (
+        id &&
+        box.top >= viewport.top &&
+        box.bottom <= viewport.bottom &&
+        !observedReads.current.has(id)
+      ) {
+        observedReads.current.add(id);
+        pendingReads.current.add(id);
+        changed = true;
+      }
+    }
+    return changed;
+  }, []);
+
   const load = useCallback(async () => {
     const current = ++version.current;
     let presenceQuery = '';
+    let readBatch: string[] = [];
     if (document.visibilityState === 'visible' && document.hasFocus()) {
       presenceScreen.current ??= crypto.randomUUID();
-      presenceQuery = `&screen=${presenceScreen.current}&sequence=${++presenceSequence.current}`;
+      readVisible();
+      readBatch = [...pendingReads.current].slice(0, 100);
+      presenceQuery = `&screen=${presenceScreen.current}&sequence=${++presenceSequence.current}${readBatch.length ? '&read=' + encodeURIComponent(readBatch.join(',')) : ''}`;
     }
     let response = await fetch(`/api/chat?room=${roomId}${presenceQuery}`, {
       cache: 'no-store',
@@ -149,6 +185,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
     if (current !== version.current) return;
     if (!response.ok)
       throw new Error(data.error ?? 'Unable to load this conversation.');
+    for (const id of readBatch) pendingReads.current.delete(id);
     setState({
       ...data,
       rooms: [],
@@ -167,7 +204,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       setInvitation(null);
       window.history.replaceState(null, '', window.location.pathname);
     }
-  }, [roomId]);
+  }, [roomId, readVisible]);
   useEffect(() => {
     const secret =
       new URLSearchParams(window.location.hash.slice(1)).get('invite') ?? '';
@@ -293,6 +330,19 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: 'nearest' });
   }, [state.messages.length]);
+  useEffect(() => {
+    if (status !== 'active' || !thread.current) return;
+    const observer = new IntersectionObserver(
+      () => {
+        if (readVisible()) void load().catch(() => setConnected(false));
+      },
+      { root: thread.current, threshold: 1 },
+    );
+    thread.current
+      .querySelectorAll('[data-read-message]')
+      .forEach((marker) => observer.observe(marker));
+    return () => observer.disconnect();
+  }, [state.messages, status, readVisible, load]);
   useEffect(() => {
     if (confirm) confirmDialog.current?.showModal();
     if (report) reportDialog.current?.showModal();
@@ -421,7 +471,10 @@ export function PrivateChat({ roomId }: { roomId: string }) {
     );
 
   return (
-    <main className="messenger-screen mx-auto flex h-dvh min-h-[400px] max-w-6xl flex-col overflow-hidden md:my-4 md:h-[calc(100dvh-2rem)] md:rounded-[28px]">
+    <main
+      lang={tamil ? 'ta' : 'en'}
+      className="messenger-screen mx-auto flex h-dvh min-h-[400px] max-w-6xl flex-col overflow-hidden md:my-4 md:h-[calc(100dvh-2rem)] md:rounded-[28px]"
+    >
       <header className="relative z-20 flex shrink-0 items-center justify-between gap-3 border-b border-[#e1eae4] bg-white/95 px-3 py-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-2.5">
           <Link
@@ -609,7 +662,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             <label
               lang="en"
               translate="no"
-              className="mt-5 flex gap-3 text-xs leading-6"
+              className="mt-5 flex gap-3 text-[8px] leading-4"
             >
               <input
                 type="checkbox"
@@ -775,6 +828,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       ) : (
         <>
           <div
+            ref={thread}
             role="log"
             aria-label="Conversation messages"
             aria-live="polite"
@@ -802,6 +856,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             )}
             {state.messages.map((message, index) => {
               const mine = message.sender_id === meId;
+              const seen = mine && !!message.seen;
               const sticker = !message.has_image
                 ? findChatSticker(message.body)
                 : undefined;
@@ -853,36 +908,63 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                         {!sticker &&
                           (!message.has_image ||
                             message.body !== '📷 Shared image') && (
-                            <p className="whitespace-pre-wrap break-words px-3.5 pb-1 pt-2.5 text-[13px] leading-7 [overflow-wrap:anywhere] sm:text-sm">
+                            <p className="whitespace-pre-wrap break-words px-3.5 py-2.5 text-[13px] leading-7 [overflow-wrap:anywhere] sm:text-sm">
                               <ChatMessageBody
                                 text={message.body}
                                 onOpenPhoto={setViewPhoto}
                               />
                             </p>
                           )}
-                        <div className="flex items-center justify-end gap-1.5 px-3 pb-1.5 pt-1 text-[10px] text-[#506e5f]">
-                          {!mine && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setReport(message);
-                                setReason('');
-                              }}
-                              className="mr-auto inline-flex min-h-7 items-center gap-1 pr-4 text-[10px] text-[#607767] hover:text-[#315e50]"
-                            >
-                              <Flag size={9} aria-hidden="true" />
-                              {txt('புகார்', 'Report')}
-                            </button>
-                          )}
-                          <time dateTime={message.created_at}>
-                            {date.toLocaleTimeString(
-                              tamil ? 'ta-IN' : 'en-IN',
-                              { hour: '2-digit', minute: '2-digit' },
-                            )}
-                          </time>
-                          {mine && <Check size={12} aria-label="Sent" />}
-                        </div>
                       </div>
+                      <div
+                        className={`mt-1 flex items-center gap-1.5 px-1 text-[10px] text-[#607767] ${mine ? 'justify-end' : 'justify-start'}`}
+                      >
+                        {!mine && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReport(message);
+                              setReason('');
+                            }}
+                            aria-label={txt(
+                              'இந்தச் செய்தியைப் புகாரளி',
+                              'Report this message',
+                            )}
+                            title={txt(
+                              'இந்தச் செய்தியைப் புகாரளி',
+                              'Report this message',
+                            )}
+                            className="grid size-7 shrink-0 place-items-center rounded-full text-[#607767] hover:bg-white/80 hover:text-[#315e50]"
+                          >
+                            <Info size={14} aria-hidden="true" />
+                          </button>
+                        )}
+                        <time dateTime={message.created_at}>
+                          {date.toLocaleTimeString(tamil ? 'ta-IN' : 'en-IN', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </time>
+                        {mine &&
+                          (seen ? (
+                            <CheckCheck
+                              size={14}
+                              className="text-sky-600"
+                              aria-label="Seen"
+                            >
+                              <title>Seen on the recipient’s chat screen</title>
+                            </CheckCheck>
+                          ) : (
+                            <Check size={12} aria-label="Sent" />
+                          ))}
+                      </div>
+                      {!mine && (
+                        <span
+                          data-read-message={message.id}
+                          className="block h-px"
+                          aria-hidden="true"
+                        />
+                      )}
                     </article>
                   </div>
                 </div>
@@ -1183,8 +1265,20 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             }}
           >
             <h2 id="report-chat-title" className="text-lg font-bold">
-              {txt('புகாரளிக்க', 'Report message')}
+              {txt('இந்தச் செய்தியைப் புகாரளி', 'Report this message')}
             </h2>
+            <blockquote className="mt-3 rounded-xl bg-[#f1f5f2] p-3 text-xs leading-6">
+              <p className="text-[10px] text-[#607767]">
+                {report.has_image ? 'Image attachment · ' : ''}
+                {new Date(report.created_at).toLocaleString(
+                  tamil ? 'ta-IN' : 'en-IN',
+                )}
+              </p>
+              <p className="mt-1 whitespace-pre-wrap break-words">
+                {Array.from(report.body).slice(0, 220).join('')}
+                {Array.from(report.body).length > 220 ? '…' : ''}
+              </p>
+            </blockquote>
             <p className="mt-3 text-xs leading-6">
               <span lang="en" translate="no" className="text-xs leading-6">
                 A moderator can review this report. New chats also retain

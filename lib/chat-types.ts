@@ -19,6 +19,8 @@ export type ChatRoom = {
   peer_name: string | null;
   peer_id: string | null;
   peer_last_seen?: string | null;
+  peer_read_id?: string;
+  peer_read_at?: string | null;
   peer_viewing?: boolean;
   peer_active_until?: string | null;
   expires_at: string;
@@ -29,6 +31,7 @@ export type ChatMessage = {
   sender_id: string;
   body: string;
   has_image?: boolean;
+  seen?: boolean;
   created_at: string;
 };
 export type ChatState = {

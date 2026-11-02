@@ -36,7 +36,7 @@ const empty: ChatState = {
 type Invite = { hostName: string; roomId: string; own: boolean };
 
 export function CommunityChat() {
-  const [tamil, setTamil] = useState(true);
+  const [tamil, setTamil] = useState(false);
   const [state, setState] = useState<ChatState>(empty);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -276,7 +276,10 @@ export function CommunityChat() {
       />
     );
   return (
-    <main className="min-h-screen bg-[#f3f5f3] text-[#18362f]">
+    <main
+      lang={tamil ? 'ta' : 'en'}
+      className="min-h-screen bg-[#f3f5f3] text-[#18362f]"
+    >
       <header className="border-b border-[#dbe5de] bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link
@@ -446,7 +449,7 @@ export function CommunityChat() {
               <label
                 lang="en"
                 translate="no"
-                className="my-6 flex items-start gap-3 text-xs leading-6 text-[#60776c]"
+                className="my-6 flex items-start gap-3 text-[8px] leading-4 text-[#60776c]"
               >
                 <input
                   type="checkbox"
