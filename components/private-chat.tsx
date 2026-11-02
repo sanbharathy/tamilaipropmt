@@ -11,9 +11,25 @@ import {
   LockKeyhole,
   Send,
   X,
+  EllipsisVertical,
+  Expand,
+  MessageCircle,
+  ShieldCheck,
+  Flag,
+  Smile,
 } from 'lucide-react';
 import type { ChatMessage, ChatState } from '@/lib/chat-types';
 import { DestroyChatButton } from '@/components/destroy-chat-button';
+import { ChatPhotoViewer } from '@/components/chat-photo-viewer';
+import { ChatMessageBody } from '@/components/chat-message-body';
+import { ChatStickerCard } from '@/components/chat-sticker-card';
+import {
+  chatStickers,
+  findChatSticker,
+  stickerBody,
+  type ChatSticker,
+} from '@/lib/chat-stickers';
+import './private-chat.css';
 
 const blank: ChatState = {
   me: null,
@@ -22,23 +38,47 @@ const blank: ChatState = {
   people: [],
   messages: [],
 };
-function ChatImage({ id }: { id: string }) {
+function ChatImage({
+  id,
+  onOpen,
+  tamil,
+}: {
+  id: string;
+  onOpen: (id: string) => void;
+  tamil: boolean;
+}) {
   const [failed, setFailed] = useState(false);
   return failed ? (
     <p className="p-3 text-xs">Image cleared or unavailable.</p>
   ) : (
-    // Authenticated private images must bypass the public Next.js image optimizer.
-    // oxlint-disable-next-line
-    <img
-      src={`/api/chat/images/${id}`}
-      alt="Shared attachment"
-      width={1200}
-      height={1200}
-      loading="lazy"
-      referrerPolicy="no-referrer"
-      onError={() => setFailed(true)}
-      className="max-h-80 w-auto max-w-full rounded-xl object-contain"
-    />
+    <a
+      href={`/api/chat/images/${id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(event) => {
+        event.preventDefault();
+        onOpen(id);
+      }}
+      aria-label={tamil ? 'படத்தைப் பெரிதாகப் பார்க்க' : 'View shared picture'}
+      className="messenger-photo group relative block overflow-hidden rounded-[16px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128577]"
+    >
+      {/* Authenticated private images must bypass the public Next.js image optimizer. */}
+      {/* oxlint-disable-next-line */}
+      <img
+        src={`/api/chat/images/${id}`}
+        alt="Shared attachment"
+        width={1200}
+        height={1200}
+        loading="lazy"
+        referrerPolicy="no-referrer"
+        onError={() => setFailed(true)}
+        className="max-h-80 min-w-36 w-auto max-w-full object-contain transition-[filter] group-hover:brightness-95"
+      />
+      <span className="absolute bottom-2 right-2 inline-flex min-h-8 items-center gap-1.5 rounded-full bg-black/55 px-3 text-[10px] font-semibold text-white backdrop-blur-sm">
+        <Expand size={12} aria-hidden="true" />
+        {tamil ? 'பெரிதாகப் பார்க்க' : 'View picture'}
+      </span>
+    </a>
   );
 }
 
@@ -65,6 +105,13 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   const [confirm, setConfirm] = useState<'end' | 'block' | null>(null);
   const [report, setReport] = useState<ChatMessage | null>(null);
   const [reason, setReason] = useState('');
+  const [viewPhoto, setViewPhoto] = useState<string | null>(null);
+  const [showStickers, setShowStickers] = useState(false);
+  const [stickerTab, setStickerTab] = useState<'sticker' | 'meme' | 'comedy'>(
+    'sticker',
+  );
+  const composer = useRef<HTMLTextAreaElement>(null);
+  const actionsMenu = useRef<HTMLDetailsElement>(null);
   const inviteRef = useRef('');
   const version = useRef(0);
   const polling = useRef(false);
@@ -201,6 +248,20 @@ export function PrivateChat({ roomId }: { roomId: string }) {
     if (confirm) confirmDialog.current?.showModal();
     if (report) reportDialog.current?.showModal();
   }, [confirm, report]);
+  useEffect(() => {
+    if (!draft && composer.current) composer.current.style.height = '48px';
+  }, [draft]);
+  useEffect(() => {
+    const close = (event: PointerEvent) => {
+      if (
+        actionsMenu.current &&
+        !actionsMenu.current.contains(event.target as Node)
+      )
+        actionsMenu.current.open = false;
+    };
+    document.addEventListener('pointerdown', close);
+    return () => document.removeEventListener('pointerdown', close);
+  }, []);
 
   async function act(payload: Record<string, unknown>, after?: () => void) {
     setBusy(true);
@@ -256,6 +317,17 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       setBusy(false);
     }
   }
+  async function sendSticker(sticker: ChatSticker) {
+    if (busy || status !== 'active' || !connected) return;
+    await act(
+      {
+        action: 'send',
+        text: stickerBody(sticker),
+        clientId: crypto.randomUUID(),
+      },
+      () => setShowStickers(false),
+    );
+  }
   function chooseImage(file: File | undefined) {
     if (!file) return;
     if (
@@ -291,26 +363,38 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   const canAccept = invitation && !invitation.own && !room;
 
   return (
-    <main className="flex h-dvh min-h-[400px] flex-col bg-[#f4f7f1] text-[#18362f]">
-      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-[#dbe5de] bg-white px-4 py-3 sm:px-6">
-        <div className="flex min-w-0 items-center gap-3">
+    <main className="messenger-screen mx-auto flex h-dvh min-h-[400px] max-w-6xl flex-col overflow-hidden md:my-4 md:h-[calc(100dvh-2rem)] md:rounded-[28px]">
+      <header className="relative z-20 flex shrink-0 items-center justify-between gap-3 border-b border-[#e1eae4] bg-white/95 px-3 py-3 sm:px-6">
+        <div className="flex min-w-0 items-center gap-2.5">
           <Link
             href="/community-chat"
             aria-label="Back to chats"
-            className="grid size-10 shrink-0 place-items-center rounded-full border border-[#dbe5de]"
+            className="grid size-10 shrink-0 place-items-center rounded-full text-[#57756c] transition hover:bg-[#edf4ef]"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={20} />
           </Link>
+          <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[#167c6a] font-heading text-lg font-bold text-white shadow-[0_4px_12px_#167c6a24]">
+            {room?.peer_name ? (
+              Array.from(room.peer_name)[0].toUpperCase()
+            ) : (
+              <MessageCircle size={21} aria-hidden="true" />
+            )}
+          </span>
           <div className="min-w-0">
-            <h1 className="truncate text-base font-bold">
+            <h1 className="truncate text-[15px] font-bold sm:text-[17px]">
               {room?.peer_name ?? txt('தனிப்பட்ட உரையாடல்', 'Private conversation')}
             </h1>
-            <p className="mt-1 flex items-center gap-1.5 text-[11px] text-[#60776c]">
-              <LockKeyhole size={12} aria-hidden="true" />
+            <p className="mt-0.5 flex items-center gap-1.5 text-[10px] font-medium text-[#6a8179] sm:text-[11px]">
+              <LockKeyhole size={10} aria-hidden="true" />
               {status === 'active'
-                ? txt('இருவர் மட்டும்', 'Two participants')
-                : txt('Private chat', 'Private chat')}
-              {me ? ` · ${me.name}` : ''}
+                ? txt(
+                    'இருவர் மட்டும் · தற்காலிக படங்கள்',
+                    'Two people · Temporary photos',
+                  )
+                : txt(
+                    'Private invite · உங்கள் விருப்பப்படி',
+                    'Private invite · On your terms',
+                  )}
             </p>
           </div>
         </div>
@@ -318,54 +402,87 @@ export function PrivateChat({ roomId }: { roomId: string }) {
           <button
             type="button"
             onClick={() => setTamil(!tamil)}
-            className="min-h-10 rounded-xl border border-[#dbe5de] px-3 text-xs font-semibold"
+            className="min-h-10 rounded-full bg-[#f0f5f2] px-3 text-[11px] font-bold text-[#4a6e62]"
           >
             {tamil ? 'EN' : 'தமிழ்'}
           </button>
-          {room && status !== 'ended' && status !== 'declined' && (
-            <>
-              {room.host_id === meId ? (
-                <DestroyChatButton
-                  roomId={roomId}
-                  tamil={tamil}
+          <details ref={actionsMenu} className="messenger-actions relative">
+            <summary
+              aria-label={txt('Chat விருப்பங்கள்', 'Chat options')}
+              className="grid size-10 cursor-pointer list-none place-items-center rounded-full text-[#547268] transition hover:bg-[#edf4ef]"
+            >
+              <EllipsisVertical size={20} />
+            </summary>
+            <div className="absolute right-0 top-full mt-3 w-64 rounded-[20px] border border-[#e3ebe5] bg-white p-2 shadow-[0_12px_50px_#153c3025]">
+              {me && (
+                <p className="border-b border-[#edf2ed] px-3 py-3 text-xs text-[#6a8179]">
+                  {txt('உங்கள் பெயர்', 'Chatting as')}{' '}
+                  <strong className="break-words text-[#244e41]">
+                    {me.name}
+                  </strong>
+                </p>
+              )}
+              {room &&
+                status !== 'ended' &&
+                status !== 'declined' &&
+                (room.host_id === meId ? (
+                  <DestroyChatButton
+                    roomId={roomId}
+                    tamil={tamil}
+                    disabled={busy}
+                    kind={room.source === 'link' ? 'link' : 'chat'}
+                    className="min-h-11 w-full rounded-xl px-3 text-left text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-40"
+                    onDestroyed={async () => {
+                      inviteRef.current = '';
+                      setInviteToken('');
+                      setInvitation(null);
+                      setImage(null);
+                      setDraft('');
+                      window.history.replaceState(
+                        null,
+                        '',
+                        window.location.pathname,
+                      );
+                      await load();
+                    }}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      if (actionsMenu.current) actionsMenu.current.open = false;
+                      setConfirm('end');
+                    }}
+                    className="min-h-11 w-full rounded-xl px-3 text-left text-sm font-semibold hover:bg-[#edf4ef]"
+                  >
+                    {txt('Chat-ஐ முடி', 'End conversation')}
+                  </button>
+                ))}
+              {room?.peer_id && status === 'active' && (
+                <button
+                  type="button"
                   disabled={busy}
-                  kind={room.source === 'link' ? 'link' : 'chat'}
-                  onDestroyed={async () => {
-                    inviteRef.current = '';
-                    setInviteToken('');
-                    setInvitation(null);
-                    setImage(null);
-                    setDraft('');
-                    window.history.replaceState(
-                      null,
-                      '',
-                      window.location.pathname,
-                    );
-                    await load();
+                  onClick={() => {
+                    if (actionsMenu.current) actionsMenu.current.open = false;
+                    setConfirm('block');
                   }}
-                />
-              ) : (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => setConfirm('end')}
-                  className="min-h-10 rounded-xl border border-[#dbe5de] px-3 text-xs font-bold"
+                  className="min-h-11 w-full rounded-xl px-3 text-left text-sm font-semibold text-red-700 hover:bg-red-50"
                 >
-                  {txt('முடி', 'End')}
+                  {txt('இந்த நபரை Block செய்', 'Block this person')}
                 </button>
               )}
-              {room.peer_id && (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => setConfirm('block')}
-                  className="min-h-10 rounded-xl px-2 text-xs font-semibold text-red-800"
-                >
-                  Block
-                </button>
-              )}
-            </>
-          )}
+              <a
+                href="/community-chat/rules"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-[#5a786b] hover:bg-[#edf4ef]"
+              >
+                <ShieldCheck size={15} aria-hidden="true" />
+                {txt('தனியுரிமை & வரம்புகள்', 'Privacy & limits')}
+              </a>
+            </div>
+          </details>
         </div>
       </header>
       {error && (
@@ -546,8 +663,8 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 </p>
                 <p className="mb-3 text-xs leading-6 text-[#60776c]">
                   {txt(
-                    'நண்பர் ஏற்றதும் link செயலிழக்கும். மேலே உள்ள “Link-ஐ அழி” மூலம் எப்போது வேண்டுமானாலும் ரத்து செய்யலாம்.',
-                    'The link is single-use. Use “Destroy link” above to cancel it whenever you want.',
+                    'நண்பர் ஏற்றதும் link செயலிழக்கும். ⋯ menu-வில் “Link-ஐ அழி” மூலம் எப்போது வேண்டுமானாலும் ரத்து செய்யலாம்.',
+                    'The link is single-use. Open ⋯ → Destroy link to cancel it whenever you want.',
                   )}
                 </p>
                 <input
@@ -591,59 +708,218 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             aria-label="Conversation messages"
             aria-live="polite"
             aria-relevant="additions text"
-            className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 sm:px-8 sm:py-6"
+            className="messenger-thread min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-5 sm:px-8 sm:py-7"
           >
             {!state.messages.length && (
-              <p className="py-8 text-center text-sm text-[#60776c]">
-                {txt(
-                  'வணக்கம் சொல்லுங்கள் அல்லது ஒரு படத்தைப் பகிருங்கள்.',
-                  'Say hello or share an image.',
-                )}
-              </p>
-            )}
-            {state.messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender_id === meId ? 'justify-end' : 'justify-start'}`}
-              >
-                <article className="max-w-[88%] sm:max-w-[70%]">
-                  <div
-                    className={`overflow-hidden rounded-2xl p-2 ${message.sender_id === meId ? 'rounded-br-sm bg-[#225343] text-white' : 'rounded-bl-sm border border-[#dbe5de] bg-white'}`}
-                  >
-                    {message.has_image && <ChatImage id={message.id} />}
-                    <p className="whitespace-pre-wrap break-words px-2 py-1 text-sm leading-7 [overflow-wrap:anywhere]">
-                      {message.body}
-                    </p>
-                  </div>
-                  <div className="mt-1 flex items-center gap-3 px-1 text-[11px] text-[#60776c]">
-                    <time dateTime={message.created_at}>
-                      {new Date(message.created_at).toLocaleTimeString(
-                        tamil ? 'ta-IN' : 'en-IN',
-                        { hour: '2-digit', minute: '2-digit' },
-                      )}
-                    </time>
-                    {message.sender_id !== meId && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReport(message);
-                          setReason('');
-                        }}
-                        className="min-h-8 underline"
-                      >
-                        {txt('புகாரளி', 'Report')}
-                      </button>
-                    )}
-                  </div>
-                </article>
+              <div className="mx-auto my-12 max-w-xs rounded-[24px] bg-white/65 px-6 py-7 text-center">
+                <span className="mx-auto mb-4 grid size-12 place-items-center rounded-full bg-[#e0efe3] text-[#258272]">
+                  <MessageCircle size={23} aria-hidden="true" />
+                </span>
+                <p className="text-sm font-bold text-[#31594b]">
+                  {txt(
+                    'ஒரு வணக்கத்தில் தொடங்கட்டும் ✨',
+                    'Good conversations start with hello ✨',
+                  )}
+                </p>
+                <p className="mt-2 text-xs leading-7 text-[#799083]">
+                  {txt(
+                    'ஒரு செய்தி அல்லது ஒரு படம். உங்கள் உரையாடல், உங்கள் ஸ்டைல்.',
+                    'A message or a picture. Your conversation, your style.',
+                  )}
+                </p>
               </div>
-            ))}
+            )}
+            {state.messages.map((message, index) => {
+              const mine = message.sender_id === meId;
+              const sticker = !message.has_image
+                ? findChatSticker(message.body)
+                : undefined;
+              const date = new Date(message.created_at);
+              const newDay =
+                index === 0 ||
+                date.toDateString() !==
+                  new Date(state.messages[index - 1].created_at).toDateString();
+              const day =
+                date.toDateString() === new Date().toDateString()
+                  ? txt('இன்று', 'Today')
+                  : date.toLocaleDateString(tamil ? 'ta-IN' : 'en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                    });
+              return (
+                <div key={message.id}>
+                  {newDay && (
+                    <div className="mb-5 mt-2 text-center">
+                      <time
+                        dateTime={message.created_at}
+                        className="inline-block rounded-full border border-[#e0e8dc] bg-white/80 px-4 py-1 text-[10px] font-semibold text-[#7a8b7d] shadow-sm"
+                      >
+                        {day}
+                      </time>
+                    </div>
+                  )}
+                  <div
+                    className={`flex ${mine ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <article className="max-w-[87%] sm:max-w-[72%]">
+                      <div
+                        className={`messenger-bubble overflow-hidden rounded-[20px] ${mine ? 'rounded-br-[5px] bg-[#d9f4e2] text-[#1b473b]' : 'rounded-bl-[5px] bg-white text-[#28473f]'}`}
+                      >
+                        {message.has_image && (
+                          <div className="p-1.5 pb-0">
+                            <ChatImage
+                              id={message.id}
+                              onOpen={setViewPhoto}
+                              tamil={tamil}
+                            />
+                          </div>
+                        )}
+                        {sticker && (
+                          <div className="p-1.5">
+                            <ChatStickerCard sticker={sticker} />
+                          </div>
+                        )}
+                        {!sticker &&
+                          (!message.has_image ||
+                            message.body !== '📷 Shared image') && (
+                            <p className="whitespace-pre-wrap break-words px-3.5 pb-1 pt-2.5 text-[13px] leading-7 [overflow-wrap:anywhere] sm:text-sm">
+                              <ChatMessageBody
+                                text={message.body}
+                                onOpenPhoto={setViewPhoto}
+                              />
+                            </p>
+                          )}
+                        <div className="flex items-center justify-end gap-1.5 px-3 pb-1.5 pt-1 text-[10px] text-[#506e5f]">
+                          {!mine && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReport(message);
+                                setReason('');
+                              }}
+                              className="mr-auto inline-flex min-h-7 items-center gap-1 pr-4 text-[10px] text-[#607767] hover:text-[#315e50]"
+                            >
+                              <Flag size={9} aria-hidden="true" />
+                              {txt('புகார்', 'Report')}
+                            </button>
+                          )}
+                          <time dateTime={message.created_at}>
+                            {date.toLocaleTimeString(
+                              tamil ? 'ta-IN' : 'en-IN',
+                              { hour: '2-digit', minute: '2-digit' },
+                            )}
+                          </time>
+                          {mine && <Check size={12} aria-label="Sent" />}
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              );
+            })}
             <div ref={bottom} />
           </div>
           <form
             onSubmit={send}
-            className="shrink-0 border-t border-[#dbe5de] bg-white px-3 py-3 sm:px-6"
+            className="shrink-0 border-t border-[#e3ece5] bg-white px-3 pb-3 pt-3 sm:px-6"
           >
+            {showStickers && (
+              <section
+                aria-label="Tamil stickers and memes"
+                className="mb-3 overflow-hidden rounded-[22px] border border-[#e0eae2] bg-[#fbfdfb] shadow-[0_-4px_20px_#244b3610]"
+              >
+                <div className="flex items-center justify-between gap-2 border-b border-[#e9efea] px-3 py-2">
+                  <div className="flex min-w-0 gap-1 overflow-x-auto">
+                    <button
+                      type="button"
+                      aria-pressed={stickerTab === 'sticker'}
+                      onClick={() => setStickerTab('sticker')}
+                      className={`min-h-10 rounded-full px-4 text-xs font-bold ${stickerTab === 'sticker' ? 'bg-[#dfeee5] text-[#28715b]' : 'text-[#8b9e92]'}`}
+                    >
+                      {txt('ஸ்டிக்கர்கள்', 'Stickers')}
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={stickerTab === 'meme'}
+                      onClick={() => setStickerTab('meme')}
+                      className={`min-h-10 rounded-full px-4 text-xs font-bold ${stickerTab === 'meme' ? 'bg-[#dfeee5] text-[#28715b]' : 'text-[#8b9e92]'}`}
+                    >
+                      Tamil memes
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={stickerTab === 'comedy'}
+                      onClick={() => setStickerTab('comedy')}
+                      className={`min-h-10 shrink-0 rounded-full px-3 text-xs font-bold ${stickerTab === 'comedy' ? 'bg-[#dfeee5] text-[#28715b]' : 'text-[#60776a]'}`}
+                    >
+                      {txt('காமெடி', 'Comedy')}
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label="Close stickers"
+                    onClick={() => setShowStickers(false)}
+                    className="grid size-9 place-items-center rounded-full text-[#6b8979]"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <div className="flex justify-center gap-1 border-b border-[#e9efea] px-3 py-2">
+                  {['😂', '🙌', '🔥', '❤️', '🪔', '😎'].map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      disabled={busy}
+                      onClick={() => {
+                        setDraft((current) => current + emoji);
+                        setShowStickers(false);
+                        composer.current?.focus();
+                      }}
+                      aria-label={`Add ${emoji}`}
+                      className="grid size-10 place-items-center rounded-full text-2xl hover:bg-[#ecf4ed]"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+                <p className="px-4 pt-3 text-[10px] text-[#81968a]">
+                  {txt(
+                    'ஒரு card-ஐத் தொட்டால் உடனே அனுப்பப்படும்',
+                    'Tap a card to send it instantly',
+                  )}
+                </p>
+                <div className="grid max-h-[30dvh] grid-cols-2 gap-2 overflow-y-auto p-3 sm:grid-cols-3">
+                  {chatStickers
+                    .filter((sticker) => sticker.kind === stickerTab)
+                    .map((sticker) => (
+                      <button
+                        key={sticker.id}
+                        type="button"
+                        disabled={busy || !connected}
+                        onClick={() => void sendSticker(sticker)}
+                        aria-label={`Send ${sticker.ta}`}
+                        title={sticker.en}
+                        className="rounded-[20px] text-left transition hover:-translate-y-0.5 hover:shadow-md disabled:opacity-40 motion-reduce:transform-none"
+                      >
+                        <ChatStickerCard sticker={sticker} small />
+                      </button>
+                    ))}
+                </div>
+                {stickerTab === 'comedy' && (
+                  <p className="px-4 pb-3 text-[10px] text-[#526c5e]">
+                    Fan-made reactions ·{' '}
+                    <a
+                      href="/sticker-credits"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      Photo credits & licenses
+                    </a>
+                  </p>
+                )}
+              </section>
+            )}
             {preview && (
               <div className="mb-3 flex items-start gap-3 rounded-xl bg-[#f0f5eb] p-3">
                 {/* A local object URL preview; it is revoked on remove, send, chat end or unmount. */}
@@ -659,8 +935,8 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                   </p>
                   <p className="mt-1 text-xs leading-6 text-[#60776c]">
                     {txt(
-                      'Chat முடிந்ததும் படம் அழிக்கப்படும்.',
-                      'Cleared when the chat ends.',
+                      'அதிகபட்சம் 2 MB · JPG / PNG / WebP',
+                      'Up to 2 MB · JPG / PNG / WebP',
                     )}
                   </p>
                 </div>
@@ -675,6 +951,19 @@ export function PrivateChat({ roomId }: { roomId: string }) {
               </div>
             )}
             <div className="flex items-end gap-2">
+              <button
+                type="button"
+                disabled={busy || !connected}
+                aria-label={txt(
+                  'தமிழ் stickers & emojis',
+                  'Tamil stickers and emojis',
+                )}
+                aria-expanded={showStickers}
+                onClick={() => setShowStickers(!showStickers)}
+                className={`grid size-10 shrink-0 place-items-center rounded-full sm:size-12 ${showStickers ? 'bg-[#d5eee0] text-[#198371]' : 'bg-[#f0f5f2] text-[#65907f]'}`}
+              >
+                <Smile size={21} />
+              </button>
               <input
                 ref={fileInput}
                 type="file"
@@ -692,7 +981,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 disabled={busy || !connected}
                 onClick={() => fileInput.current?.click()}
                 aria-label={txt('படத்தைச் சேர்', 'Attach image')}
-                className="grid size-12 shrink-0 place-items-center rounded-xl border border-[#cbd9c7] disabled:opacity-40"
+                className="grid size-10 shrink-0 place-items-center rounded-full bg-[#f0f5f2] text-[#65907f] transition hover:bg-[#e2ede6] disabled:opacity-40 sm:size-12"
               >
                 <ImagePlus size={20} />
               </button>
@@ -700,9 +989,25 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 {txt('உங்கள் செய்தி', 'Your message')}
               </label>
               <textarea
+                ref={composer}
                 id="private-message"
                 value={draft}
-                onChange={(e) => setDraft(e.target.value)}
+                onChange={(e) => {
+                  setDraft(e.target.value);
+                  e.target.style.height = '48px';
+                  e.target.style.height = `${Math.min(e.target.scrollHeight, 128)}px`;
+                }}
+                onKeyDown={(event) => {
+                  if (
+                    event.key === 'Enter' &&
+                    !event.shiftKey &&
+                    !event.nativeEvent.isComposing &&
+                    window.matchMedia('(pointer:fine)').matches
+                  ) {
+                    event.preventDefault();
+                    void send(event);
+                  }
+                }}
                 rows={1}
                 maxLength={1200}
                 disabled={busy}
@@ -711,13 +1016,13 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                     ? txt('விருப்பமான விளக்கம்…', 'Add a caption…')
                     : txt('செய்தியை எழுதுங்கள்…', 'Write a message…')
                 }
-                className="max-h-32 min-h-12 min-w-0 flex-1 resize-none rounded-xl border border-[#cbd9c7] px-3 py-3 text-sm leading-6"
+                className="max-h-32 min-h-12 min-w-0 flex-1 resize-none rounded-[24px] border border-transparent bg-[#f1f5f3] px-5 py-3 text-sm leading-6 placeholder:text-[#667b6d] focus:border-[#81bba2] focus:outline-none focus:ring-2 focus:ring-[#d9eee2]"
               />
               <button
                 type="submit"
                 disabled={busy || (!draft.trim() && !image) || !connected}
                 aria-label={txt('அனுப்பு', 'Send')}
-                className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#225343] text-white disabled:opacity-40"
+                className="grid size-11 shrink-0 place-items-center rounded-full bg-[#148675] text-white shadow-[0_4px_14px_#14867530] transition hover:bg-[#106e60] disabled:opacity-30 disabled:shadow-none sm:size-12"
               >
                 {busy ? (
                   <LoaderCircle className="animate-spin" size={18} />
@@ -726,14 +1031,16 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 )}
               </button>
             </div>
-            <p className="mt-2 text-center text-[10px] leading-5 text-[#60776c]">
-              {txt(
-                'JPG / PNG / WebP · 2 MB வரை · Chat முடிந்ததும் படங்கள் அழிக்கப்படும்',
-                'JPG / PNG / WebP · Up to 2 MB · Images cleared when chat ends',
-              )}
-            </p>
           </form>
         </>
+      )}
+      {viewPhoto && status === 'active' && (
+        <ChatPhotoViewer
+          key={viewPhoto}
+          messageId={viewPhoto}
+          tamil={tamil}
+          onClose={() => setViewPhoto(null)}
+        />
       )}
       {confirm && (
         <dialog

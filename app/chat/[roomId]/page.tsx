@@ -19,5 +19,5 @@ export default async function PrivateChatPage({
     )
   )
     notFound();
-  return <PrivateChat roomId={roomId} />;
+  return <PrivateChat key={roomId} roomId={roomId} />;
 }

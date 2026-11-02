@@ -1,0 +1,20 @@
+.messenger-screen {
+  background: #f1f5f3;
+  color: #193c37;
+}
+.messenger-thread {
+  background-color: #edf3ee;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='190' height='190' viewBox='0 0 190 190'%3E%3Cg fill='none' stroke='%23a2bbae' stroke-width='1.1' opacity='.19'%3E%3Cpath d='M21 29h23a6 6 0 016 6v14a6 6 0 01-6 6H32l-9 7v-7h-2a6 6 0 01-6-6V35a6 6 0 016-6z'/%3E%3Cpath d='M138 24l3 8 9 1-7 6 2 9-7-5-8 5 3-9-7-6 9-1zM70 111l4 9 10 2-8 7 1 10-7-5-9 5 3-10-8-7 10-2z'/%3E%3Crect x='124' y='125' width='27' height='23' rx='5' transform='rotate(-12 124 125)'/%3E%3Ccircle cx='135' cy='134' r='3'/%3E%3Cpath d='M128 145l7-5 4 3 6-7M31 153c-8-6-16 4 0 14 16-10 8-20 0-14zM92 48l5-5 5 5-5 5z'/%3E%3C/g%3E%3C/svg%3E");
+}
+.messenger-bubble {
+  box-shadow: 0 2px 6px #183c3210;
+  overflow-wrap: anywhere;
+}
+.messenger-photo {
+  background: #142d2912;
+}
+.messenger-actions > summary::-webkit-details-marker { display: none; }
+.messenger-actions[open] > summary { background: #e6eeea; }
+@media (min-width: 768px) {
+  .messenger-screen { border: 1px solid #dce7e0; box-shadow: 0 18px 70px #1b493818; }
+}

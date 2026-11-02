@@ -6,6 +6,14 @@ Conversations open exclusively at `/chat/[roomId]`. New invitation links use tha
 
 Creators can use “Destroy link” in the conversation header or their conversation list, before or after acceptance. The server authorizes `destroy` only for the room's host, atomically ends the room and removes its invite hash. The existing end-of-chat database trigger clears image data. Guests retain their normal End/Block controls, but cannot invoke the creator-only destroy action. All invite links also become unusable automatically after acceptance or expiry.
 
+The messenger header uses a ⋯ options menu for creator destruction, guest End, Block and privacy/limits. Persistent privacy banners and upload-limit footer text are hidden from the thread; privacy remains available through the menu and public rules, with limits shown for image selection and validation errors.
+
+Shared thumbnails and same-origin private image links open an authenticated picture viewer with zoom and an original-file link. The viewer unmounts when the chat is no longer active. No public thumbnail cache or third-party media service is used. Native HTTP(S) message links open with noopener/noreferrer.
+
+Six original Tamil sticker cards, three comic meme cards, four licensed actor-photo comedy cards and quick reaction emojis are built in. Stickers send as ordinary Tamil message bodies and are rendered from an allowlist of local designs, so old clients still receive readable text. Actor photos are public static assets with original captions and source/license credits at `/sticker-credits`; they are not private attachments. No uploaded image binaries, third-party embeds, or extra message endpoints are needed; existing consent/access/rate checks apply. Sticker messages follow normal text retention, while their conversation remains inaccessible after it ends.
+
+`/tamil-chat` is the public, indexable landing page with canonical metadata and a sitemap entry. `/community-chat`, individual conversation pages and all chat/image APIs remain noindex. Private room IDs, tokens, participant names and messages are never added to the sitemap or landing page. Google indexing is not guaranteed by sitemap inclusion.
+
 ## Temporary image sharing
 
 `POST /api/chat/images` accepts one authenticated multipart JPG, PNG or WebP file (max 2 MB), validates file signatures and decoding, strips metadata, rotates and resizes to 1200 pixels, and encodes WebP (max 512 KB stored). Each room holds at most ten images. Images are bytea payloads in `tamil_chat.messages` for this bounded initial version, keeping them private without a separate storage service. `GET /api/chat/images/[messageId]` requires a live participant cookie and an active, unexpired room. Images are never returned in JSON, public links, Next.js image optimization, or cacheable responses.

@@ -8,12 +8,14 @@ export function DestroyChatButton({
   onDestroyed,
   disabled = false,
   kind = 'link',
+  className,
 }: {
   roomId: string;
   tamil: boolean;
   onDestroyed: () => Promise<void>;
   disabled?: boolean;
   kind?: 'link' | 'chat';
+  className?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -59,7 +61,10 @@ export function DestroyChatButton({
           setError('');
           setOpen(true);
         }}
-        className="min-h-10 rounded-xl border border-red-200 px-3 text-xs font-bold text-red-800 disabled:opacity-50"
+        className={
+          className ??
+          'min-h-10 rounded-xl border border-red-200 px-3 text-xs font-bold text-red-800 disabled:opacity-50'
+        }
       >
         {label}
       </button>
