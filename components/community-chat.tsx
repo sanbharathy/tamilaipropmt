@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -34,7 +34,6 @@ const empty: ChatState = {
 type Invite = { hostName: string; roomId: string; own: boolean };
 
 export function CommunityChat() {
-  const router = useRouter();
   const [tamil, setTamil] = useState(true);
   const [state, setState] = useState<ChatState>(empty);
   const [loading, setLoading] = useState(true);
@@ -131,7 +130,7 @@ export function CommunityChat() {
         .then(async (response) => {
           const data = await response.json();
           if (response.ok)
-            router.replace(
+            window.location.replace(
               `/chat/${String(data.roomId)}#invite=${encodeURIComponent(token)}`,
             );
         })
@@ -150,7 +149,7 @@ export function CommunityChat() {
       }
     }, 4000);
     return () => window.clearInterval(timer);
-  }, [refresh, router]);
+  }, [refresh]);
   useEffect(() => {
     lastMessage.current?.scrollIntoView({ block: 'nearest' });
   }, [state.messages.length, roomId]);
@@ -207,13 +206,15 @@ export function CommunityChat() {
 
   async function createLink() {
     await perform({ action: 'create' }, (data) => {
-      router.push(`/chat/${String(data.roomId)}#invite=${String(data.invite)}`);
+      window.location.assign(
+        `/chat/${String(data.roomId)}#invite=${String(data.invite)}`,
+      );
     });
   }
   async function acceptInvite() {
     await perform({ action: 'accept-invite', invite: inviteToken }, (data) => {
       const id = String(data.roomId);
-      router.push(`/chat/${id}`);
+      window.location.assign(`/chat/${id}`);
       setInvite(null);
       setInviteToken('');
       window.history.replaceState(null, '', window.location.pathname);
@@ -243,7 +244,7 @@ export function CommunityChat() {
     }
   }
   function selectRoom(value: ChatRoom) {
-    router.push(`/chat/${value.id}`);
+    window.location.assign(`/chat/${value.id}`);
   }
   async function confirm() {
     const action = confirmAction;
@@ -619,7 +620,9 @@ export function CommunityChat() {
                                 void perform(
                                   { action: 'request', peer: person.id },
                                   (data) => {
-                                    router.push(`/chat/${String(data.roomId)}`);
+                                    window.location.assign(
+                                      `/chat/${String(data.roomId)}`,
+                                    );
                                   },
                                 )
                               }
@@ -660,7 +663,9 @@ export function CommunityChat() {
                                 void perform(
                                   { action: 'accept', roomId: request.id },
                                   () => {
-                                    router.push(`/chat/${request.id}`);
+                                    window.location.assign(
+                                      `/chat/${request.id}`,
+                                    );
                                   },
                                 )
                               }

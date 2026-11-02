@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_Tamil, Outfit } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
+import {AdsenseLoader} from '@/components/adsense-loader';
 import './globals.css';
 
 const tamil = Noto_Sans_Tamil({
@@ -158,11 +159,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ta">
       <head>
         {adsensePublisherId && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsensePublisherId}`}
-            crossOrigin="anonymous"
-          />
+          <AdsenseLoader publisherId={adsensePublisherId}/>
         )}
       </head>
       <body className={`${tamil.variable} ${outfit.variable} antialiased`}>

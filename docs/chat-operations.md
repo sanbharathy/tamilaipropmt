@@ -12,6 +12,8 @@ Conversations open exclusively at `/chat/[roomId]`. New invitation links use tha
 
 The private page revokes local preview URLs on remove/send/end/unmount. Image attempts are capped at 20/hour per guest and 30/hour per network. File access is same-origin, private, no-store, and noindex. `scripts/test-chat-images.mjs` verifies validation, participant isolation, metadata removal, consent, clearing on end/block/logout/suspension/expiry, and moderation image access.
 
+For repeated operator-run production image tests, `CHAT_TEST_SEED_GUESTS=1 CHAT_TEST_URL=https://www.tamilaiprompt.com node scripts/test-chat-images.mjs` seeds disposable guest identities directly through the restricted local database connection instead of consuming public signup limits. All HTTP message/image access checks still run normally; no test bypass is deployed in an application route. The script removes its fixture records afterward. The separate text-chat suite verifies normal guest signup.
+
 Two-person guest conversations with single-use invite links and explicit acceptance. The optional people list shows only guests who enabled availability, chose the same interest, and updated presence within 50 seconds. Discovery operates while the chat page is open. Messages refresh every four seconds while the tab is visible; this version uses polling, not WebSockets.
 
 ## Storage and credentials

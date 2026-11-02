@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { randomUUID, createHmac } from 'node:crypto';
+import { randomUUID, createHmac, randomBytes, createHash } from 'node:crypto';
 import postgres from 'postgres';
 import sharp from 'sharp';
 
@@ -43,6 +43,18 @@ async function ok(person, body, path) {
 }
 async function guest(name) {
   const person = {};
+  // Operator-only fixture setup, never an HTTP/auth bypass in the application.
+  // Use for repeated live checks without consuming the public guest-join quota.
+  if (process.env.CHAT_TEST_SEED_GUESTS === '1') {
+    const secret = randomBytes(32).toString('base64url');
+    const id = randomUUID();
+    const digest = createHash('sha256').update(secret).digest('hex');
+    await sql`insert into tamil_chat.sessions(id,token_hash,name) values(${id},${digest},${name})`;
+    person.cookie = `tamilai_chat=${secret}`;
+    person.id = id;
+    people.push(person);
+    return person;
+  }
   await ok(person, { action: 'join', name, accepted: true });
   person.id = (await ok(person)).me.id;
   people.push(person);
