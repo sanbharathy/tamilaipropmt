@@ -1356,6 +1356,16 @@ export default function HomePage() {
         ) : null}
       </header>
 
+      <Link href="/diwali-greetings" className="group block bg-[#38151d] text-[#fff2d5]">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
+          <div className="flex items-center gap-4">
+            <NextImage src="/diwali-lamps.svg" alt="" width={80} height={64} className="hidden rounded-xl sm:block" />
+            <div><p className="text-xs font-bold uppercase tracking-widest text-[#efbd75]">DIWALI COLLECTION · தீபாவளி</p><p className="mt-2 text-sm font-semibold leading-7 sm:text-base">{language === 'ta' ? 'உங்கள் படத்துடன் தீபாவளி வாழ்த்து · 8 photo prompts + 12 தமிழ் வாழ்த்துகள்' : 'Make it a brighter Diwali · 8 photo prompts + 12 heartfelt greetings'}</p></div>
+          </div>
+          <ArrowRight className="size-5 shrink-0 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+        </div>
+      </Link>
+
       <section className="relative overflow-hidden border-b border-border/70">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,oklch(0.89_0.09_305/.58),transparent_28%),radial-gradient(circle_at_85%_45%,oklch(0.93_0.06_190/.48),transparent_25%)]" />
         <div className="relative mx-auto max-w-5xl px-4 py-11 text-center sm:px-6 sm:py-16 lg:py-20">
