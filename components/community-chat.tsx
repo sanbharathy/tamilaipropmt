@@ -268,7 +268,6 @@ export function CommunityChat() {
   if (me && !me.archive_notice)
     return (
       <ChatArchiveNotice
-        tamil={tamil}
         busy={busy}
         error={error}
         onAccept={() =>
@@ -444,7 +443,11 @@ export function CommunityChat() {
                   className="mt-2 min-h-12 w-full rounded-xl border border-[#bfd0c2] px-4 font-normal outline-offset-4"
                 />
               </label>
-              <label className="my-6 flex items-start gap-3 text-sm leading-7 text-[#60776c]">
+              <label
+                lang="en"
+                translate="no"
+                className="my-6 flex items-start gap-3 text-xs leading-6 text-[#60776c]"
+              >
                 <input
                   type="checkbox"
                   checked={rules}
@@ -453,15 +456,15 @@ export function CommunityChat() {
                   className="mt-1.5 size-4 shrink-0 accent-[#225343]"
                 />
                 <span>
-                  {txt(
-                    'மரியாதையாகப் பேச ஒப்புக்கொள்கிறேன். Chat முடிந்ததும் செய்திகள், சிறிய படங்கள், புனைப்பெயர்கள், நேரங்கள் அடங்கிய PDF நிர்வாகிகளுக்காக 30 நாட்கள் சேமிக்கப்படும் என்பதைப் படித்தேன். இது end-to-end encrypted chat அல்ல.',
-                    'I agree to chat respectfully. I have read that messages, smaller image copies, nicknames and timestamps are retained in an admin-only security PDF for 30 days after a new chat ends. This is not end-to-end encrypted chat.',
-                  )}{' '}
+                  I agree to chat respectfully. I have read that messages,
+                  smaller image copies, nicknames and timestamps are retained in
+                  an admin-only security PDF for 30 days after a new chat ends.
+                  This is not end-to-end encrypted chat.{' '}
                   <Link
                     href="/community-chat/rules"
                     className="font-bold underline"
                   >
-                    {txt('Chat விதிகள் & தனியுரிமை', 'Chat rules & privacy')}
+                    Chat rules & privacy
                   </Link>
                 </span>
               </label>

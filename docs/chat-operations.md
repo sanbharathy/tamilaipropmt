@@ -22,6 +22,8 @@ Local previews are revoked on remove, send, end and unmount. The viewer unmounts
 
 ## Security archive
 
+Privacy policy, chat rules and privacy/retention notices always remain in English, independently of the chat language toggle. Policy containers declare lang=en and translate=no. Notice body text is 13px; acknowledgement and inline retention summaries are 12px with readable line spacing.
+
 New rooms require acknowledgement of the updated archive notice. Existing guest sessions see a blocking notice before continuing; new join forms disclose the policy. Backend consent checks prevent older clients from joining or sending into a new archived room without acknowledgement.
 
 Database triggers atomically capture all message text, shared images, guest nicknames and IDs, timestamps, status events and end reason before live image clearing. A durable RLS-protected processing snapshot survives room/session removal. New rooms have a 1,000-message and ten-image cap to bound archive generation.

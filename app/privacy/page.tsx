@@ -50,7 +50,11 @@ const sections = [
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main
+      lang="en"
+      translate="no"
+      className="min-h-screen bg-background text-foreground"
+    >
       <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         <Link
           href="/"
@@ -59,11 +63,11 @@ export default function PrivacyPage() {
           <Sparkles className="size-4" aria-hidden="true" />
           TamilAI Prompt
         </Link>
-        <h1 className="mt-6 font-heading text-4xl font-extrabold tracking-tight sm:text-5xl">
+        <h1 className="mt-6 font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">
           Privacy Policy
         </h1>
         <p className="mt-4 text-sm text-muted-foreground">
-          Last updated: November 2, 2026
+          Last updated: November 3, 2026
         </p>
         <div className="mt-8 space-y-6">
           {sections.map((section) => (
@@ -71,10 +75,10 @@ export default function PrivacyPage() {
               key={section.title}
               className="rounded-2xl border border-border bg-card p-5"
             >
-              <h2 className="font-heading text-xl font-bold">
+              <h2 className="font-heading text-lg font-bold">
                 {section.title}
               </h2>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">
+              <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
                 {section.body}
               </p>
             </article>

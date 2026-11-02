@@ -414,7 +414,6 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   if (me && !me.archive_notice)
     return (
       <ChatArchiveNotice
-        tamil={tamil}
         busy={busy}
         error={error}
         onAccept={() => void act({ action: 'archive-consent', accepted: true })}
@@ -540,7 +539,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 className="flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-[#5a786b] hover:bg-[#edf4ef]"
               >
                 <ShieldCheck size={15} aria-hidden="true" />
-                {txt('தனியுரிமை & வரம்புகள்', 'Privacy & limits')}
+                Privacy & limits
               </a>
             </div>
           </details>
@@ -607,7 +606,11 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 className="mt-2 min-h-12 w-full rounded-xl border border-[#cbd9c7] px-3 font-normal"
               />
             </label>
-            <label className="mt-5 flex gap-3 text-xs leading-6">
+            <label
+              lang="en"
+              translate="no"
+              className="mt-5 flex gap-3 text-xs leading-6"
+            >
               <input
                 type="checkbox"
                 checked={agreed}
@@ -616,12 +619,12 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 className="mt-1 size-4 shrink-0 accent-[#225343]"
               />
               <span>
-                {txt(
-                  'மரியாதையாகப் பேச ஒப்புக்கொள்கிறேன். புதிய chat முடிந்ததும் செய்திகள், சிறிய படங்கள், புனைப்பெயர்கள், நேரங்கள் அடங்கிய பாதுகாப்பு PDF நிர்வாகிகளுக்காக 30 நாட்கள் சேமிக்கப்படும் என்பதைப் படித்தேன். இது end-to-end encrypted chat அல்ல.',
-                  'I agree to chat respectfully. I have read that messages, smaller image copies, nicknames and timestamps are retained in an admin-only security PDF for 30 days after a new chat ends. This is not end-to-end encrypted chat.',
-                )}{' '}
+                I agree to chat respectfully. I have read that messages, smaller
+                image copies, nicknames and timestamps are retained in an
+                admin-only security PDF for 30 days after a new chat ends. This
+                is not end-to-end encrypted chat.{' '}
                 <Link href="/community-chat/rules" className="underline">
-                  {txt('Chat விதிகள்', 'Chat rules')}
+                  Chat rules
                 </Link>
               </span>
             </label>
@@ -660,15 +663,17 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                           )}
             </h2>
             <p className="mt-3 text-sm leading-7 text-[#60776c]">
-              {status === 'ended' || status === 'declined'
-                ? txt(
-                    'இந்த chat-ல் படங்களை இனி பார்க்க முடியாது. புதிய chats-க்கு அறிவிக்கப்பட்ட 30 நாள் பாதுகாப்பு சேமிப்பு பொருந்தும்.',
-                    'Pictures are no longer available in this chat. For new chats, the disclosed 30-day security archive still applies.',
-                  )
-                : txt(
-                    'இருவரும் ஒப்புக்கொண்ட பிறகே படங்களையும் செய்திகளையும் பகிர முடியும்.',
-                    'Messages and images can be shared only after both people agree.',
-                  )}
+              {status === 'ended' || status === 'declined' ? (
+                <span lang="en" translate="no" className="text-xs leading-6">
+                  Pictures are no longer available in this chat. For new chats,
+                  the disclosed 30-day security archive still applies.
+                </span>
+              ) : (
+                txt(
+                  'இருவரும் ஒப்புக்கொண்ட பிறகே படங்களையும் செய்திகளையும் பகிர முடியும்.',
+                  'Messages and images can be shared only after both people agree.',
+                )
+              )}
             </p>
             {(canAccept || incoming) && (
               <div className="mt-5 flex justify-center gap-3">
@@ -1121,10 +1126,11 @@ export function PrivateChat({ roomId }: { roomId: string }) {
               : txt('Chat-ஐ முடிக்கவா?', 'End this chat?')}
           </h2>
           <p className="mt-3 text-sm leading-7">
-            {txt(
-              'Chat-ல் படங்களை இனி பார்க்க முடியாது. புதிய chats-ன் செய்திகள் மற்றும் சிறிய படங்கள் பாதுகாப்பு PDF-ல் 30 நாட்கள் சேமிக்கப்படும். இங்கு இனி செய்தி அனுப்ப முடியாது.',
-              'Shared images will disappear from the chat. New chats retain a restricted PDF with smaller image copies for 30 days. Neither person can send further messages here.',
-            )}
+            <span lang="en" translate="no" className="text-xs leading-6">
+              Shared images will disappear from the chat. New chats retain a
+              restricted PDF with smaller image copies for 30 days. Neither
+              person can send further messages here.
+            </span>
           </p>
           {error && (
             <p role="alert" className="mt-3 text-sm text-red-800">
@@ -1180,10 +1186,11 @@ export function PrivateChat({ roomId }: { roomId: string }) {
               {txt('புகாரளிக்க', 'Report message')}
             </h2>
             <p className="mt-3 text-xs leading-6">
-              {txt(
-                'Moderator இந்தப் புகாரை ஆய்வு செய்யலாம். புதிய chats-ன் செய்திகள் மற்றும் சிறிய படங்கள் chat முடிந்த பிறகு பாதுகாப்பு PDF-ல் 30 நாட்கள் சேமிக்கப்படும்.',
-                'A moderator can review this report. New chats also retain messages and smaller image copies in a restricted security PDF for 30 days after ending.',
-              )}
+              <span lang="en" translate="no" className="text-xs leading-6">
+                A moderator can review this report. New chats also retain
+                messages and smaller image copies in a restricted security PDF
+                for 30 days after ending.
+              </span>
             </p>
             <label className="mt-4 block text-sm font-semibold">
               {txt('காரணம்', 'Reason')}
