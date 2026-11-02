@@ -18,6 +18,9 @@ export type ChatRoom = {
   source: 'link' | 'directory';
   peer_name: string | null;
   peer_id: string | null;
+  peer_last_seen?: string | null;
+  peer_viewing?: boolean;
+  peer_active_until?: string | null;
   expires_at: string;
   created_at: string;
 };

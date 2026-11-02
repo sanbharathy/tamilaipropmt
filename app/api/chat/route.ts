@@ -18,6 +18,7 @@ import {
 } from '@/lib/chat-server';
 import { chatTopics } from '@/lib/chat-types';
 import { scheduleArchives } from '@/lib/chat-archives';
+import { screenSequence, updatePresence } from '@/lib/chat-presence';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -49,6 +50,23 @@ export async function GET(request: Request) {
     const room = roomId ? (rooms.find((r) => r.id === roomId) ?? null) : null;
     if (roomId && !room)
       throw new ChatError('Conversation not found or expired.', 404);
+    if (room?.status === 'active') {
+      const query = new URL(request.url).searchParams,
+        screen = query.get('screen');
+      if (screen && me.archive_notice)
+        await updatePresence(
+          room.id,
+          me.id,
+          validId(screen),
+          screenSequence(query.get('sequence')),
+          true,
+        );
+      const [presence] = await sql`select max(last_seen) as peer_last_seen,
+        coalesce(bool_or(present and last_seen>now()-interval '20 seconds'),false) as peer_viewing,
+        max(last_seen+interval '20 seconds') filter(where present) as peer_active_until
+        from tamil_chat.room_presence where room_id=${room.id} and session_id=${room.peer_id}`;
+      Object.assign(room, presence);
+    }
     const messages =
       room?.status === 'active'
         ? await sql`select id::text,sender_id,body,created_at,has_image from (select id,sender_id,body,created_at,image_type is not null as has_image from tamil_chat.messages where room_id=${room.id} and removed_at is null order by id desc limit 100) m order by id`

@@ -39,6 +39,12 @@ try {
     );
     const inherited =
       await tx`select count(*)::int as count from pg_tables where schemaname not in ('tamil_chat','pg_catalog','information_schema') and has_table_privilege('tamilaiprompt_chat',quote_ident(schemaname)||'.'||quote_ident(tablename),'SELECT,INSERT,UPDATE,DELETE')`;
+    await tx.unsafe(
+      await readFile(
+        new URL('../database/chat-presence.sql', import.meta.url),
+        'utf8',
+      ),
+    );
     if (inherited[0].count)
       throw new Error(
         'Host database grants inherited PUBLIC table access; refusing to reuse it.',

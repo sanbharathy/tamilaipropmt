@@ -1,5 +1,6 @@
 'use client';
 import { ChatArchiveNotice } from '@/components/chat-archive-notice';
+import { ChatPresence } from '@/components/chat-presence';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -84,6 +85,8 @@ function ChatImage({
 }
 
 export function PrivateChat({ roomId }: { roomId: string }) {
+  const presenceScreen = useRef<string | null>(null);
+  const presenceSequence = useRef(0);
   const [state, setState] = useState<ChatState>(blank);
   const [tamil, setTamil] = useState(true);
   const [ready, setReady] = useState(false);
@@ -128,7 +131,12 @@ export function PrivateChat({ roomId }: { roomId: string }) {
 
   const load = useCallback(async () => {
     const current = ++version.current;
-    let response = await fetch(`/api/chat?room=${roomId}`, {
+    let presenceQuery = '';
+    if (document.visibilityState === 'visible' && document.hasFocus()) {
+      presenceScreen.current ??= crypto.randomUUID();
+      presenceQuery = `&screen=${presenceScreen.current}&sequence=${++presenceSequence.current}`;
+    }
+    let response = await fetch(`/api/chat?room=${roomId}${presenceQuery}`, {
       cache: 'no-store',
     });
     let data = await response.json();
@@ -194,6 +202,46 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       window.clearInterval(timer);
     };
   }, [load]);
+
+  useEffect(() => {
+    if (status !== 'active' || !me?.archive_notice) return;
+    const hide = () => {
+      if (!presenceScreen.current) return;
+      void fetch('/api/chat/presence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+          roomId,
+          screen: presenceScreen.current,
+          sequence: ++presenceSequence.current,
+          present: false,
+        }),
+      }).catch(() => {});
+    };
+    const focus = () => {
+      if (document.visibilityState === 'visible' && document.hasFocus())
+        void load().catch(() => setConnected(false));
+    };
+    const visibility = () => {
+      if (document.visibilityState === 'hidden') hide();
+      else focus();
+    };
+    const offline = () => setConnected(false);
+    window.addEventListener('blur', hide);
+    window.addEventListener('focus', focus);
+    window.addEventListener('pagehide', hide);
+    window.addEventListener('offline', offline);
+    document.addEventListener('visibilitychange', visibility);
+    return () => {
+      hide();
+      window.removeEventListener('blur', hide);
+      window.removeEventListener('focus', focus);
+      window.removeEventListener('pagehide', hide);
+      window.removeEventListener('offline', offline);
+      document.removeEventListener('visibilitychange', visibility);
+    };
+  }, [status, me?.archive_notice, roomId, load]);
 
   useEffect(() => {
     if (!inviteToken || !meId || status === 'active') return;
@@ -396,16 +444,18 @@ export function PrivateChat({ roomId }: { roomId: string }) {
               {room?.peer_name ?? txt('தனிப்பட்ட உரையாடல்', 'Private conversation')}
             </h1>
             <p className="mt-0.5 flex items-center gap-1.5 text-[10px] font-medium text-[#6a8179] sm:text-[11px]">
-              <LockKeyhole size={10} aria-hidden="true" />
-              {status === 'active'
-                ? txt(
-                    'இருவர் மட்டும் · Private invite',
-                    'Two people · Private invite',
-                  )
-                : txt(
-                    'Private invite · உங்கள் விருப்பப்படி',
-                    'Private invite · On your terms',
-                  )}
+              {status === 'active' ? (
+                <ChatPresence
+                  room={room!}
+                  tamil={tamil}
+                  connected={connected}
+                />
+              ) : (
+                txt(
+                  'Private invite · உங்கள் விருப்பப்படி',
+                  'Private invite · On your terms',
+                )
+              )}
             </p>
           </div>
         </div>

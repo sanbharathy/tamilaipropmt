@@ -11,6 +11,10 @@ export const metadata: Metadata = {
 
 const sections = [
   {
+    title: 'Chat screen presence',
+    body: 'Accepted chat participants can see when the other person has that chat screen visible and focused, or their last visit time in that conversation. Presence is approximate, not a read receipt, and disappears with the expired live room record. Activity elsewhere on the site is not shared as chat presence.',
+  },
+  {
     title: 'Chat images & 30-day security archives',
     body: 'For new chats created after the archive notice was introduced on November 2, 2026, messages, smaller copies of shared images, nicknames, timestamps and chat activity are retained in an admin-only security PDF for 30 days after ending, link destruction or expiry. Images in the PDF are reduced to at most 512 pixels at JPEG quality 45. The PDF is encrypted in storage; authorized moderator access is logged. A protected processing snapshot may temporarily hold the chat while the PDF is generated. The archive becomes inaccessible at its 30-day deadline and a database job removes expired archives every minute while the database is running. Provider-managed backups may follow separate backup retention schedules. Downloaded copies or screenshots cannot be remotely erased. Existing chats keep their original retention policy. Images stop being available through participant chat links when a chat ends.',
   },

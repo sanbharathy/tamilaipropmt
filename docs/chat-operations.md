@@ -10,7 +10,11 @@ Only the creator can destroy an invitation. End, destroy, block, logout, moderat
 
 The messenger has an options menu, clickable image viewer with zoom, safe HTTP(S) links, and original Tamil stickers/memes. Four actor-photo comedy cards use licensed local assets; sources and credits are at /sticker-credits. Captions are fan-made. No actor endorsement is implied.
 
-## Images
+## Screen presence
+
+Accepted rooms expose only their peer's room-specific presence. A heartbeat is piggybacked on the existing four-second GET poll while the document is visible and focused. Blur, hide, pagehide and unmount send a best-effort keepalive leave event. Unreported disconnects expire after 20 seconds. Per-screen UUIDs and monotonic sequence numbers prevent late requests and multiple tabs from incorrectly overriding one another. Presence does not imply reading or human attention. Reconnecting clients hide the active indicator. Records are bounded to 64 screens per participant/room and cascade with the room; older screen records can be replaced on a fresh visit. RLS denies public Data API access. See database/chat-presence.sql and scripts/test-chat-presence.mjs.
+
+## Image processing
 
 JPG, PNG or WebP source files up to 2 MB are checked by signature and decoded with a 16 MP limit. Animated files are rejected. Sharp strips original metadata, resizes to 1200px and outputs WebP up to 512 KB. Maximum ten images per chat. Participant image endpoints require an accepted active room and return no-store, noindex responses. The public Next.js image optimizer is allowlisted to artwork, so private API images cannot enter its shared cache.
 

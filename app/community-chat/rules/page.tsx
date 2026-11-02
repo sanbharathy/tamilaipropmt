@@ -7,6 +7,10 @@ export const metadata: Metadata = {
 };
 const rules = [
   [
+    'Chat திரை நிலை · Screen presence',
+    'In an accepted chat, the other participant can see whether your chat screen is visible and focused, or the last time you were there. Presence updates every few seconds and can take up to 20 seconds to expire after a disconnect. It does not prove that you read a message or are looking at the screen. Activity elsewhere on the website does not count. Presence records are private to this room and are removed when its live room record expires; they are not a permanent activity history.',
+  ],
+  [
     'படங்கள் & பாதுகாப்பு சேமிப்பு · Images & security retention',
     'Accepted participants can share JPG, PNG or WebP files up to 2 MB. Images are validated, resized to at most 1200 pixels and saved as WebP without original metadata, with a ten-image limit per conversation. Chat image links stop working when a chat ends or expires. For new chats under the archive notice, smaller image copies are retained inside the restricted security PDF for 30 days after the chat ends. Existing conversations keep their original deletion policy. Other people may retain screenshots or downloaded copies.',
   ],
