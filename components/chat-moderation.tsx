@@ -11,10 +11,17 @@ type Report = {
   status: string;
   created_at: string;
 };
+type Archive = {
+  room_id: string;
+  ended_at: string;
+  expires_at: string;
+  ready_at: string | null;
+};
 export function ChatModeration() {
   const [key, setKey] = useState('');
   const [signedIn, setSignedIn] = useState(false);
   const [reports, setReports] = useState<Report[]>([]);
+  const [archives, setArchives] = useState<Archive[]>([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const load = useCallback(async () => {
@@ -26,6 +33,12 @@ export function ChatModeration() {
     }
     if (!response.ok) throw new Error(data.error);
     setReports(data.reports);
+    const archiveResponse = await fetch('/api/chat/moderation/archives', {
+      cache: 'no-store',
+    });
+    if (!archiveResponse.ok)
+      throw new Error('Could not load security archives.');
+    setArchives((await archiveResponse.json()).archives);
     setSignedIn(true);
   }, []);
   useEffect(() => {
@@ -60,8 +73,9 @@ export function ChatModeration() {
         </Link>
         <h1 className="mt-6 text-3xl font-bold">Chat moderation</h1>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          Review reported messages. Conversations are not shown here; only
-          messages submitted in a report are included.
+          Review reports and restricted security archives for new chats. Archive
+          PDFs contain messages and reduced-size images, expire after 30 days
+          and must only be used for security review. Downloads are logged.
         </p>
         {error && (
           <p
@@ -121,6 +135,35 @@ export function ChatModeration() {
               </button>
             </div>
             <div className="space-y-5">
+              <section className="rounded-2xl border bg-card p-5">
+                <h2 className="text-xl font-bold">30-day security archives</h2>
+                <p className="mt-2 text-xs leading-6 text-muted-foreground">
+                  Newest 100 ended chats. Pending archives are generated when
+                  opened. Older chats retain their original policy.
+                </p>
+                {!archives.length && (
+                  <p className="mt-4 text-sm">No retained archives.</p>
+                )}
+                {archives.map((archive) => (
+                  <article key={archive.room_id} className="mt-4 border-t pt-4">
+                    <p className="break-all font-mono text-xs">
+                      {archive.room_id}
+                    </p>
+                    <p className="mt-1 text-xs leading-6">
+                      Ended: {new Date(archive.ended_at).toLocaleString()} ·
+                      Expires: {new Date(archive.expires_at).toLocaleString()}
+                    </p>
+                    <a
+                      href={`/api/chat/moderation/archives/${archive.room_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex min-h-11 items-center rounded-xl border px-4 text-sm font-bold"
+                    >
+                      {archive.ready_at ? 'Open PDF' : 'Generate & open PDF'}
+                    </a>
+                  </article>
+                ))}
+              </section>
               {!reports.length && (
                 <p className="rounded-xl border bg-card p-6 text-sm">
                   No reports.

@@ -31,6 +31,12 @@ try {
         'utf8',
       ),
     );
+    await tx.unsafe(
+      await readFile(
+        new URL('../database/chat-archives.sql', import.meta.url),
+        'utf8',
+      ),
+    );
     const inherited =
       await tx`select count(*)::int as count from pg_tables where schemaname not in ('tamil_chat','pg_catalog','information_schema') and has_table_privilege('tamilaiprompt_chat',quote_ident(schemaname)||'.'||quote_ident(tablename),'SELECT,INSERT,UPDATE,DELETE')`;
     if (inherited[0].count)
@@ -48,7 +54,8 @@ try {
   connection.password = password;
   const rateSalt = randomBytes(32).toString('hex');
   const moderatorKey = randomBytes(24).toString('base64url');
-  const env = `CHAT_DATABASE_URL=${connection.toString()}\nCHAT_RATE_SALT=${rateSalt}\nCHAT_MODERATOR_KEY=${moderatorKey}\n`;
+  const cronSecret = randomBytes(32).toString('base64url');
+  const env = `CHAT_DATABASE_URL=${connection.toString()}\nCHAT_RATE_SALT=${rateSalt}\nCHAT_MODERATOR_KEY=${moderatorKey}\nCRON_SECRET=${cronSecret}\n`;
   await writeFile(new URL('../.env.chat.local', import.meta.url), env, {
     mode: 0o600,
     flag: 'wx',

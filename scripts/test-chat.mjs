@@ -6,6 +6,7 @@ process.loadEnvFile('.env.chat.local');
 const base = process.env.CHAT_TEST_URL ?? 'http://localhost:3020';
 const network = `chat-test-${randomUUID()}`;
 const people = [];
+const fixtureRooms = new Set();
 const sql = postgres(process.env.CHAT_DATABASE_URL, {
   ssl: 'require',
   max: 1,
@@ -29,7 +30,14 @@ async function call(person, body, path = '/api/chat') {
 async function guest(name) {
   const person = {};
   assert.equal(
-    (await call(person, { action: 'join', name, accepted: true })).status,
+    (
+      await call(person, {
+        action: 'join',
+        name,
+        accepted: true,
+        archiveConsent: true,
+      })
+    ).status,
     200,
   );
   const state = await call(person);
@@ -40,6 +48,7 @@ async function guest(name) {
 async function ok(person, body, path) {
   const result = await call(person, body, path);
   assert.equal(result.status, 200, JSON.stringify(result.data));
+  if (result.data.roomId) fixtureRooms.add(result.data.roomId);
   return result.data;
 }
 try {
@@ -262,6 +271,8 @@ try {
   if (ids.length) {
     await sql`delete from tamil_chat.reports where reporter_id in ${sql(ids)}`;
     await sql`delete from tamil_chat.sessions where id in ${sql(ids)}`;
+    if (fixtureRooms.size)
+      await sql`delete from tamil_chat.archives where room_id in ${sql([...fixtureRooms])}`;
     for (const id of ids)
       await sql`delete from tamil_chat.limits where key like ${'%:' + id}`;
   }

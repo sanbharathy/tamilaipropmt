@@ -4,14 +4,15 @@ import { Sparkles } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Terms and Conditions - TamilAI Prompt',
-  description: 'Terms and Conditions for using TamilAI Prompt prompts, AI tips, and third-party tool links.',
+  description:
+    'Terms and Conditions for using TamilAI Prompt prompts, AI tips, and third-party tool links.',
   alternates: { canonical: '/terms' },
 };
 
 const sections = [
   {
     title: 'Community Chat',
-    body: 'Private creator chat is optional and subject to /community-chat/rules. Chat only with people who consent. Do not harass, impersonate, exploit, scam, threaten, spam, or share another person’s private information. Guest identities are not verified. You may report messages, block guests, or leave a conversation. We may remove reported content or suspend abusive guest sessions. This is not end-to-end encrypted messaging.',
+    body: 'Private creator chat is optional and subject to /community-chat/rules. New chats require acknowledgement that messages and reduced-size images are retained in an admin-only security PDF for 30 days after ending, destruction or expiry. Destroying a link does not delete that archive. Chat only with people who consent. Do not harass, impersonate, exploit, scam, threaten, spam, or share another person’s private information. Guest identities are unverified. You may report, block or leave. We may remove reported content from the conversation or suspend abusive guest sessions. This is not end-to-end encrypted messaging.',
   },
   {
     title: 'Use of the website',
@@ -43,19 +44,31 @@ export default function TermsPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+        >
           <Sparkles className="size-4" aria-hidden="true" />
           TamilAI Prompt
         </Link>
         <h1 className="mt-6 font-heading text-4xl font-extrabold tracking-tight sm:text-5xl">
           Terms and Conditions
         </h1>
-        <p className="mt-4 text-sm text-muted-foreground">Last updated: November 2, 2026</p>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Last updated: November 2, 2026
+        </p>
         <div className="mt-8 space-y-6">
           {sections.map((section) => (
-            <article key={section.title} className="rounded-2xl border border-border bg-card p-5">
-              <h2 className="font-heading text-xl font-bold">{section.title}</h2>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">{section.body}</p>
+            <article
+              key={section.title}
+              className="rounded-2xl border border-border bg-card p-5"
+            >
+              <h2 className="font-heading text-xl font-bold">
+                {section.title}
+              </h2>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                {section.body}
+              </p>
             </article>
           ))}
         </div>

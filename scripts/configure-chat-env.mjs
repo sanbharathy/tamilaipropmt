@@ -19,6 +19,7 @@ for (const key of [
   'CHAT_DATABASE_URL',
   'CHAT_RATE_SALT',
   'CHAT_MODERATOR_KEY',
+  'CRON_SECRET',
 ]) {
   if (!values[key]) throw new Error(`Missing ${key}`);
   const result = spawnSync(

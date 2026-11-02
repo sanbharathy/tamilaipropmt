@@ -14,6 +14,7 @@ import {
   token,
   validId,
 } from '@/lib/chat-server';
+import { scheduleArchives } from '@/lib/chat-archives';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,6 +31,7 @@ async function authenticate(request: Request) {
 export async function GET(request: Request) {
   try {
     await authenticate(request);
+    scheduleArchives();
     const sql = chatDb();
     const reports =
       await sql`select report.id,report.reported_id,report.message_id::text,report.excerpt,report.reason,report.status,report.created_at,
@@ -81,6 +83,7 @@ export async function POST(request: Request) {
       });
       return response;
     }
+    scheduleArchives();
     const reportId = validId(body.reportId);
     const [report] =
       await sql`select * from tamil_chat.reports where id=${reportId}`;
@@ -90,11 +93,12 @@ export async function POST(request: Request) {
     } else if (body.action === 'suspend') {
       await sql.begin(async (tx) => {
         await tx`update tamil_chat.sessions set suspended=true,available=false where id=${report.reported_id}`;
-        await tx`update tamil_chat.rooms set status='ended',invite_hash=null where host_id=${report.reported_id} or guest_id=${report.reported_id}`;
+        await tx`update tamil_chat.rooms set status='ended',invite_hash=null,end_reason='moderator_suspension' where host_id=${report.reported_id} or guest_id=${report.reported_id}`;
         await tx`update tamil_chat.reports set status='resolved' where id=${reportId}`;
       });
     } else if (body.action === 'remove-message') {
-      await sql`delete from tamil_chat.messages where id=${report.message_id}`;
+      await sql`update tamil_chat.messages m set removed_at=now() from tamil_chat.rooms r where m.id=${report.message_id} and r.id=m.room_id and r.archive_enabled`;
+      await sql`delete from tamil_chat.messages m using tamil_chat.rooms r where m.id=${report.message_id} and r.id=m.room_id and not r.archive_enabled`;
       await sql`update tamil_chat.reports set status='resolved' where id=${reportId}`;
     } else throw new ChatError('Unknown moderation action.');
     return respond({ ok: true });

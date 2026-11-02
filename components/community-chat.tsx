@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { DestroyChatButton } from '@/components/destroy-chat-button';
+import { ChatArchiveNotice } from '@/components/chat-archive-notice';
 
 import {
   ArrowLeft,
@@ -264,6 +265,17 @@ export function CommunityChat() {
     (r) => r.status === 'pending' && r.guest_id === me?.id,
   );
 
+  if (me && !me.archive_notice)
+    return (
+      <ChatArchiveNotice
+        tamil={tamil}
+        busy={busy}
+        error={error}
+        onAccept={() =>
+          void perform({ action: 'archive-consent', accepted: true })
+        }
+      />
+    );
   return (
     <main className="min-h-screen bg-[#f3f5f3] text-[#18362f]">
       <header className="border-b border-[#dbe5de] bg-white">
@@ -402,6 +414,7 @@ export function CommunityChat() {
                   action: 'join',
                   name: nickname,
                   accepted: rules,
+                  archiveConsent: rules,
                 });
               }}
               className="order-1 flex flex-col justify-center p-7 sm:p-12 lg:order-2"
@@ -441,8 +454,8 @@ export function CommunityChat() {
                 />
                 <span>
                   {txt(
-                    'மரியாதையாகப் பேசவும், spam செய்யாமல் இருக்கவும் ஒப்புக்கொள்கிறேன். இது end-to-end encrypted chat அல்ல.',
-                    'I agree to be respectful and avoid spam. This chat is not end-to-end encrypted.',
+                    'மரியாதையாகப் பேச ஒப்புக்கொள்கிறேன். Chat முடிந்ததும் செய்திகள், சிறிய படங்கள், புனைப்பெயர்கள், நேரங்கள் அடங்கிய PDF நிர்வாகிகளுக்காக 30 நாட்கள் சேமிக்கப்படும் என்பதைப் படித்தேன். இது end-to-end encrypted chat அல்ல.',
+                    'I agree to chat respectfully. I have read that messages, smaller image copies, nicknames and timestamps are retained in an admin-only security PDF for 30 days after a new chat ends. This is not end-to-end encrypted chat.',
                   )}{' '}
                   <Link
                     href="/community-chat/rules"

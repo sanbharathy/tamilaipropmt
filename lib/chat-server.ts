@@ -112,7 +112,7 @@ export async function sessionOf(request: Request, required = true) {
   const secret = cookieToken(request);
   const sql = chatDb();
   const [me] = secret
-    ? await sql`select id,name,available,topic,suspended from tamil_chat.sessions where token_hash=${hash(secret)} and expires_at>now()`
+    ? await sql`select id,name,available,topic,suspended,archive_notice from tamil_chat.sessions where token_hash=${hash(secret)} and expires_at>now()`
     : [];
   if (!me && required)
     throw new ChatError('Your guest session expired. Please join again.', 401);
@@ -152,6 +152,7 @@ export function networkKey(request: Request) {
 }
 export async function cleanup() {
   const sql = chatDb();
+  await sql`select tamil_chat.archive_retention()`;
   await sql.begin(async (tx) => {
     await tx`update tamil_chat.rooms r set status='ended',invite_hash=null where r.status in ('pending','active') and (r.expires_at<=now() or exists(select 1 from tamil_chat.sessions s where (s.id=r.host_id or s.id=r.guest_id) and (s.expires_at<=now() or s.suspended=true)))`;
     const changed =

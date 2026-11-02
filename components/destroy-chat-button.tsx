@@ -85,8 +85,8 @@ export function DestroyChatButton({
           </h2>
           <p className="mt-3 text-sm leading-7">
             {tamil
-              ? 'பகிர்ந்த link உடனடியாக செயலிழக்கும். உரையாடல் முடிவடையும்; பகிர்ந்த படங்கள் அழிக்கப்படும். மீண்டும் பேச புதிய chat link உருவாக்க வேண்டும்.'
-              : 'The shared link will stop working immediately. This conversation will end and shared images will be cleared. You will need a new chat link to start again.'}
+              ? 'பகிர்ந்த link செயலிழந்து chat முடிவடையும். புதிய chats-ன் செய்திகள் மற்றும் சிறிய படங்கள் பாதுகாப்பு PDF-ல் 30 நாட்கள் சேமிக்கப்படும். மீண்டும் பேச புதிய link தேவை.'
+              : 'The shared link will stop working and this chat will end. New chats retain a restricted security PDF with smaller image copies for 30 days. You will need a new link to start again.'}
           </p>
           {error && (
             <p role="alert" className="mt-3 text-sm text-red-800">

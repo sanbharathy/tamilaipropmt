@@ -1,4 +1,5 @@
 'use client';
+import { ChatArchiveNotice } from '@/components/chat-archive-notice';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -362,6 +363,16 @@ export function PrivateChat({ roomId }: { roomId: string }) {
     room.source === 'directory';
   const canAccept = invitation && !invitation.own && !room;
 
+  if (me && !me.archive_notice)
+    return (
+      <ChatArchiveNotice
+        tamil={tamil}
+        busy={busy}
+        error={error}
+        onAccept={() => void act({ action: 'archive-consent', accepted: true })}
+      />
+    );
+
   return (
     <main className="messenger-screen mx-auto flex h-dvh min-h-[400px] max-w-6xl flex-col overflow-hidden md:my-4 md:h-[calc(100dvh-2rem)] md:rounded-[28px]">
       <header className="relative z-20 flex shrink-0 items-center justify-between gap-3 border-b border-[#e1eae4] bg-white/95 px-3 py-3 sm:px-6">
@@ -388,8 +399,8 @@ export function PrivateChat({ roomId }: { roomId: string }) {
               <LockKeyhole size={10} aria-hidden="true" />
               {status === 'active'
                 ? txt(
-                    'இருவர் மட்டும் · தற்காலிக படங்கள்',
-                    'Two people · Temporary photos',
+                    'இருவர் மட்டும் · Private invite',
+                    'Two people · Private invite',
                   )
                 : txt(
                     'Private invite · உங்கள் விருப்பப்படி',
@@ -516,7 +527,12 @@ export function PrivateChat({ roomId }: { roomId: string }) {
           <form
             onSubmit={(event) => {
               event.preventDefault();
-              void act({ action: 'join', name: nickname, accepted: agreed });
+              void act({
+                action: 'join',
+                name: nickname,
+                accepted: agreed,
+                archiveConsent: agreed,
+              });
             }}
             className="m-auto w-full max-w-sm rounded-3xl border border-[#dbe5de] bg-white p-6"
           >
@@ -551,8 +567,8 @@ export function PrivateChat({ roomId }: { roomId: string }) {
               />
               <span>
                 {txt(
-                  'மரியாதையாகப் பேச ஒப்புக்கொள்கிறேன்.',
-                  'I agree to chat respectfully.',
+                  'மரியாதையாகப் பேச ஒப்புக்கொள்கிறேன். புதிய chat முடிந்ததும் செய்திகள், சிறிய படங்கள், புனைப்பெயர்கள், நேரங்கள் அடங்கிய பாதுகாப்பு PDF நிர்வாகிகளுக்காக 30 நாட்கள் சேமிக்கப்படும் என்பதைப் படித்தேன். இது end-to-end encrypted chat அல்ல.',
+                  'I agree to chat respectfully. I have read that messages, smaller image copies, nicknames and timestamps are retained in an admin-only security PDF for 30 days after a new chat ends. This is not end-to-end encrypted chat.',
                 )}{' '}
                 <Link href="/community-chat/rules" className="underline">
                   {txt('Chat விதிகள்', 'Chat rules')}
@@ -596,8 +612,8 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             <p className="mt-3 text-sm leading-7 text-[#60776c]">
               {status === 'ended' || status === 'declined'
                 ? txt(
-                    'இந்த chat-ல் பகிரப்பட்ட படங்கள் அழிக்கப்பட்டன.',
-                    'Images shared in this chat have been cleared.',
+                    'இந்த chat-ல் படங்களை இனி பார்க்க முடியாது. புதிய chats-க்கு அறிவிக்கப்பட்ட 30 நாள் பாதுகாப்பு சேமிப்பு பொருந்தும்.',
+                    'Pictures are no longer available in this chat. For new chats, the disclosed 30-day security archive still applies.',
                   )
                 : txt(
                     'இருவரும் ஒப்புக்கொண்ட பிறகே படங்களையும் செய்திகளையும் பகிர முடியும்.',
@@ -1056,8 +1072,8 @@ export function PrivateChat({ roomId }: { roomId: string }) {
           </h2>
           <p className="mt-3 text-sm leading-7">
             {txt(
-              'பகிரப்பட்ட அனைத்துப் படங்களும் உடனடியாக அழிக்கப்படும். இருவரும் இனி இந்த chat-ல் செய்தி அனுப்ப முடியாது.',
-              'All shared images will be cleared immediately. Neither person can send further messages in this conversation.',
+              'Chat-ல் படங்களை இனி பார்க்க முடியாது. புதிய chats-ன் செய்திகள் மற்றும் சிறிய படங்கள் பாதுகாப்பு PDF-ல் 30 நாட்கள் சேமிக்கப்படும். இங்கு இனி செய்தி அனுப்ப முடியாது.',
+              'Shared images will disappear from the chat. New chats retain a restricted PDF with smaller image copies for 30 days. Neither person can send further messages here.',
             )}
           </p>
           {error && (
@@ -1115,8 +1131,8 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             </h2>
             <p className="mt-3 text-xs leading-6">
               {txt(
-                'Chat செயல்பாட்டில் இருக்கும்போது moderator இந்தச் செய்தியையும் படத்தையும் பார்க்கலாம். முடிந்த பிறகு படம் இருக்காது.',
-                'A moderator can review this message and its image while the chat is active. The image is cleared when the chat ends.',
+                'Moderator இந்தப் புகாரை ஆய்வு செய்யலாம். புதிய chats-ன் செய்திகள் மற்றும் சிறிய படங்கள் chat முடிந்த பிறகு பாதுகாப்பு PDF-ல் 30 நாட்கள் சேமிக்கப்படும்.',
+                'A moderator can review this report. New chats also retain messages and smaller image copies in a restricted security PDF for 30 days after ending.',
               )}
             </p>
             <label className="mt-4 block text-sm font-semibold">

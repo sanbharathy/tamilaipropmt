@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Free Tamil Chat, Private Links & Stickers',
     description:
-      'Chat with friends in Tamil. Share temporary photos, original stickers and funny meme cards.',
+      'Chat with friends in Tamil. Share photos, original stickers and funny meme cards with a disclosed 30-day security archive.',
     images: ['/og.jpg'],
   },
 };
@@ -52,11 +52,11 @@ const faqs = [
   ],
   [
     'Are shared pictures private and temporary?',
-    'Only accepted participants can open chat pictures. You can send JPG, PNG or WebP files up to 2 MB. Images are cleared from the chat when it ends, including block or guest logout. A friend may still keep a screenshot or a file they saved themselves.',
+    'Only accepted participants can open chat pictures. Send JPG, PNG or WebP files up to 2 MB. Participant image links stop working when a chat ends. For new chats, messages and smaller image copies are retained in an admin-only security PDF for 30 days after ending. Both people acknowledge this before joining. A friend may also retain screenshots or downloaded copies.',
   ],
   [
     'Can I destroy my invitation link?',
-    'Yes. The creator can choose Destroy link from the chat options menu or their conversation list, before or after someone joins. This ends the conversation and clears shared images. An invitation is also single-use: after a friend accepts, nobody else can join through it.',
+    'Yes. The creator can choose Destroy link before or after someone joins. This ends the conversation and disables participant image links. It does not remove the disclosed 30-day security PDF for new chats. Invitations are single-use: after a friend accepts, nobody else can join through that link.',
   ],
   [
     'Is this end-to-end encrypted messaging?',
@@ -77,7 +77,7 @@ const data = {
   name: 'Free Tamil Chat with Private Links & Stickers',
   url: 'https://tamilaiprompt.com/tamil-chat',
   description:
-    'A public guide to TamilAI Prompt private Tamil chat, temporary photos, original stickers, consent and invitation controls.',
+    'A public guide to private Tamil chat, photo sharing, stickers, invitation controls and disclosed 30-day security retention.',
   inLanguage: ['ta', 'en'],
   isPartOf: {
     '@type': 'WebSite',
@@ -230,8 +230,8 @@ export default function TamilChatLanding() {
             [
               ImagePlus,
               'படம் பகிரலாம்',
-              'Temporary photo sharing',
-              'Tap to open a shared picture, zoom in, or view the original. Pictures clear when the conversation ends.',
+              'Photo sharing with clear retention',
+              'Tap to view and zoom. Chat image links stop at the end; new chats retain smaller copies in an admin-only security PDF for 30 days.',
             ],
           ].map(([Icon, ta, en, description]) => {
             const I = Icon as typeof Link2;
@@ -275,7 +275,9 @@ export default function TamilChatLanding() {
           <p className="mt-4 max-w-3xl text-xs leading-7 text-[#67785d]">
             <strong className="text-[#677b59]">A clear privacy promise:</strong>{' '}
             this is invitation-based chat with protected access, not end-to-end
-            encrypted messaging. Keep sensitive information out of chat.{' '}
+            encrypted messaging. New chats retain messages and smaller image
+            copies in an admin-only security PDF for 30 days after ending. Keep
+            sensitive information out of chat.{' '}
             <Link
               href="/community-chat/rules"
               className="font-semibold underline underline-offset-2"

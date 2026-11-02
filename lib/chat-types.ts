@@ -8,6 +8,7 @@ export type ChatSession = {
   name: string;
   available: boolean;
   topic: string;
+  archive_notice?: boolean;
 };
 export type ChatRoom = {
   id: string;

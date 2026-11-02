@@ -40,3 +40,4 @@ next-env.d.ts
 
 # TypeScript incremental compiler output
 *.tsbuildinfo
+/tmp/pdfs/

@@ -7,6 +7,7 @@ process.loadEnvFile('.env.chat.local');
 const base = process.env.CHAT_TEST_URL ?? 'http://localhost:3020';
 const network = `chat-image-test-${randomUUID()}`;
 const people = [];
+const fixtureRooms = new Set();
 const sql = postgres(process.env.CHAT_DATABASE_URL, {
   ssl: 'require',
   max: 1,
@@ -39,6 +40,7 @@ async function call(person, body, path = '/api/chat') {
 async function ok(person, body, path) {
   const response = await call(person, body, path);
   assert.equal(response.status, 200, JSON.stringify(response.data));
+  if (response.data.roomId) fixtureRooms.add(response.data.roomId);
   return response.data;
 }
 async function guest(name) {
@@ -49,13 +51,18 @@ async function guest(name) {
     const secret = randomBytes(32).toString('base64url');
     const id = randomUUID();
     const digest = createHash('sha256').update(secret).digest('hex');
-    await sql`insert into tamil_chat.sessions(id,token_hash,name) values(${id},${digest},${name})`;
+    await sql`insert into tamil_chat.sessions(id,token_hash,name,archive_notice) values(${id},${digest},${name},true)`;
     person.cookie = `tamilai_chat=${secret}`;
     person.id = id;
     people.push(person);
     return person;
   }
-  await ok(person, { action: 'join', name, accepted: true });
+  await ok(person, {
+    action: 'join',
+    name,
+    accepted: true,
+    archiveConsent: true,
+  });
   person.id = (await ok(person)).me.id;
   people.push(person);
   return person;
@@ -258,6 +265,8 @@ try {
   if (ids.length) {
     await sql`delete from tamil_chat.reports where reporter_id in ${sql(ids)}`;
     await sql`delete from tamil_chat.sessions where id in ${sql(ids)}`;
+    if (fixtureRooms.size)
+      await sql`delete from tamil_chat.archives where room_id in ${sql([...fixtureRooms])}`;
     for (const id of ids)
       await sql`delete from tamil_chat.limits where key like ${'%:' + id}`;
   }

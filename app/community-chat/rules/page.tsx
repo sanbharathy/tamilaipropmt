@@ -7,8 +7,8 @@ export const metadata: Metadata = {
 };
 const rules = [
   [
-    'படங்கள் தற்காலிகமானவை · Temporary images',
-    'Accepted chat participants can share JPG, PNG or WebP files up to 2 MB. Images are validated, resized to at most 1200 pixels and saved as WebP without the original metadata. A conversation can hold up to ten images. Images are accessible only to its participants; moderators can view an image only if it was reported and the chat is still active. Ending the chat, blocking, leaving the guest session or moderator suspension clears image data immediately. Expired chats immediately lose image access and stored images are cleared when the service next checks expiry. Reports do not retain image copies. Other people may still keep screenshots or files they saved themselves.',
+    'படங்கள் & பாதுகாப்பு சேமிப்பு · Images & security retention',
+    'Accepted participants can share JPG, PNG or WebP files up to 2 MB. Images are validated, resized to at most 1200 pixels and saved as WebP without original metadata, with a ten-image limit per conversation. Chat image links stop working when a chat ends or expires. For new chats under the archive notice, smaller image copies are retained inside the restricted security PDF for 30 days after the chat ends. Existing conversations keep their original deletion policy. Other people may retain screenshots or downloaded copies.',
   ],
   [
     'உங்கள் அனுமதி முக்கியம் · Consent first',
@@ -16,7 +16,7 @@ const rules = [
   ],
   [
     'இருவர் மட்டும் · Two-person invitations',
-    'An invitation link reserves one additional seat for the first person who accepts. Treat the link like a private invitation and share it only with the intended person. The creator can use Destroy link in the conversation header or chat list at any time; this disables the invitation, ends the conversation and clears shared images. We do not verify a guest’s real identity. A nickname is not proof of identity.',
+    'An invitation reserves one seat for the first person who accepts. Share it only with the intended person. Destroy link disables the invitation and ends the conversation immediately; it does not delete the disclosed 30-day security archive for new chats. Guest identities are not verified; a nickname is not proof of identity.',
   ],
   [
     'மரியாதையாகப் பேசுங்கள் · Be respectful',
@@ -28,7 +28,11 @@ const rules = [
   ],
   [
     'Messages & retention',
-    'Messages are stored on our server in an isolated Supabase PostgreSQL schema. Each conversation expires after 24 hours; the interface shows its most recent 100 messages. Expired conversations and their messages are removed by cleanup triggered by chat activity at most once per hour. If the service is inactive, expired records may remain until it is used again. Guest records are removed after their session has been expired for seven days.',
+    'Messages are stored in an isolated Supabase PostgreSQL schema. Conversations last up to 24 hours, or end earlier if a participant session expires. The interface shows the latest 100 messages. New archived chats allow up to 1,000 messages and ten images so that the complete conversation can be preserved within service limits. Ended conversations become inaccessible to participants. Expiry maintenance removes active chat records; guest records are removed after their session has expired for seven days.',
+  ],
+  [
+    '30 நாள் பாதுகாப்பு PDF · 30-day security PDF',
+    'New chats created after the November 2, 2026 archive notice retain all message text, reduced-size shared images, nicknames, timestamps, invitation activity and end details for security review. Both participants must acknowledge the notice before joining a new archived chat. No retrospective archive is created for older chats. End, destroy, block, logout, moderator suspension and expiry create a protected snapshot before live image data is cleared. Background processing converts it into an encrypted PDF, then removes the processing snapshot. Images in the PDF are at most 512 pixels at JPEG quality 45. Exact Unicode text is also embedded as a JSON attachment. A pending snapshot remains protected until processing succeeds or its deadline arrives. Authorized moderator PDF downloads are logged. Archives are inaccessible 30 days after ending and a database job purges them every minute while the database is running. Provider backups may have separate retention schedules; downloaded copies cannot be remotely erased. These are service records, not verified proof of identity or forensic originals.',
   ],
   [
     'இது end-to-end encryption அல்ல · Privacy limits',

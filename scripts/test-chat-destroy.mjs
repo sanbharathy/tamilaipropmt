@@ -11,12 +11,13 @@ const sql = postgres(process.env.CHAT_DATABASE_URL, {
   max: 1,
 });
 const people = [];
+const fixtureRooms = new Set();
 const network = `destroy-test-${randomUUID()}`;
 async function guest(name) {
   const id = randomUUID();
   const secret = randomBytes(32).toString('base64url');
   const digest = createHash('sha256').update(secret).digest('hex');
-  await sql`insert into tamil_chat.sessions(id,token_hash,name) values(${id},${digest},${name})`;
+  await sql`insert into tamil_chat.sessions(id,token_hash,name,archive_notice) values(${id},${digest},${name},true)`;
   const person = { id, cookie: `tamilai_chat=${secret}` };
   people.push(person);
   return person;
@@ -37,6 +38,7 @@ async function call(person, body) {
 async function ok(person, body) {
   const result = await call(person, body);
   assert.equal(result.status, 200, JSON.stringify(result.data));
+  if (result.data.roomId) fixtureRooms.add(result.data.roomId);
   return result.data;
 }
 try {
@@ -113,6 +115,8 @@ try {
   const ids = people.map((person) => person.id);
   if (ids.length) {
     await sql`delete from tamil_chat.sessions where id in ${sql(ids)}`;
+    if (fixtureRooms.size)
+      await sql`delete from tamil_chat.archives where room_id in ${sql([...fixtureRooms])}`;
     for (const id of ids)
       await sql`delete from tamil_chat.limits where key like ${'%:' + id}`;
   }

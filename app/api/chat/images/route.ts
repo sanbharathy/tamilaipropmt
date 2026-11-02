@@ -13,6 +13,7 @@ import {
   validId,
 } from '@/lib/chat-server';
 import { uploadForm } from '@/lib/chat-images';
+import { scheduleArchives } from '@/lib/chat-archives';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
     await limit(`image-attempts:${me.id}`, 20, 3600);
     await limit(`image-network:${networkKey(request)}`, 30, 3600);
     await cleanup();
+    scheduleArchives();
     const form = await uploadForm(request);
     const roomId = validId(form.get('roomId'));
     const clientId = validId(form.get('clientId'));
@@ -34,13 +36,18 @@ export async function POST(request: Request) {
         : '📷 Shared image';
     const sql = chatDb();
     const [allowed] =
-      await sql`select id from tamil_chat.rooms where id=${roomId} and (host_id=${me.id} or guest_id=${me.id}) and status='active' and expires_at>now()`;
+      await sql`select id,archive_enabled from tamil_chat.rooms where id=${roomId} and (host_id=${me.id} or guest_id=${me.id}) and status='active' and expires_at>now()`;
     if (!allowed)
       throw new ChatError(
         'Only participants in an accepted, active chat can share images.',
         403,
       );
     const file = form.get('image');
+    if (allowed.archive_enabled && !me.archive_notice)
+      throw new ChatError(
+        'Please acknowledge the security archive notice first.',
+        403,
+      );
     if (
       !(file instanceof File) ||
       form.getAll('image').length !== 1 ||
@@ -104,6 +111,13 @@ export async function POST(request: Request) {
       const [existing] =
         await tx`select id::text from tamil_chat.messages where sender_id=${me.id} and client_id=${clientId}`;
       if (existing) return existing;
+      const [total] =
+        await tx`select count(*)::int as count from tamil_chat.messages where room_id=${roomId}`;
+      if (allowed.archive_enabled && total.count >= 1000)
+        throw new ChatError(
+          'This chat has reached its 1,000-message limit.',
+          429,
+        );
       const [count] =
         await tx`select count(*)::int as count from tamil_chat.messages where room_id=${roomId} and image_data is not null`;
       if (count.count >= 10)

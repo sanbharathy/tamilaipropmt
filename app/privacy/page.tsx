@@ -4,18 +4,19 @@ import { Sparkles } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy - TamilAI Prompt',
-  description: 'Privacy Policy for TamilAI Prompt, including analytics, advertising, cookies, and third-party links.',
+  description:
+    'Privacy Policy for TamilAI Prompt, including analytics, advertising, cookies, and third-party links.',
   alternates: { canonical: '/privacy' },
 };
 
 const sections = [
   {
-    title: 'Temporary chat images',
-    body: 'Private chat image uploads are processed to remove original metadata and stored in the isolated chat database. Image data is cleared when a conversation ends, including blocking, guest logout and moderator suspension. Access stops immediately on expiry; stored expired images are cleared by activity-triggered expiry checks. Moderation reports do not retain image copies. Recipients may retain screenshots or files they saved themselves. See the chat rules for upload limits and details.',
+    title: 'Chat images & 30-day security archives',
+    body: 'For new chats created after the archive notice was introduced on November 2, 2026, messages, smaller copies of shared images, nicknames, timestamps and chat activity are retained in an admin-only security PDF for 30 days after ending, link destruction or expiry. Images in the PDF are reduced to at most 512 pixels at JPEG quality 45. The PDF is encrypted in storage; authorized moderator access is logged. A protected processing snapshot may temporarily hold the chat while the PDF is generated. The archive becomes inaccessible at its 30-day deadline and a database job removes expired archives every minute while the database is running. Provider-managed backups may follow separate backup retention schedules. Downloaded copies or screenshots cannot be remotely erased. Existing chats keep their original retention policy. Images stop being available through participant chat links when a chat ends.',
   },
   {
     title: 'Optional private creator chat',
-    body: 'Community Chat stores guest nicknames, invitation records, chat messages, blocks, reports, and hashed identifiers used for spam limits. A secure HTTP-only cookie identifies your guest session for up to 24 hours. Availability is off by default. Chat is not end-to-end encrypted. Conversations expire after 24 hours, and expired conversations are removed by hourly cleanup triggered by chat activity. Reports are retained for seven days subject to that cleanup. See /community-chat/rules for full retention and moderation details.',
+    body: 'Community Chat stores guest nicknames, invitations, messages, blocks, reports, security archives and hashed identifiers for spam limits. A secure HTTP-only cookie identifies your guest session for up to 24 hours. Availability is off by default. Chat is not end-to-end encrypted. New chats require acknowledgement of the 30-day archive notice before joining. Conversations expire after 24 hours or earlier if a participant session expires. Active message records are removed through expiry maintenance; security PDFs have a separate 30-day deadline. Reports are retained for seven days subject to maintenance. See /community-chat/rules for full details.',
   },
   {
     title: 'Information we collect',
@@ -47,19 +48,31 @@ export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+        >
           <Sparkles className="size-4" aria-hidden="true" />
           TamilAI Prompt
         </Link>
         <h1 className="mt-6 font-heading text-4xl font-extrabold tracking-tight sm:text-5xl">
           Privacy Policy
         </h1>
-        <p className="mt-4 text-sm text-muted-foreground">Last updated: November 2, 2026</p>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Last updated: November 2, 2026
+        </p>
         <div className="mt-8 space-y-6">
           {sections.map((section) => (
-            <article key={section.title} className="rounded-2xl border border-border bg-card p-5">
-              <h2 className="font-heading text-xl font-bold">{section.title}</h2>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">{section.body}</p>
+            <article
+              key={section.title}
+              className="rounded-2xl border border-border bg-card p-5"
+            >
+              <h2 className="font-heading text-xl font-bold">
+                {section.title}
+              </h2>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                {section.body}
+              </p>
             </article>
           ))}
         </div>
