@@ -154,6 +154,12 @@ try {
   );
   const id = await picture(a, waiting.roomId);
   const privateUrl = `/api/chat/images/${id}`;
+  const optimizerUrl = `/_next/image?url=${encodeURIComponent(privateUrl)}&w=640&q=75`;
+  assert.equal(
+    (await fetch(base + optimizerUrl, { headers: headers(b) })).status,
+    400,
+    'Private uploads must be rejected by the public image optimizer',
+  );
   const visible = await fetch(base + privateUrl, { headers: headers(b) });
   assert.equal(visible.status, 200);
   assert.match(visible.headers.get('cache-control'), /no-store/);
