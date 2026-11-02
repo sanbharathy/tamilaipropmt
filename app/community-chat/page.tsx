@@ -4,7 +4,7 @@ import { CommunityChat } from '@/components/community-chat';
 export const metadata: Metadata = {
   title: 'Private Tamil Creator Chat | TamilAI Prompt',
   description:
-    'Create a private chat link or opt in to meet Tamil AI creators. Two-person text conversations with invitations, consent, reporting, and blocking.',
+    'Create a private chat link or opt in to meet Tamil AI creators. Two-person conversations with temporary image sharing, consent, reporting, and blocking.',
   alternates: { canonical: '/community-chat' },
   openGraph: {
     title: 'Tamil Creator Chat — Connect with a link',

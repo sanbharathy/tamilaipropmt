@@ -6,6 +6,7 @@ import Link from 'next/link';
 type Report = {
   id: string;
   excerpt: string;
+  has_image?: boolean;
   reason: string;
   status: string;
   created_at: string;
@@ -135,6 +136,15 @@ export function ChatModeration() {
                     {new Date(report.created_at).toLocaleString()}
                   </p>
                   <blockquote className="my-4 whitespace-pre-wrap break-words rounded-xl bg-muted p-4 text-sm leading-7">
+                    {report.has_image && (
+                      // Moderator-only image URL; it stops working when the chat ends.
+                      // oxlint-disable-next-line
+                      <img
+                        src={`/api/chat/moderation/images/${report.id}`}
+                        alt="Reported attachment, available only while its chat is active"
+                        className="mb-3 max-h-64 max-w-full rounded-xl"
+                      />
+                    )}
                     {report.excerpt}
                   </blockquote>
                   <p className="text-sm leading-7">

@@ -2,6 +2,16 @@
 
 Routes: `/community-chat`, `/community-chat/rules`, `/community-chat/moderation`.
 
+Conversations open exclusively at `/chat/[roomId]`. New invitation links use that path with the single-use token in a fragment. Old `/community-chat#invite=...` links resolve to the dedicated page. No directory, marketing sections, ads or general site navigation are shown in the conversation view.
+
+## Temporary image sharing
+
+`POST /api/chat/images` accepts one authenticated multipart JPG, PNG or WebP file (max 2 MB), validates file signatures and decoding, strips metadata, rotates and resizes to 1200 pixels, and encodes WebP (max 512 KB stored). Each room holds at most ten images. Images are bytea payloads in `tamil_chat.messages` for this bounded initial version, keeping them private without a separate storage service. `GET /api/chat/images/[messageId]` requires a live participant cookie and an active, unexpired room. Images are never returned in JSON, public links, Next.js image optimization, or cacheable responses.
+
+`database/chat-images.sql` adds the columns and an AFTER UPDATE trigger. Any transition to ended/declined immediately sets image payloads and MIME types to NULL, including all rooms affected by block, logout or moderator suspension. Expiry is checked on activity, ends the affected rooms and invokes the same trigger. Image reads reject expiry even before that check runs. Moderator image access joins through an actual report to the original active message; no copy survives the chat. Database/provider backups and files recipients saved themselves are outside this application-level clearing mechanism.
+
+The private page revokes local preview URLs on remove/send/end/unmount. Image attempts are capped at 20/hour per guest and 30/hour per network. File access is same-origin, private, no-store, and noindex. `scripts/test-chat-images.mjs` verifies validation, participant isolation, metadata removal, consent, clearing on end/block/logout/suspension/expiry, and moderation image access.
+
 Two-person guest conversations with single-use invite links and explicit acceptance. The optional people list shows only guests who enabled availability, chose the same interest, and updated presence within 50 seconds. Discovery operates while the chat page is open. Messages refresh every four seconds while the tab is visible; this version uses polling, not WebSockets.
 
 ## Storage and credentials

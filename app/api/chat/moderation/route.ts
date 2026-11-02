@@ -32,7 +32,9 @@ export async function GET(request: Request) {
     await authenticate(request);
     const sql = chatDb();
     const reports =
-      await sql`select id,reported_id,message_id::text,excerpt,reason,status,created_at from tamil_chat.reports order by created_at desc limit 100`;
+      await sql`select report.id,report.reported_id,report.message_id::text,report.excerpt,report.reason,report.status,report.created_at,
+        exists(select 1 from tamil_chat.messages m join tamil_chat.rooms r on r.id=m.room_id where m.id=report.message_id and m.image_data is not null and r.status='active' and r.expires_at>now()) as has_image
+        from tamil_chat.reports report order by report.created_at desc limit 100`;
     return respond({ reports });
   } catch (error) {
     return fail(error);

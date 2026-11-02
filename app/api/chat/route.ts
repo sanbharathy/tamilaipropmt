@@ -43,13 +43,13 @@ export async function GET(request: Request) {
       case when r.host_id=${me.id} then g.name else h.name end as peer_name,
       case when r.host_id=${me.id} then r.guest_id else r.host_id end as peer_id
       from tamil_chat.rooms r join tamil_chat.sessions h on h.id=r.host_id left join tamil_chat.sessions g on g.id=r.guest_id
-      where (r.host_id=${me.id} or r.guest_id=${me.id}) and r.expires_at>now() order by r.created_at desc limit 30`;
+      where (r.host_id=${me.id} or r.guest_id=${me.id}) and r.expires_at>now() and (${roomId}::uuid is null or r.id=${roomId}::uuid) order by r.created_at desc limit 30`;
     const room = roomId ? (rooms.find((r) => r.id === roomId) ?? null) : null;
     if (roomId && !room)
       throw new ChatError('Conversation not found or expired.', 404);
     const messages =
       room?.status === 'active'
-        ? await sql`select id::text,sender_id,body,created_at from (select id,sender_id,body,created_at from tamil_chat.messages where room_id=${room.id} order by id desc limit 100) m order by id`
+        ? await sql`select id::text,sender_id,body,created_at,has_image from (select id,sender_id,body,created_at,image_type is not null as has_image from tamil_chat.messages where room_id=${room.id} order by id desc limit 100) m order by id`
         : [];
     const people = me.available
       ? await sql`select s.id,s.name,s.topic from tamil_chat.sessions s where s.available=true and s.suspended=false
@@ -79,6 +79,19 @@ export async function POST(request: Request) {
     assertOrigin(request);
     const body = await bodyOf(request);
     const sql = chatDb();
+    if (body.action === 'resolve-invite') {
+      await limit(`resolve:${networkKey(request)}`, 30, 60);
+      if (
+        typeof body.invite !== 'string' ||
+        !/^[a-zA-Z0-9_-]{43}$/.test(body.invite)
+      )
+        throw new ChatError('Invalid invitation.');
+      const [invited] =
+        await sql`select id from tamil_chat.rooms where invite_hash=${hash(body.invite)} and status='pending' and expires_at>now()`;
+      if (!invited)
+        throw new ChatError('This invitation is no longer available.', 404);
+      return respond({ roomId: invited.id });
+    }
     if (body.action === 'join') {
       const existing = await sessionOf(request, false);
       if (existing) return respond({ ok: true });
@@ -166,6 +179,11 @@ export async function POST(request: Request) {
           await tx`select r.*,s.name as host_name from tamil_chat.rooms r join tamil_chat.sessions s on s.id=r.host_id where r.invite_hash=${hash(String(body.invite))} and r.source='link' and r.expires_at>now() and s.expires_at>now() and s.suspended=false for update of r`;
         if (!room || room.status === 'ended' || room.status === 'declined')
           throw new ChatError('This invitation has expired or ended.', 404);
+        if (body.roomId && body.roomId !== room.id)
+          throw new ChatError(
+            'This invitation belongs to a different conversation.',
+            400,
+          );
         if (room.host_id === me.id || room.guest_id === me.id)
           return { roomId: room.id, hostName: room.host_name, own: true };
         if (room.guest_id)

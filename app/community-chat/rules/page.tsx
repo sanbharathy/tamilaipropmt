@@ -7,6 +7,10 @@ export const metadata: Metadata = {
 };
 const rules = [
   [
+    'படங்கள் தற்காலிகமானவை · Temporary images',
+    'Accepted chat participants can share JPG, PNG or WebP files up to 2 MB. Images are validated, resized to at most 1200 pixels and saved as WebP without the original metadata. A conversation can hold up to ten images. Images are accessible only to its participants; moderators can view an image only if it was reported and the chat is still active. Ending the chat, blocking, leaving the guest session or moderator suspension clears image data immediately. Expired chats immediately lose image access and stored images are cleared when the service next checks expiry. Reports do not retain image copies. Other people may still keep screenshots or files they saved themselves.',
+  ],
+  [
     'உங்கள் அனுமதி முக்கியம் · Consent first',
     'Discovery is off by default. Turn on “Available to chat” to show your nickname to visitors on the chat page who choose the same interest. Directory listings expire after about 50 seconds without an update. Every conversation needs an acceptance before messages can be sent.',
   ],

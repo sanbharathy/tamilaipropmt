@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   ArrowRight,
@@ -33,6 +34,7 @@ const empty: ChatState = {
 type Invite = { hostName: string; roomId: string; own: boolean };
 
 export function CommunityChat() {
+  const router = useRouter();
   const [tamil, setTamil] = useState(true);
   const [state, setState] = useState<ChatState>(empty);
   const [loading, setLoading] = useState(true);
@@ -120,6 +122,22 @@ export function CommunityChat() {
     // Read the external invitation fragment only after hydration.
     // oxlint-disable-next-line
     if (token) setInviteToken(token);
+    if (token)
+      void fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'resolve-invite', invite: token }),
+      })
+        .then(async (response) => {
+          const data = await response.json();
+          if (response.ok)
+            router.replace(
+              `/chat/${String(data.roomId)}#invite=${encodeURIComponent(token)}`,
+            );
+        })
+        .catch(() =>
+          setError('Unable to open the invitation. Please try again.'),
+        );
     const timer = window.setInterval(async () => {
       if (document.visibilityState !== 'visible' || polling.current) return;
       polling.current = true;
@@ -132,7 +150,7 @@ export function CommunityChat() {
       }
     }, 4000);
     return () => window.clearInterval(timer);
-  }, [refresh]);
+  }, [refresh, router]);
   useEffect(() => {
     lastMessage.current?.scrollIntoView({ block: 'nearest' });
   }, [state.messages.length, roomId]);
@@ -189,19 +207,13 @@ export function CommunityChat() {
 
   async function createLink() {
     await perform({ action: 'create' }, (data) => {
-      const id = String(data.roomId);
-      activeRoom.current = id;
-      setRoomId(id);
-      setShareLink(
-        `${window.location.origin}/community-chat#invite=${String(data.invite)}`,
-      );
+      router.push(`/chat/${String(data.roomId)}#invite=${String(data.invite)}`);
     });
   }
   async function acceptInvite() {
     await perform({ action: 'accept-invite', invite: inviteToken }, (data) => {
       const id = String(data.roomId);
-      activeRoom.current = id;
-      setRoomId(id);
+      router.push(`/chat/${id}`);
       setInvite(null);
       setInviteToken('');
       window.history.replaceState(null, '', window.location.pathname);
@@ -231,11 +243,7 @@ export function CommunityChat() {
     }
   }
   function selectRoom(value: ChatRoom) {
-    setRoomId(value.id);
-    setShareLink('');
-    setDraft('');
-    setError('');
-    setReport(null);
+    router.push(`/chat/${value.id}`);
   }
   async function confirm() {
     const action = confirmAction;
@@ -295,7 +303,10 @@ export function CommunityChat() {
           </div>
           <span className="inline-flex items-center gap-2 rounded-full bg-[#e4eee6] px-4 py-2 text-xs font-bold">
             <LockKeyhole size={14} aria-hidden="true" />
-            {txt('இருவர் மட்டும் · Text chat', 'Just two people · Text chat')}
+            {txt(
+              'இருவர் மட்டும் · செய்திகள் & படங்கள்',
+              'Two people · Messages & images',
+            )}
           </span>
         </div>
 
@@ -608,8 +619,7 @@ export function CommunityChat() {
                                 void perform(
                                   { action: 'request', peer: person.id },
                                   (data) => {
-                                    activeRoom.current = String(data.roomId);
-                                    setRoomId(String(data.roomId));
+                                    router.push(`/chat/${String(data.roomId)}`);
                                   },
                                 )
                               }
@@ -650,8 +660,7 @@ export function CommunityChat() {
                                 void perform(
                                   { action: 'accept', roomId: request.id },
                                   () => {
-                                    activeRoom.current = request.id;
-                                    setRoomId(request.id);
+                                    router.push(`/chat/${request.id}`);
                                   },
                                 )
                               }

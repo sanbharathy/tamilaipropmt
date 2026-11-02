@@ -71,11 +71,14 @@ export function fail(error: unknown) {
     503,
   );
 }
-export function assertOrigin(request: Request) {
+export function assertOrigin(
+  request: Request,
+  contentType = 'application/json',
+) {
   if (request.headers.get('origin') !== new URL(request.url).origin)
     throw new ChatError('Please use chat from this website.', 403);
-  if (!request.headers.get('content-type')?.startsWith('application/json'))
-    throw new ChatError('Expected a JSON request.', 415);
+  if (!request.headers.get('content-type')?.startsWith(contentType))
+    throw new ChatError('Unexpected request format.', 415);
 }
 export async function bodyOf(request: Request) {
   const raw = await request.text();
@@ -150,6 +153,7 @@ export function networkKey(request: Request) {
 export async function cleanup() {
   const sql = chatDb();
   await sql.begin(async (tx) => {
+    await tx`update tamil_chat.rooms r set status='ended',invite_hash=null where r.status in ('pending','active') and (r.expires_at<=now() or exists(select 1 from tamil_chat.sessions s where (s.id=r.host_id or s.id=r.guest_id) and (s.expires_at<=now() or s.suspended=true)))`;
     const changed =
       await tx`update tamil_chat.maintenance set last_cleaned=now() where id=true and last_cleaned<now()-interval '1 hour' returning id`;
     if (!changed.length) return;

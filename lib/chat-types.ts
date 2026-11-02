@@ -24,6 +24,7 @@ export type ChatMessage = {
   id: string;
   sender_id: string;
   body: string;
+  has_image?: boolean;
   created_at: string;
 };
 export type ChatState = {

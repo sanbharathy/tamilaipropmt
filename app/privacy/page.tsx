@@ -10,6 +10,10 @@ export const metadata: Metadata = {
 
 const sections = [
   {
+    title: 'Temporary chat images',
+    body: 'Private chat image uploads are processed to remove original metadata and stored in the isolated chat database. Image data is cleared when a conversation ends, including blocking, guest logout and moderator suspension. Access stops immediately on expiry; stored expired images are cleared by activity-triggered expiry checks. Moderation reports do not retain image copies. Recipients may retain screenshots or files they saved themselves. See the chat rules for upload limits and details.',
+  },
+  {
     title: 'Optional private creator chat',
     body: 'Community Chat stores guest nicknames, invitation records, chat messages, blocks, reports, and hashed identifiers used for spam limits. A secure HTTP-only cookie identifies your guest session for up to 24 hours. Availability is off by default. Chat is not end-to-end encrypted. Conversations expire after 24 hours, and expired conversations are removed by hourly cleanup triggered by chat activity. Reports are retained for seven days subject to that cleanup. See /community-chat/rules for full retention and moderation details.',
   },
