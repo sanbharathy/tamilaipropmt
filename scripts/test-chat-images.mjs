@@ -16,10 +16,8 @@ const fixture = await sharp({
   create: { width: 32, height: 24, channels: 3, background: '#406050' },
 })
   .jpeg()
-  .withMetadata({
-    orientation: 6,
-    exif: { IFD0: { Artist: 'Test metadata that must be removed' } },
-  })
+  .withMetadata({ orientation: 6 })
+  .withExif({ IFD0: { Artist: 'Test metadata that must be removed' } })
   .toBuffer();
 function headers(person) {
   return {
