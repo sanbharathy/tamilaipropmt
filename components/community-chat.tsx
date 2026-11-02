@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { DestroyChatButton } from '@/components/destroy-chat-button';
 
 import {
   ArrowLeft,
@@ -700,28 +701,48 @@ export function CommunityChat() {
                     {state.rooms
                       .filter((r) => r.status !== 'declined')
                       .map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => selectRoom(item)}
-                          aria-pressed={roomId === item.id}
-                          className={`min-h-14 w-full rounded-xl border p-3 text-left ${roomId === item.id ? 'border-[#a0bc96] bg-[#eef4e8]' : 'border-transparent bg-[#f6f8f5]'}`}
-                        >
-                          <span className="block truncate text-sm font-bold">
-                            {item.peer_name ??
-                              txt('நண்பருக்கான அழைப்பு', 'Invitation for a friend')}
-                          </span>
-                          <span className="mt-1 block text-xs text-[#60776c]">
-                            {item.status === 'active'
-                              ? txt('பேசலாம்', 'Accepted')
-                              : item.status === 'pending'
-                                ? txt(
-                                    'அனுமதிக்காகக் காத்திருக்கிறது',
-                                    'Waiting for acceptance',
-                                  )
-                                : txt('முடிந்தது', 'Ended')}
-                          </span>
-                        </button>
+                        <div key={item.id} className="rounded-xl bg-[#f6f8f5]">
+                          <button
+                            type="button"
+                            onClick={() => selectRoom(item)}
+                            aria-pressed={roomId === item.id}
+                            className={`min-h-14 w-full rounded-xl border p-3 text-left ${roomId === item.id ? 'border-[#a0bc96] bg-[#eef4e8]' : 'border-transparent bg-[#f6f8f5]'}`}
+                          >
+                            <span className="block truncate text-sm font-bold">
+                              {item.peer_name ??
+                                txt(
+                                  'நண்பருக்கான அழைப்பு',
+                                  'Invitation for a friend',
+                                )}
+                            </span>
+                            <span className="mt-1 block text-xs text-[#60776c]">
+                              {item.status === 'active'
+                                ? txt('பேசலாம்', 'Accepted')
+                                : item.status === 'pending'
+                                  ? txt(
+                                      'அனுமதிக்காகக் காத்திருக்கிறது',
+                                      'Waiting for acceptance',
+                                    )
+                                  : txt('முடிந்தது', 'Ended')}
+                            </span>
+                          </button>
+                          {item.host_id === me.id &&
+                            ['pending', 'active'].includes(item.status) && (
+                              <div className="px-3 pb-3">
+                                <DestroyChatButton
+                                  roomId={item.id}
+                                  tamil={tamil}
+                                  kind={
+                                    item.source === 'link' ? 'link' : 'chat'
+                                  }
+                                  disabled={busy}
+                                  onDestroyed={async () => {
+                                    await refresh(activeRoom.current);
+                                  }}
+                                />
+                              </div>
+                            )}
+                        </div>
                       ))}
                     {!state.rooms.length && (
                       <p className="text-xs leading-6 text-[#60776c]">

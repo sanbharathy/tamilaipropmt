@@ -4,6 +4,8 @@ Routes: `/community-chat`, `/community-chat/rules`, `/community-chat/moderation`
 
 Conversations open exclusively at `/chat/[roomId]`. New invitation links use that path with the single-use token in a fragment. Old `/community-chat#invite=...` links resolve to the dedicated page. No directory, marketing sections, ads or general site navigation are shown in the conversation view.
 
+Creators can use “Destroy link” in the conversation header or their conversation list, before or after acceptance. The server authorizes `destroy` only for the room's host, atomically ends the room and removes its invite hash. The existing end-of-chat database trigger clears image data. Guests retain their normal End/Block controls, but cannot invoke the creator-only destroy action. All invite links also become unusable automatically after acceptance or expiry.
+
 ## Temporary image sharing
 
 `POST /api/chat/images` accepts one authenticated multipart JPG, PNG or WebP file (max 2 MB), validates file signatures and decoding, strips metadata, rotates and resizes to 1200 pixels, and encodes WebP (max 512 KB stored). Each room holds at most ten images. Images are bytea payloads in `tamil_chat.messages` for this bounded initial version, keeping them private without a separate storage service. `GET /api/chat/images/[messageId]` requires a live participant cookie and an active, unexpired room. Images are never returned in JSON, public links, Next.js image optimization, or cacheable responses.

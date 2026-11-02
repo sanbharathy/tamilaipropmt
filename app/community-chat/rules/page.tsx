@@ -16,7 +16,7 @@ const rules = [
   ],
   [
     'இருவர் மட்டும் · Two-person invitations',
-    'An invitation link reserves one additional seat for the first person who accepts. Treat the link like a private invitation and share it only with the intended person. We do not verify a guest’s real identity. A nickname is not proof of identity.',
+    'An invitation link reserves one additional seat for the first person who accepts. Treat the link like a private invitation and share it only with the intended person. The creator can use Destroy link in the conversation header or chat list at any time; this disables the invitation, ends the conversation and clears shared images. We do not verify a guest’s real identity. A nickname is not proof of identity.',
   ],
   [
     'மரியாதையாகப் பேசுங்கள் · Be respectful',

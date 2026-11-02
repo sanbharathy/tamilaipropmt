@@ -13,6 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import type { ChatMessage, ChatState } from '@/lib/chat-types';
+import { DestroyChatButton } from '@/components/destroy-chat-button';
 
 const blank: ChatState = {
   me: null,
@@ -101,7 +102,10 @@ export function PrivateChat({ roomId }: { roomId: string }) {
     setMissing(absent);
     setConnected(true);
     setReady(true);
-    if (data.room?.status === 'active' && inviteRef.current) {
+    if (
+      ['active', 'ended', 'declined'].includes(data.room?.status) &&
+      inviteRef.current
+    ) {
       inviteRef.current = '';
       setInviteToken('');
       setInvitation(null);
@@ -320,14 +324,36 @@ export function PrivateChat({ roomId }: { roomId: string }) {
           </button>
           {room && status !== 'ended' && status !== 'declined' && (
             <>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setConfirm('end')}
-                className="min-h-10 rounded-xl border border-[#dbe5de] px-3 text-xs font-bold"
-              >
-                {txt('முடி', 'End')}
-              </button>
+              {room.host_id === meId ? (
+                <DestroyChatButton
+                  roomId={roomId}
+                  tamil={tamil}
+                  disabled={busy}
+                  kind={room.source === 'link' ? 'link' : 'chat'}
+                  onDestroyed={async () => {
+                    inviteRef.current = '';
+                    setInviteToken('');
+                    setInvitation(null);
+                    setImage(null);
+                    setDraft('');
+                    window.history.replaceState(
+                      null,
+                      '',
+                      window.location.pathname,
+                    );
+                    await load();
+                  }}
+                />
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setConfirm('end')}
+                  className="min-h-10 rounded-xl border border-[#dbe5de] px-3 text-xs font-bold"
+                >
+                  {txt('முடி', 'End')}
+                </button>
+              )}
               {room.peer_id && (
                 <button
                   type="button"
@@ -516,6 +542,12 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                   {txt(
                     'இந்த link-ஐ நண்பருக்கு அனுப்புங்கள்',
                     'Send this link to your friend',
+                  )}
+                </p>
+                <p className="mb-3 text-xs leading-6 text-[#60776c]">
+                  {txt(
+                    'நண்பர் ஏற்றதும் link செயலிழக்கும். மேலே உள்ள “Link-ஐ அழி” மூலம் எப்போது வேண்டுமானாலும் ரத்து செய்யலாம்.',
+                    'The link is single-use. Use “Destroy link” above to cancel it whenever you want.',
                   )}
                 </p>
                 <input

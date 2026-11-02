@@ -213,7 +213,13 @@ export async function POST(request: Request) {
       await sql`update tamil_chat.rooms set status=${body.action === 'accept' ? 'active' : 'declined'} where id=${roomId} and status='pending'`;
       return respond({ ok: true });
     }
-    if (body.action === 'end' || body.action === 'block') {
+    if (body.action === 'destroy' && room.host_id !== me.id)
+      throw new ChatError('Only the creator can destroy this invitation.', 403);
+    if (
+      body.action === 'end' ||
+      body.action === 'block' ||
+      body.action === 'destroy'
+    ) {
       await sql.begin(async (tx) => {
         await tx`select id from tamil_chat.rooms where id=${roomId} for update`;
         await tx`update tamil_chat.rooms set status='ended',invite_hash=null where id=${roomId}`;
