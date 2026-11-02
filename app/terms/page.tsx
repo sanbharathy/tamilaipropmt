@@ -10,6 +10,10 @@ export const metadata: Metadata = {
 
 const sections = [
   {
+    title: 'Community Chat',
+    body: 'Private creator chat is optional and subject to /community-chat/rules. Chat only with people who consent. Do not harass, impersonate, exploit, scam, threaten, spam, or share another person’s private information. Guest identities are not verified. You may report messages, block guests, or leave a conversation. We may remove reported content or suspend abusive guest sessions. This is not end-to-end encrypted messaging.',
+  },
+  {
     title: 'Use of the website',
     body: 'TamilAI Prompt provides educational prompt ideas, AI tips, and links to useful AI tools. You may copy and adapt prompts for personal, creative, educational, and business use.',
   },
@@ -46,7 +50,7 @@ export default function TermsPage() {
         <h1 className="mt-6 font-heading text-4xl font-extrabold tracking-tight sm:text-5xl">
           Terms and Conditions
         </h1>
-        <p className="mt-4 text-sm text-muted-foreground">Last updated: September 14, 2026</p>
+        <p className="mt-4 text-sm text-muted-foreground">Last updated: November 2, 2026</p>
         <div className="mt-8 space-y-6">
           {sections.map((section) => (
             <article key={section.title} className="rounded-2xl border border-border bg-card p-5">

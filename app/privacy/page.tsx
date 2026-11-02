@@ -10,6 +10,10 @@ export const metadata: Metadata = {
 
 const sections = [
   {
+    title: 'Optional private creator chat',
+    body: 'Community Chat stores guest nicknames, invitation records, chat messages, blocks, reports, and hashed identifiers used for spam limits. A secure HTTP-only cookie identifies your guest session for up to 24 hours. Availability is off by default. Chat is not end-to-end encrypted. Conversations expire after 24 hours, and expired conversations are removed by hourly cleanup triggered by chat activity. Reports are retained for seven days subject to that cleanup. See /community-chat/rules for full retention and moderation details.',
+  },
+  {
     title: 'Information we collect',
     body: 'TamilAI Prompt is mainly a public content website. We do not ask visitors to create an account. We may collect basic technical information such as pages visited, device type, browser type, approximate location, and referral source through analytics and hosting logs.',
   },
@@ -46,7 +50,7 @@ export default function PrivacyPage() {
         <h1 className="mt-6 font-heading text-4xl font-extrabold tracking-tight sm:text-5xl">
           Privacy Policy
         </h1>
-        <p className="mt-4 text-sm text-muted-foreground">Last updated: September 14, 2026</p>
+        <p className="mt-4 text-sm text-muted-foreground">Last updated: November 2, 2026</p>
         <div className="mt-8 space-y-6">
           {sections.map((section) => (
             <article key={section.title} className="rounded-2xl border border-border bg-card p-5">

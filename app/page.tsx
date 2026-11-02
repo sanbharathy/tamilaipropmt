@@ -21,6 +21,7 @@ import {
   Lightbulb,
   Megaphone,
   Menu,
+  MessageCircle,
   Search,
   Sparkles,
   TrendingUp,
@@ -1251,7 +1252,7 @@ export default function HomePage() {
             <span className="font-heading text-[17px] font-bold tracking-tight">TamilAI<span className="text-primary">Prompt</span></span>
           </button>
 
-          <nav className="hidden items-center gap-7 text-sm font-semibold text-muted-foreground lg:flex" aria-label="Primary navigation">
+          <nav className="hidden items-center gap-3 text-xs font-semibold text-muted-foreground xl:flex" aria-label="Primary navigation">
             <button type="button" onClick={() => selectCategory('all')} className="cursor-pointer transition-colors hover:text-foreground">{t.navTrending}</button>
             <button type="button" onClick={() => selectCategory('image')} className="cursor-pointer transition-colors hover:text-foreground">{t.navImages}</button>
             <button type="button" onClick={() => selectCategory('video')} className="cursor-pointer transition-colors hover:text-foreground">{t.navVideos}</button>
@@ -1261,7 +1262,7 @@ export default function HomePage() {
             <Link href="/realtime-photo-generator" className="transition-colors hover:text-foreground">{t.navPhotoMaker}</Link>
             <Link href="/instagram-profile-checker" className="transition-colors hover:text-foreground">{t.navProfile}</Link>
             <Link href="/youtube-channel-checker" className="transition-colors hover:text-foreground">{t.navYouTube}</Link>
-            <a href="#tips" className="transition-colors hover:text-foreground">{t.navTips}</a>
+            <Link href="/community-chat" className="transition-colors hover:text-foreground">Chat</Link>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -1276,7 +1277,7 @@ export default function HomePage() {
             </Button>
             <Button
               variant="outline"
-              className="h-11 cursor-pointer rounded-xl px-3 lg:hidden"
+              className="h-11 cursor-pointer rounded-xl px-3 xl:hidden"
               onClick={() => setMobileMenuOpen((open) => !open)}
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-menu"
@@ -1287,7 +1288,7 @@ export default function HomePage() {
           </div>
         </div>
         {mobileMenuOpen ? (
-          <div id="mobile-menu" className="border-t border-border bg-background/98 px-4 py-3 shadow-[0_18px_40px_-30px_oklch(0.2_0.04_300/.6)] lg:hidden">
+          <div id="mobile-menu" className="border-t border-border bg-background/98 px-4 py-3 shadow-[0_18px_40px_-30px_oklch(0.2_0.04_300/.6)] xl:hidden">
             <div className="grid gap-2">
               {filters.map((filter) => {
                 const Icon = filter.icon;
@@ -1347,6 +1348,7 @@ export default function HomePage() {
                 <Video className="size-4" aria-hidden="true" />
                 {t.navYouTube}
               </Link>
+              <Link href="/community-chat" onClick={() => setMobileMenuOpen(false)} className="flex min-h-12 items-center gap-3 rounded-2xl border border-border bg-card px-4 text-sm font-bold text-muted-foreground"><MessageCircle className="size-4" aria-hidden="true" />Creator Chat</Link>
               <a href="#tips" onClick={() => setMobileMenuOpen(false)} className="flex min-h-12 items-center gap-3 rounded-2xl border border-border bg-card px-4 text-sm font-bold text-muted-foreground">
                 <Lightbulb className="size-4" aria-hidden="true" />
                 {t.navTips}
@@ -1715,6 +1717,7 @@ export default function HomePage() {
         <p>© 2026 TamilAI Prompt · தமிழர்களால், தமிழர்களுக்காக.</p>
         <nav className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-2" aria-label="Footer navigation">
           <Link href="/about" className="hover:text-primary hover:underline">About</Link>
+          <Link href="/community-chat" className="hover:text-primary hover:underline">Creator Chat</Link>
           <Link href="/daily-creator-ideas" className="hover:text-primary hover:underline">Daily Ideas</Link>
           <Link href="/hashtags" className="hover:text-primary hover:underline">Hashtags</Link>
           <Link href="/realtime-photo-generator" className="hover:text-primary hover:underline">AI Photo Maker</Link>
