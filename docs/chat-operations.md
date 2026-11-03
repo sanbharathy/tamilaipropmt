@@ -10,7 +10,17 @@ Only the creator can destroy an invitation. End, destroy, block, logout, moderat
 
 The messenger has an options menu, clickable image viewer with zoom, safe HTTP(S) links, and original Tamil stickers/memes. Four actor-photo comedy cards use licensed local assets; sources and credits are at /sticker-credits. Captions are fan-made. No actor endorsement is implied.
 
-## Screen presence
+## Two-person games
+
+The composer gamepad button and the Games button inside the smiley picker open four small turn-based games: Tic-tac-toe, Four in a Row, 2×2 Dots & Boxes and Take 21. A player invites their accepted chat partner; the partner accepts or declines. One game runs at a time. Either player can leave the game without ending the chat. A minimized panel leaves a game indicator on the toolbar; moves never fill the normal message thread.
+
+No extra database, game service, images, AI calls or sockets are used. Compact signed snapshots are stored as ordinary chat activity messages (under 1,200 characters), read through the existing poll, and retained/archived with the chat. The current game is recovered from the latest server-signed event even if it is older than the latest 100 chat activities. Snapshots use a domain-separated HMAC; ordinary sends cannot use the reserved game prefix, preventing state replay or forged game cards. Game endpoints use the existing restricted chat role only.
+
+The server locks the room, verifies both players' active sessions and block state, validates the expected game ID/revision and turn, and enforces legal moves. UUID request IDs make retries idempotent; concurrent moves cannot overwrite each other. Game actions are capped at 30/minute per guest and 120/5 minutes per network, with ten invitations/hour per guest. New-chat activity caps apply to moves too. Expired/ended rooms cannot play or expose game state.
+
+Tests: node --import tsx scripts/test-chat-games-unit.mjs covers all four engines, wins/draws, invalid moves and signed-state integrity. node scripts/test-chat-games.mjs covers two independent guests, invitation consent, turns, concurrent moves, deduplication, stale revisions, chat alongside play, replay protection, outsider isolation and end-of-chat access. Fixtures are disposable and removed afterward.
+
+## Screen presence details
 
 Accepted rooms expose only their peer's room-specific presence. A heartbeat is piggybacked on the existing four-second GET poll while the document is visible and focused. Blur, hide, pagehide and unmount send a best-effort keepalive leave event. Unreported disconnects expire after 20 seconds. Per-screen UUIDs and monotonic sequence numbers prevent late requests and multiple tabs from incorrectly overriding one another. Presence does not imply reading or human attention. Reconnecting clients hide the active indicator. Records are bounded to 64 screens per participant/room and cascade with the room; older screen records can be replaced on a fresh visit. RLS denies public Data API access. See database/chat-presence.sql and scripts/test-chat-presence.mjs.
 

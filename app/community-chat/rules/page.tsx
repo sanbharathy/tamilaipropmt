@@ -7,6 +7,10 @@ export const metadata: Metadata = {
 };
 const rules = [
   [
+    'Games together',
+    'Accepted chat participants can invite one another to simple turn-based games. Your friend must accept before play starts. Game invitations and moves are stored as chat activity and follow the same chat expiry and disclosed security-archive policy. One game can be active at a time. Leaving a game does not end the conversation. Games use no external game service and have no prizes or paid stakes.',
+  ],
+  [
     'Seen receipts',
     'A blue double tick means the recipient’s browser displayed the message in a visible, focused chat screen. A single tick means the message was sent. Seen receipts are shared only between accepted participants and are retained with the live room until it expires. They do not prove that a person read or understood the message. Opening a background tab alone does not send a seen receipt.',
   ],

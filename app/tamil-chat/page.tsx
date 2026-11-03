@@ -43,6 +43,10 @@ export const metadata: Metadata = {
 };
 const faqs = [
   [
+    'Can we play games while chatting?',
+    'Yes. Open Games from the smiley menu or tap the gamepad beside your message box. Invite your friend to Tic-tac-toe, Four in a Row, Dots & Boxes or Take 21. Your friend accepts before the game starts. Keep chatting while you take turns, minimize the board, or leave the game without ending your conversation.',
+  ],
+  [
     'How do I start a private Tamil chat?',
     'Open Creator Chat, choose a nickname, and create a private link. Send it to your friend. The conversation starts when they accept the invitation. You can also opt in to find creators with the same interests.',
   ],

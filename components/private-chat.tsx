@@ -1,6 +1,7 @@
 'use client';
 import { ChatArchiveNotice } from '@/components/chat-archive-notice';
 import { ChatPresence } from '@/components/chat-presence';
+import { ChatGames } from '@/components/chat-games';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -20,6 +21,7 @@ import {
   MessageCircle,
   ShieldCheck,
   Smile,
+  Gamepad2,
 } from 'lucide-react';
 import type { ChatMessage, ChatState } from '@/lib/chat-types';
 import { DestroyChatButton } from '@/components/destroy-chat-button';
@@ -115,6 +117,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   const [reason, setReason] = useState('');
   const [viewPhoto, setViewPhoto] = useState<string | null>(null);
   const [showStickers, setShowStickers] = useState(false);
+  const [showGames, setShowGames] = useState(false);
   const [stickerTab, setStickerTab] = useState<'sticker' | 'meme' | 'comedy'>(
     'sticker',
   );
@@ -131,6 +134,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   const meId = me?.id;
   const room = state.room;
   const status = room?.status;
+  const chatMessages = state.messages.filter((message) => !message.game_event);
   const txt = (ta: string, en: string) => (tamil ? ta : en);
 
   const readVisible = useCallback(() => {
@@ -329,7 +333,14 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   }, [status]);
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: 'nearest' });
-  }, [state.messages.length]);
+  }, [chatMessages.length]);
+  useEffect(() => {
+    if (state.game?.id) {
+      // Open newly received game invitations without moving focus from chat.
+      // oxlint-disable-next-line
+      setShowGames(true);
+    }
+  }, [state.game?.id]);
   useEffect(() => {
     if (status !== 'active' || !thread.current) return;
     const observer = new IntersectionObserver(
@@ -835,7 +846,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             aria-relevant="additions text"
             className="messenger-thread min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-5 sm:px-8 sm:py-7"
           >
-            {!state.messages.length && (
+            {!chatMessages.length && (
               <div className="mx-auto my-12 max-w-xs rounded-[24px] bg-white/65 px-6 py-7 text-center">
                 <span className="mx-auto mb-4 grid size-12 place-items-center rounded-full bg-[#e0efe3] text-[#258272]">
                   <MessageCircle size={23} aria-hidden="true" />
@@ -854,7 +865,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 </p>
               </div>
             )}
-            {state.messages.map((message, index) => {
+            {chatMessages.map((message, index) => {
               const mine = message.sender_id === meId;
               const seen = mine && !!message.seen;
               const sticker = !message.has_image
@@ -864,7 +875,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
               const newDay =
                 index === 0 ||
                 date.toDateString() !==
-                  new Date(state.messages[index - 1].created_at).toDateString();
+                  new Date(chatMessages[index - 1].created_at).toDateString();
               const day =
                 date.toDateString() === new Date().toDateString()
                   ? txt('இன்று', 'Today')
@@ -972,6 +983,18 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             })}
             <div ref={bottom} />
           </div>
+          {showGames && meId && (
+            <ChatGames
+              key={state.game?.id ?? 'picker'}
+              roomId={roomId}
+              game={state.game ?? null}
+              meId={meId}
+              peerName={room?.peer_name ?? 'Your friend'}
+              connected={connected}
+              onRefresh={load}
+              onClose={() => setShowGames(false)}
+            />
+          )}
           <form
             onSubmit={send}
             className="shrink-0 border-t border-[#e3ece5] bg-white px-3 pb-3 pt-3 sm:px-6"
@@ -1006,6 +1029,17 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                       className={`min-h-10 shrink-0 rounded-full px-3 text-xs font-bold ${stickerTab === 'comedy' ? 'bg-[#dfeee5] text-[#28715b]' : 'text-[#60776a]'}`}
                     >
                       {txt('காமெடி', 'Comedy')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowStickers(false);
+                        setShowGames(true);
+                      }}
+                      className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-bold text-[#28715b]"
+                    >
+                      <Gamepad2 size={14} />
+                      Games
                     </button>
                   </div>
                   <button
@@ -1116,6 +1150,26 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 className={`grid size-10 shrink-0 place-items-center rounded-full sm:size-12 ${showStickers ? 'bg-[#d5eee0] text-[#198371]' : 'bg-[#f0f5f2] text-[#65907f]'}`}
               >
                 <Smile size={21} />
+              </button>
+              <button
+                type="button"
+                aria-label="Choose a game"
+                title="Play a game together"
+                aria-expanded={showGames}
+                onClick={() => {
+                  setShowGames(!showGames);
+                  setShowStickers(false);
+                }}
+                className={`relative grid size-10 shrink-0 place-items-center rounded-full sm:size-12 ${showGames ? 'bg-[#d5eee0] text-[#198371]' : 'bg-[#f0f5f2] text-[#65907f]'}`}
+              >
+                <Gamepad2 size={20} />
+                {state.game &&
+                  ['invited', 'playing'].includes(state.game.phase) && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute right-1 top-1 size-1.5 rounded-full bg-[#238569]"
+                    />
+                  )}
               </button>
               <input
                 ref={fileInput}

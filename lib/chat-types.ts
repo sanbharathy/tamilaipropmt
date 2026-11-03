@@ -1,3 +1,4 @@
+import type { ChatGame } from './chat-games';
 export const chatTopics = [
   { id: 'ai', ta: 'AI & Prompts', en: 'AI & prompts' },
   { id: 'photos', ta: 'படங்கள் & Design', en: 'Photos & design' },
@@ -32,6 +33,7 @@ export type ChatMessage = {
   body: string;
   has_image?: boolean;
   seen?: boolean;
+  game_event?: boolean;
   created_at: string;
 };
 export type ChatState = {
@@ -40,4 +42,5 @@ export type ChatState = {
   people: Pick<ChatSession, 'id' | 'name' | 'topic'>[];
   messages: ChatMessage[];
   room: ChatRoom | null;
+  game?: ChatGame | null;
 };

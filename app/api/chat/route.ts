@@ -17,8 +17,14 @@ import {
   validId,
 } from '@/lib/chat-server';
 import { chatTopics } from '@/lib/chat-types';
+import { gameChoices } from '@/lib/chat-games';
 import { scheduleArchives } from '@/lib/chat-archives';
 import { screenSequence, updatePresence } from '@/lib/chat-presence';
+import {
+  GAME_PREFIX,
+  latestGame,
+  readGameMessage,
+} from '@/lib/chat-game-server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -82,6 +88,14 @@ export async function GET(request: Request) {
       and not exists(select 1 from tamil_chat.blocks b where (b.blocker_id=${me.id} and b.blocked_id=s.id) or (b.blocker_id=s.id and b.blocked_id=${me.id}))
       order by s.last_seen desc limit 20`
       : [];
+    const gameRows =
+      room?.status === 'active'
+        ? await sql`select body,sender_id from tamil_chat.messages where room_id=${room.id} and image_data is null and removed_at is null and body like ${GAME_PREFIX + '%'} order by id desc limit 30`
+        : [];
+    const game =
+      room?.status === 'active'
+        ? latestGame(gameRows, room.id, room.host_id, room.guest_id)
+        : null;
     return respond({
       me: {
         id: me.id,
@@ -92,7 +106,23 @@ export async function GET(request: Request) {
       },
       rooms,
       room,
-      messages,
+      messages: messages.map((message) => {
+        const event =
+          room && !message.has_image
+            ? readGameMessage(message.body, room.id, message.sender_id)
+            : null;
+        const gameName = event
+          ? gameChoices.find((choice) => choice.kind === event.kind)?.name
+          : '';
+        return {
+          ...message,
+          game_event: !!event,
+          body: event
+            ? `🎮 ${gameName}: ${event.lastAction === 'invite' ? 'game invitation' : event.phase === 'finished' ? 'game finished' : event.phase === 'declined' ? 'invitation closed' : event.lastAction === 'accept' ? 'game accepted' : 'move played'}. Open Games to play.`
+            : message.body,
+        };
+      }),
+      game,
       people,
     });
   } catch (error) {
@@ -303,6 +333,10 @@ export async function POST(request: Request) {
     }
     if (body.action === 'send') {
       const message = textOf(body.text, 1, 1200);
+      if (message.startsWith(GAME_PREFIX))
+        throw new ChatError(
+          'Game cards can only be sent using the game controls.',
+        );
       const clientId = validId(body.clientId);
       await limit(`messages:${me.id}`, 15, 60);
       await limit(`message-network:${networkKey(request)}`, 120, 300);
