@@ -14,6 +14,15 @@ import {
 } from '@/lib/chat-server';
 import { uploadForm } from '@/lib/chat-images';
 import { scheduleArchives } from '@/lib/chat-archives';
+import { GAME_PREFIX } from '@/lib/chat-game-server';
+import {
+  REACTION_PREFIX,
+  reservedInteraction,
+  makeReply,
+  replyQuote,
+  messageId,
+} from '@/lib/chat-interactions-server';
+import { REPLY_TEXT_LIMIT } from '@/lib/chat-interactions';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,10 +39,14 @@ export async function POST(request: Request) {
     const roomId = validId(form.get('roomId'));
     const clientId = validId(form.get('clientId'));
     const rawCaption = form.get('caption');
+    const rawReply = form.get('replyTo');
+    const replyTo = rawReply === null ? null : messageId(rawReply);
     const caption =
       typeof rawCaption === 'string' && rawCaption.trim()
-        ? textOf(rawCaption, 1, 1200)
+        ? textOf(rawCaption, 1, replyTo ? REPLY_TEXT_LIMIT : 1200)
         : '📷 Shared image';
+    if (caption.startsWith(GAME_PREFIX) || reservedInteraction(caption))
+      throw new ChatError('Choose a normal caption for this picture.');
     const sql = chatDb();
     const [allowed] =
       await sql`select id,archive_enabled from tamil_chat.rooms where id=${roomId} and (host_id=${me.id} or guest_id=${me.id}) and status='active' and expires_at>now()`;
@@ -122,8 +135,36 @@ export async function POST(request: Request) {
         await tx`select count(*)::int as count from tamil_chat.messages where room_id=${roomId} and image_data is not null`;
       if (count.count >= 10)
         throw new ChatError('This chat has reached its 10-image limit.', 429);
+      let stored = caption;
+      if (replyTo) {
+        const [target] =
+          await tx`select id::text,sender_id,body,image_type is not null as has_image from tamil_chat.messages where id=${replyTo} and room_id=${roomId} and removed_at is null`;
+        if (
+          !target ||
+          target.body.startsWith(GAME_PREFIX) ||
+          target.body.startsWith(REACTION_PREFIX)
+        )
+          throw new ChatError(
+            'The message you are replying to is no longer available.',
+            404,
+          );
+        stored = makeReply(
+          caption,
+          replyQuote(
+            {
+              id: target.id,
+              sender_id: target.sender_id,
+              body: target.body,
+              has_image: target.has_image,
+            },
+            roomId,
+          ),
+          roomId,
+          me.id,
+        );
+      }
       const [message] =
-        await tx`insert into tamil_chat.messages(room_id,sender_id,client_id,body,image_data,image_type) values(${roomId},${me.id},${clientId},${caption},${image},'image/webp') returning id::text`;
+        await tx`insert into tamil_chat.messages(room_id,sender_id,client_id,body,image_data,image_type) values(${roomId},${me.id},${clientId},${stored},${image},'image/webp') returning id::text`;
       return message;
     });
     return respond({ ok: true, messageId: result.id });

@@ -16,10 +16,24 @@ import {
   token,
   validId,
 } from '@/lib/chat-server';
-import { chatTopics } from '@/lib/chat-types';
+import { chatTopics, type ChatMessage } from '@/lib/chat-types';
 import { gameChoices } from '@/lib/chat-games';
 import { scheduleArchives } from '@/lib/chat-archives';
 import { screenSequence, updatePresence } from '@/lib/chat-presence';
+import {
+  REACTION_EMOJIS,
+  REPLY_TEXT_LIMIT,
+  type ChatReaction,
+} from '@/lib/chat-interactions';
+import {
+  REACTION_PREFIX,
+  readReply,
+  readReaction,
+  reservedInteraction,
+  makeReply,
+  replyQuote,
+  messageId,
+} from '@/lib/chat-interactions-server';
 import {
   GAME_PREFIX,
   latestGame,
@@ -96,6 +110,84 @@ export async function GET(request: Request) {
       room?.status === 'active'
         ? latestGame(gameRows, room.id, room.host_id, room.guest_id)
         : null;
+    const decoded = messages.map((row) => {
+      const message = row as ChatMessage;
+      const reply = room
+        ? readReply(message.body, room.id, message.sender_id)
+        : null;
+      const reaction =
+        room && !message.has_image
+          ? readReaction(message.body, room.id, message.sender_id)
+          : null;
+      const gameEvent =
+        room && !message.has_image
+          ? readGameMessage(message.body, room.id, message.sender_id)
+          : null;
+      return {
+        ...message,
+        body:
+          reply?.body ??
+          (reaction
+            ? `${reaction.emoji} ${reaction.active ? 'Reaction added' : 'Reaction removed'}`
+            : gameEvent
+              ? `🎮 ${gameChoices.find((choice) => choice.kind === gameEvent.kind)?.name}: ${gameEvent.phase === 'finished' ? 'game finished' : 'game activity'}. Open Games to play.`
+              : message.body),
+        reply: reply?.reply,
+        game_event: !!gameEvent,
+        reaction_event: !!reaction,
+      };
+    });
+    const quotedIds = decoded.flatMap((message) =>
+      message.reply ? [message.reply.id] : [],
+    );
+    const availableQuotes =
+      room && quotedIds.length
+        ? await sql`select id::text from tamil_chat.messages where room_id=${room.id} and removed_at is null and id::text in ${sql(quotedIds)}`
+        : [];
+    const quoteIds = new Set(availableQuotes.map((row) => row.id));
+    const keys = room
+      ? decoded
+          .filter((message) => !message.game_event && !message.reaction_event)
+          .flatMap((message) =>
+            [me.id, room.peer_id]
+              .filter(Boolean)
+              .map((actor) => `reaction:${room.id}:${message.id}:${actor}`),
+          )
+      : [];
+    const reactionRows = keys.length
+      ? await sql`select key,count from tamil_chat.limits where key in ${sql(keys)} and expires_at>now() and count between 1 and ${REACTION_EMOJIS.length}`
+      : [];
+    const badges = new Map<string, ChatReaction[]>();
+    for (const row of reactionRows) {
+      const [, , target, actor] = row.key.split(':');
+      const emoji = REACTION_EMOJIS[row.count - 1];
+      const list = badges.get(target) ?? [];
+      let badge = list.find((item) => item.emoji === emoji);
+      if (!badge) {
+        badge = { emoji, count: 0, mine: false };
+        list.push(badge);
+      }
+      badge.count++;
+      badge.mine ||= actor === me.id;
+      badges.set(target, list);
+    }
+    const reactionRowsForEffects =
+      room?.status === 'active'
+        ? await sql`select id::text,body,sender_id,created_at from tamil_chat.messages where room_id=${room.id} and image_data is null and removed_at is null and body like ${REACTION_PREFIX + '%'} order by id desc limit 30`
+        : [];
+    const reactionEvents = reactionRowsForEffects.flatMap((row) => {
+      const event = readReaction(row.body, room!.id, row.sender_id);
+      return event
+        ? [
+            {
+              id: row.id,
+              actor_id: row.sender_id,
+              created_at: row.created_at,
+              ...event,
+            },
+          ]
+        : [];
+    });
     return respond({
       me: {
         id: me.id,
@@ -106,22 +198,20 @@ export async function GET(request: Request) {
       },
       rooms,
       room,
-      messages: messages.map((message) => {
-        const event =
-          room && !message.has_image
-            ? readGameMessage(message.body, room.id, message.sender_id)
-            : null;
-        const gameName = event
-          ? gameChoices.find((choice) => choice.kind === event.kind)?.name
-          : '';
-        return {
-          ...message,
-          game_event: !!event,
-          body: event
-            ? `🎮 ${gameName}: ${event.lastAction === 'invite' ? 'game invitation' : event.phase === 'finished' ? 'game finished' : event.phase === 'declined' ? 'invitation closed' : event.lastAction === 'accept' ? 'game accepted' : 'move played'}. Open Games to play.`
-            : message.body,
-        };
-      }),
+      messages: decoded.map((message) => ({
+        ...message,
+        reply: message.reply
+          ? {
+              ...message.reply,
+              ...(!quoteIds.has(message.reply.id)
+                ? { preview: 'Message unavailable', available: false }
+                : {}),
+            }
+          : undefined,
+        reactions: badges.get(message.id) ?? [],
+      })),
+      reaction_events: reactionEvents,
+      server_time: new Date().toISOString(),
       game,
       people,
     });
@@ -332,8 +422,12 @@ export async function POST(request: Request) {
       return respond({ ok: true });
     }
     if (body.action === 'send') {
-      const message = textOf(body.text, 1, 1200);
-      if (message.startsWith(GAME_PREFIX))
+      const replyTo =
+        body.replyTo === undefined || body.replyTo === null
+          ? null
+          : messageId(body.replyTo);
+      const message = textOf(body.text, 1, replyTo ? REPLY_TEXT_LIMIT : 1200);
+      if (message.startsWith(GAME_PREFIX) || reservedInteraction(message))
         throw new ChatError(
           'Game cards can only be sent using the game controls.',
         );
@@ -356,7 +450,35 @@ export async function POST(request: Request) {
             'This chat has reached its 1,000-message limit. Please end it and create a new link.',
             429,
           );
-        await tx`insert into tamil_chat.messages(room_id,sender_id,client_id,body) values(${roomId},${me.id},${clientId},${message}) on conflict(sender_id,client_id) do nothing`;
+        let stored = message;
+        if (replyTo) {
+          const [target] =
+            await tx`select id::text,sender_id,body,image_type is not null as has_image from tamil_chat.messages where id=${replyTo} and room_id=${roomId} and removed_at is null`;
+          if (
+            !target ||
+            target.body.startsWith(GAME_PREFIX) ||
+            target.body.startsWith(REACTION_PREFIX)
+          )
+            throw new ChatError(
+              'The message you are replying to is no longer available.',
+              404,
+            );
+          stored = makeReply(
+            message,
+            replyQuote(
+              {
+                id: target.id,
+                sender_id: target.sender_id,
+                body: target.body,
+                has_image: target.has_image,
+              },
+              roomId,
+            ),
+            roomId,
+            me.id,
+          );
+        }
+        await tx`insert into tamil_chat.messages(room_id,sender_id,client_id,body) values(${roomId},${me.id},${clientId},${stored}) on conflict(sender_id,client_id) do nothing`;
       });
       return respond({ ok: true });
     }

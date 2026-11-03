@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { findChatSticker } from './chat-stickers';
+import { readReply, readReaction } from './chat-interactions-server';
 
 export type ArchiveSnapshot = {
   roomId: string;
@@ -106,11 +107,27 @@ export async function archivePdf(snapshot: ArchiveSnapshot): Promise<Buffer> {
       doc
         .fillColor('#9a3412')
         .text(`Removed by moderation: ${date(message.removedAt)}`);
+    const reply = readReply(message.body, snapshot.roomId, message.senderId);
+    const reaction = readReaction(
+      message.body,
+      snapshot.roomId,
+      message.senderId,
+    );
+    const displayBody =
+      reply?.body ??
+      (reaction
+        ? `${reaction.active ? 'Added' : 'Removed'} ${reaction.emoji} reaction to message #${reaction.target_id}`
+        : message.body);
+    if (reply)
+      doc
+        .fontSize(9)
+        .fillColor('#475569')
+        .text(`Reply to #${reply.reply.id}: ${printable(reply.reply.preview)}`);
     doc
       .fontSize(10)
       .fillColor('#111827')
-      .text(printable(message.body), { lineGap: 4 });
-    const sticker = findChatSticker(message.body);
+      .text(printable(displayBody), { lineGap: 4 });
+    const sticker = findChatSticker(displayBody);
     let bytes: Buffer | undefined;
     if (message.image) bytes = Buffer.from(message.image, 'base64');
     else if (sticker?.photo)

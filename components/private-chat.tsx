@@ -9,9 +9,7 @@ import {
   ArrowLeft,
   Check,
   CheckCheck,
-  Info,
   Copy,
-  ImagePlus,
   LoaderCircle,
   LockKeyhole,
   Send,
@@ -20,7 +18,6 @@ import {
   Expand,
   MessageCircle,
   ShieldCheck,
-  Smile,
   Gamepad2,
 } from 'lucide-react';
 import type { ChatMessage, ChatState } from '@/lib/chat-types';
@@ -34,6 +31,15 @@ import {
   stickerBody,
   type ChatSticker,
 } from '@/lib/chat-stickers';
+import { compressChatImage } from '@/lib/chat-image-client';
+import { loveEmoji, REPLY_TEXT_LIMIT } from '@/lib/chat-interactions';
+import {
+  MessagePressable,
+  ChatActionDialog,
+  ChatAttachmentMenu,
+  ChatReportPicker,
+  ChatEmojiShower,
+} from '@/components/chat-message-actions';
 import './private-chat.css';
 
 const blank: ChatState = {
@@ -88,6 +94,7 @@ function ChatImage({
 }
 
 export function PrivateChat({ roomId }: { roomId: string }) {
+  const screen = useRef<HTMLElement>(null);
   const presenceScreen = useRef<string | null>(null);
   const presenceSequence = useRef(0);
   const observedReads = useRef(new Set<string>());
@@ -109,6 +116,15 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   } | null>(null);
   const [missing, setMissing] = useState(false);
   const [draft, setDraft] = useState('');
+  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
+  const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
+  const [reportPicker, setReportPicker] = useState(false);
+  const [processingImage, setProcessingImage] = useState(false);
+  const imageJob = useRef(0);
+  const effectIds = useRef<Set<string> | null>(null);
+  const [burst, setBurst] = useState<{ id: string; emoji: string } | null>(
+    null,
+  );
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState('');
   const [copied, setCopied] = useState(false);
@@ -130,11 +146,28 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   const reportDialog = useRef<HTMLDialogElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    const resize = () =>
+      screen.current?.style.setProperty(
+        '--chat-viewport-height',
+        `${viewport?.height ?? window.innerHeight}px`,
+      );
+    resize();
+    viewport?.addEventListener('resize', resize);
+    window.addEventListener('resize', resize);
+    return () => {
+      viewport?.removeEventListener('resize', resize);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
   const me = state.me;
   const meId = me?.id;
   const room = state.room;
   const status = room?.status;
-  const chatMessages = state.messages.filter((message) => !message.game_event);
+  const chatMessages = state.messages.filter(
+    (message) => !message.game_event && !message.reaction_event,
+  );
   const txt = (ta: string, en: string) => (tamil ? ta : en);
 
   const readVisible = useCallback(() => {
@@ -329,8 +362,67 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       // Drop any unsent local file as soon as the chat ends.
       // oxlint-disable-next-line
       setImage(null);
+      imageJob.current++;
+      setProcessingImage(false);
+      setReplyTo(null);
+      setActionMessage(null);
     }
   }, [status]);
+  useEffect(
+    () => () => {
+      imageJob.current++;
+    },
+    [],
+  );
+  useEffect(() => {
+    if (!ready || !state.server_time) return;
+    const events = [
+      ...(state.reaction_events ?? [])
+        .filter((event) => event.active)
+        .map((event) => ({
+          id: 'r' + event.id,
+          emoji: loveEmoji(event.emoji),
+          at: event.created_at,
+        })),
+      ...state.messages
+        .filter((message) => !message.game_event && !message.reaction_event)
+        .map((message) => ({
+          id: 'm' + message.id,
+          emoji: loveEmoji(message.body),
+          at: message.created_at,
+        })),
+    ];
+    if (!effectIds.current) {
+      effectIds.current = new Set(events.map((event) => event.id));
+      return;
+    }
+    let latest: { id: string; emoji: string } | null = null;
+    for (const event of events.sort(
+      (a, b) => Date.parse(a.at) - Date.parse(b.at),
+    )) {
+      if (effectIds.current.has(event.id)) continue;
+      effectIds.current.add(event.id);
+      const age = Date.parse(state.server_time) - Date.parse(event.at);
+      if (
+        event.emoji &&
+        age >= -1000 &&
+        age < 15000 &&
+        document.visibilityState === 'visible' &&
+        document.hasFocus()
+      )
+        latest = { id: event.id, emoji: event.emoji };
+    }
+    if (effectIds.current.size > 2000)
+      effectIds.current = new Set(events.map((event) => event.id));
+    // Only new, recent activity animates; loading conversation history never does.
+    // oxlint-disable-next-line
+    if (latest) setBurst(latest);
+  }, [state, ready]);
+  useEffect(() => {
+    if (!burst) return;
+    const timer = setTimeout(() => setBurst(null), 4500);
+    return () => clearTimeout(timer);
+  }, [burst]);
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: 'nearest' });
   }, [chatMessages.length]);
@@ -395,11 +487,26 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   }
   async function send(event: { preventDefault: () => void }) {
     event.preventDefault();
-    if (busy || status !== 'active' || (!draft.trim() && !image)) return;
+    if (
+      busy ||
+      processingImage ||
+      !connected ||
+      status !== 'active' ||
+      (!draft.trim() && !image)
+    )
+      return;
     if (!image) {
       await act(
-        { action: 'send', text: draft, clientId: crypto.randomUUID() },
-        () => setDraft(''),
+        {
+          action: 'send',
+          text: draft,
+          clientId: crypto.randomUUID(),
+          replyTo: replyTo?.id,
+        },
+        () => {
+          setDraft('');
+          setReplyTo(null);
+        },
       );
       return;
     }
@@ -411,6 +518,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       form.set('roomId', roomId);
       form.set('clientId', crypto.randomUUID());
       form.set('caption', draft);
+      if (replyTo) form.set('replyTo', replyTo.id);
       const response = await fetch('/api/chat/images', {
         method: 'POST',
         body: form,
@@ -420,6 +528,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
         throw new Error(data.error ?? 'Image could not be sent.');
       setImage(null);
       setDraft('');
+      setReplyTo(null);
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Image could not be sent.');
@@ -433,27 +542,57 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       {
         action: 'send',
         text: stickerBody(sticker),
+        replyTo: replyTo?.id,
         clientId: crypto.randomUUID(),
       },
-      () => setShowStickers(false),
+      () => {
+        setShowStickers(false);
+        setReplyTo(null);
+      },
     );
   }
-  function chooseImage(file: File | undefined) {
+  async function chooseImage(file: File | undefined) {
     if (!file) return;
-    if (
-      !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
-      file.size > 2 * 1024 * 1024
-    ) {
-      setError(
-        txt(
-          '2 MB-க்குள் JPG, PNG அல்லது WebP படத்தைத் தேர்ந்தெடுக்கவும்.',
-          'Choose a JPG, PNG or WebP image under 2 MB.',
-        ),
-      );
-      return;
-    }
+    const job = ++imageJob.current;
+    setProcessingImage(true);
+    setImage(null);
     setError('');
-    setImage(file);
+    try {
+      const optimized = await compressChatImage(file);
+      if (job === imageJob.current) setImage(optimized);
+    } catch (error) {
+      if (job === imageJob.current)
+        setError(
+          error instanceof Error ? error.message : 'Unable to process photo.',
+        );
+    } finally {
+      if (job === imageJob.current) setProcessingImage(false);
+    }
+  }
+  async function reactTo(message: ChatMessage, emoji: string) {
+    if (busy || status !== 'active' || !connected) return;
+    setBusy(true);
+    setError('');
+    try {
+      const response = await fetch('/api/chat/reactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomId,
+          messageId: message.id,
+          emoji,
+          clientId: crypto.randomUUID(),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? 'Unable to react.');
+      setActionMessage(null);
+      await load();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Unable to react.');
+    } finally {
+      setBusy(false);
+    }
   }
   async function copyInvite() {
     try {
@@ -483,10 +622,12 @@ export function PrivateChat({ roomId }: { roomId: string }) {
 
   return (
     <main
+      ref={screen}
       lang={tamil ? 'ta' : 'en'}
-      className="messenger-screen mx-auto flex h-dvh min-h-[400px] max-w-6xl flex-col overflow-hidden md:my-4 md:h-[calc(100dvh-2rem)] md:rounded-[28px]"
+      className="messenger-screen relative isolate mx-auto flex h-dvh min-h-0 max-w-6xl flex-col overflow-hidden md:my-4 md:h-[calc(100dvh-2rem)] md:rounded-[28px]"
     >
-      <header className="relative z-20 flex shrink-0 items-center justify-between gap-3 border-b border-[#e1eae4] bg-white/95 px-3 py-3 sm:px-6">
+      <ChatEmojiShower burst={burst} />
+      <header className="messenger-header relative z-20 flex shrink-0 items-center justify-between gap-3 border-b border-[#e1eae4] bg-white/95 px-3 py-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-2.5">
           <Link
             href="/community-chat"
@@ -594,6 +735,19 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                   className="min-h-11 w-full rounded-xl px-3 text-left text-sm font-semibold text-red-700 hover:bg-red-50"
                 >
                   {txt('இந்த நபரை Block செய்', 'Block this person')}
+                </button>
+              )}
+              {status === 'active' && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    if (actionsMenu.current) actionsMenu.current.open = false;
+                    setReportPicker(true);
+                  }}
+                  className="min-h-11 w-full rounded-xl px-3 text-left text-sm font-semibold text-red-700 hover:bg-red-50"
+                >
+                  Report chat
                 </button>
               )}
               <a
@@ -844,7 +998,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             aria-label="Conversation messages"
             aria-live="polite"
             aria-relevant="additions text"
-            className="messenger-thread min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-5 sm:px-8 sm:py-7"
+            className="messenger-thread min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-5 sm:px-8 sm:py-7"
           >
             {!chatMessages.length && (
               <div className="mx-auto my-12 max-w-xs rounded-[24px] bg-white/65 px-6 py-7 text-center">
@@ -898,10 +1052,23 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                   <div
                     className={`flex ${mine ? 'justify-end' : 'justify-start'}`}
                   >
-                    <article className="max-w-[87%] sm:max-w-[72%]">
+                    <MessagePressable onOpen={() => setActionMessage(message)}>
                       <div
                         className={`messenger-bubble overflow-hidden rounded-[20px] ${mine ? 'rounded-br-[5px] bg-[#d9f4e2] text-[#1b473b]' : 'rounded-bl-[5px] bg-white text-[#28473f]'}`}
                       >
+                        {message.reply && (
+                          <div className="mx-1.5 mt-1.5 max-w-full rounded-xl border-l-[3px] border-[#479b79] bg-black/[0.04] px-3 py-2 text-xs">
+                            <strong className="block text-[10px] text-[#317257]">
+                              {message.reply.sender_id === meId
+                                ? 'You'
+                                : (room?.peer_name ?? 'Your friend')}
+                            </strong>
+                            <span className="line-clamp-2 break-words">
+                              {message.reply.has_image ? '📷 ' : ''}
+                              {message.reply.preview}
+                            </span>
+                          </div>
+                        )}
                         {message.has_image && (
                           <div className="p-1.5 pb-0">
                             <ChatImage
@@ -916,59 +1083,62 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                             <ChatStickerCard sticker={sticker} />
                           </div>
                         )}
-                        {!sticker &&
-                          (!message.has_image ||
-                            message.body !== '📷 Shared image') && (
-                            <p className="whitespace-pre-wrap break-words px-3.5 py-2.5 text-[13px] leading-7 [overflow-wrap:anywhere] sm:text-sm">
-                              <ChatMessageBody
-                                text={message.body}
-                                onOpenPhoto={setViewPhoto}
-                              />
-                            </p>
-                          )}
+                        <div className="flow-root px-3 py-2">
+                          {!sticker &&
+                            (!message.has_image ||
+                              message.body !== '📷 Shared image') && (
+                              <span className="whitespace-pre-wrap break-words text-[14px] leading-[1.55] [overflow-wrap:anywhere]">
+                                <ChatMessageBody
+                                  text={message.body}
+                                  onOpenPhoto={setViewPhoto}
+                                />
+                              </span>
+                            )}
+                          <span className="float-right ml-2 mt-1 inline-flex h-3 items-center gap-0.5 whitespace-nowrap text-[8px] leading-3 text-[#607767]">
+                            <time dateTime={message.created_at}>
+                              {date.toLocaleTimeString(
+                                tamil ? 'ta-IN' : 'en-IN',
+                                { hour: '2-digit', minute: '2-digit' },
+                              )}
+                            </time>
+                            {mine &&
+                              (seen ? (
+                                <CheckCheck
+                                  size={12}
+                                  className="text-sky-600"
+                                  aria-label="Seen"
+                                >
+                                  <title>
+                                    Seen on the recipient’s chat screen
+                                  </title>
+                                </CheckCheck>
+                              ) : (
+                                <Check size={10} aria-label="Sent" />
+                              ))}
+                          </span>
+                        </div>
                       </div>
-                      <div
-                        className={`mt-1 flex items-center gap-1.5 px-1 text-[10px] text-[#607767] ${mine ? 'justify-end' : 'justify-start'}`}
-                      >
-                        {!mine && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setReport(message);
-                              setReason('');
-                            }}
-                            aria-label={txt(
-                              'இந்தச் செய்தியைப் புகாரளி',
-                              'Report this message',
-                            )}
-                            title={txt(
-                              'இந்தச் செய்தியைப் புகாரளி',
-                              'Report this message',
-                            )}
-                            className="grid size-7 shrink-0 place-items-center rounded-full text-[#607767] hover:bg-white/80 hover:text-[#315e50]"
-                          >
-                            <Info size={14} aria-hidden="true" />
-                          </button>
-                        )}
-                        <time dateTime={message.created_at}>
-                          {date.toLocaleTimeString(tamil ? 'ta-IN' : 'en-IN', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </time>
-                        {mine &&
-                          (seen ? (
-                            <CheckCheck
-                              size={14}
-                              className="text-sky-600"
-                              aria-label="Seen"
+                      {!!message.reactions?.length && (
+                        <div
+                          className={`mt-0.5 flex gap-1 ${mine ? 'justify-end' : ''}`}
+                        >
+                          {message.reactions.map((reaction) => (
+                            <button
+                              key={reaction.emoji}
+                              type="button"
+                              disabled={busy || !connected}
+                              aria-label={`${reaction.emoji}, ${reaction.count} reaction${reaction.count > 1 ? 's' : ''}${reaction.mine ? ', yours' : ''}`}
+                              onClick={() =>
+                                void reactTo(message, reaction.emoji)
+                              }
+                              className={`min-h-7 rounded-full border px-2 text-xs ${reaction.mine ? 'border-[#64aa88] bg-[#dbf2e3]' : 'border-[#d9e6dd] bg-white'}`}
                             >
-                              <title>Seen on the recipient’s chat screen</title>
-                            </CheckCheck>
-                          ) : (
-                            <Check size={12} aria-label="Sent" />
+                              {reaction.emoji}
+                              {reaction.count > 1 ? ` ${reaction.count}` : ''}
+                            </button>
                           ))}
-                      </div>
+                        </div>
+                      )}
                       {!mine && (
                         <span
                           data-read-message={message.id}
@@ -976,7 +1146,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                           aria-hidden="true"
                         />
                       )}
-                    </article>
+                    </MessagePressable>
                   </div>
                 </div>
               );
@@ -997,7 +1167,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
           )}
           <form
             onSubmit={send}
-            className="shrink-0 border-t border-[#e3ece5] bg-white px-3 pb-3 pt-3 sm:px-6"
+            className="messenger-composer relative shrink-0 border-t border-[#e3ece5] bg-white px-2 pb-2 pt-2 sm:px-6"
           >
             {showStickers && (
               <section
@@ -1052,7 +1222,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                   </button>
                 </div>
                 <div className="flex justify-center gap-1 border-b border-[#e9efea] px-3 py-2">
-                  {['😂', '🙌', '🔥', '❤️', '🪔', '😎'].map((emoji) => (
+                  {['😂', '😘', '🔥', '❤️', '🪔', '😎'].map((emoji) => (
                     <button
                       key={emoji}
                       type="button"
@@ -1121,10 +1291,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                     {txt('பகிரத் தயாராக உள்ளது', 'Ready to share')}
                   </p>
                   <p className="mt-1 text-xs leading-6 text-[#60776c]">
-                    {txt(
-                      'அதிகபட்சம் 2 MB · JPG / PNG / WebP',
-                      'Up to 2 MB · JPG / PNG / WebP',
-                    )}
+                    Optimized · {Math.ceil((image?.size ?? 0) / 1024)} KB
                   </p>
                 </div>
                 <button
@@ -1137,40 +1304,49 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 </button>
               </div>
             )}
+            {processingImage && (
+              <output className="mb-2 flex items-center gap-2 text-xs text-[#527568]">
+                <LoaderCircle size={14} className="animate-spin" />
+                Optimizing photo…
+              </output>
+            )}
+            {replyTo && (
+              <div className="mb-2 flex min-w-0 items-center gap-2 rounded-xl border-l-[3px] border-[#4a9c78] bg-[#edf5ef] px-3 py-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-bold text-[#347354]">
+                    Replying to{' '}
+                    {replyTo.sender_id === meId
+                      ? 'yourself'
+                      : (room?.peer_name ?? 'your friend')}
+                  </p>
+                  <p className="truncate text-xs">
+                    {replyTo.has_image ? '📷 ' : ''}
+                    {replyTo.body}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Cancel reply"
+                  onClick={() => setReplyTo(null)}
+                  className="grid size-9 shrink-0 place-items-center"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
             <div className="flex items-end gap-2">
-              <button
-                type="button"
-                disabled={busy || !connected}
-                aria-label={txt(
-                  'தமிழ் stickers & emojis',
-                  'Tamil stickers and emojis',
-                )}
-                aria-expanded={showStickers}
-                onClick={() => setShowStickers(!showStickers)}
-                className={`grid size-10 shrink-0 place-items-center rounded-full sm:size-12 ${showStickers ? 'bg-[#d5eee0] text-[#198371]' : 'bg-[#f0f5f2] text-[#65907f]'}`}
-              >
-                <Smile size={21} />
-              </button>
-              <button
-                type="button"
-                aria-label="Choose a game"
-                title="Play a game together"
-                aria-expanded={showGames}
-                onClick={() => {
-                  setShowGames(!showGames);
+              <ChatAttachmentMenu
+                disabled={busy || processingImage || !connected}
+                onPhoto={() => fileInput.current?.click()}
+                onStickers={() => {
+                  setShowStickers((value) => !value);
+                  setShowGames(false);
+                }}
+                onGames={() => {
+                  setShowGames((value) => !value);
                   setShowStickers(false);
                 }}
-                className={`relative grid size-10 shrink-0 place-items-center rounded-full sm:size-12 ${showGames ? 'bg-[#d5eee0] text-[#198371]' : 'bg-[#f0f5f2] text-[#65907f]'}`}
-              >
-                <Gamepad2 size={20} />
-                {state.game &&
-                  ['invited', 'playing'].includes(state.game.phase) && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute right-1 top-1 size-1.5 rounded-full bg-[#238569]"
-                    />
-                  )}
-              </button>
+              />
               <input
                 ref={fileInput}
                 type="file"
@@ -1179,19 +1355,10 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 className="sr-only"
                 disabled={busy}
                 onChange={(e) => {
-                  chooseImage(e.target.files?.[0]);
+                  void chooseImage(e.target.files?.[0]);
                   e.target.value = '';
                 }}
               />
-              <button
-                type="button"
-                disabled={busy || !connected}
-                onClick={() => fileInput.current?.click()}
-                aria-label={txt('படத்தைச் சேர்', 'Attach image')}
-                className="grid size-10 shrink-0 place-items-center rounded-full bg-[#f0f5f2] text-[#65907f] transition hover:bg-[#e2ede6] disabled:opacity-40 sm:size-12"
-              >
-                <ImagePlus size={20} />
-              </button>
               <label htmlFor="private-message" className="sr-only">
                 {txt('உங்கள் செய்தி', 'Your message')}
               </label>
@@ -1216,18 +1383,23 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                   }
                 }}
                 rows={1}
-                maxLength={1200}
+                maxLength={replyTo ? REPLY_TEXT_LIMIT : 1200}
                 disabled={busy}
                 placeholder={
                   image
                     ? txt('விருப்பமான விளக்கம்…', 'Add a caption…')
                     : txt('செய்தியை எழுதுங்கள்…', 'Write a message…')
                 }
-                className="max-h-32 min-h-12 min-w-0 flex-1 resize-none rounded-[24px] border border-transparent bg-[#f1f5f3] px-5 py-3 text-sm leading-6 placeholder:text-[#667b6d] focus:border-[#81bba2] focus:outline-none focus:ring-2 focus:ring-[#d9eee2]"
+                className="max-h-32 min-h-12 min-w-0 flex-1 resize-none rounded-[24px] border border-transparent bg-[#f1f5f3] px-4 py-3 text-base leading-6 sm:text-sm placeholder:text-[#667b6d] focus:border-[#81bba2] focus:outline-none focus:ring-2 focus:ring-[#d9eee2]"
               />
               <button
                 type="submit"
-                disabled={busy || (!draft.trim() && !image) || !connected}
+                disabled={
+                  busy ||
+                  processingImage ||
+                  (!draft.trim() && !image) ||
+                  !connected
+                }
                 aria-label={txt('அனுப்பு', 'Send')}
                 className="grid size-11 shrink-0 place-items-center rounded-full bg-[#148675] text-white shadow-[0_4px_14px_#14867530] transition hover:bg-[#106e60] disabled:opacity-30 disabled:shadow-none sm:size-12"
               >
@@ -1240,6 +1412,35 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             </div>
           </form>
         </>
+      )}
+      {actionMessage && status === 'active' && (
+        <ChatActionDialog
+          message={actionMessage}
+          busy={busy}
+          onClose={() => setActionMessage(null)}
+          onReply={() => {
+            setReplyTo(actionMessage);
+            setDraft((current) =>
+              Array.from(current).slice(0, REPLY_TEXT_LIMIT).join(''),
+            );
+            setActionMessage(null);
+            composer.current?.focus();
+          }}
+          onReact={(emoji) => void reactTo(actionMessage, emoji)}
+        />
+      )}
+      {reportPicker && status === 'active' && (
+        <ChatReportPicker
+          messages={chatMessages.filter(
+            (message) => message.sender_id !== meId,
+          )}
+          onClose={() => setReportPicker(false)}
+          onChoose={(message) => {
+            setReportPicker(false);
+            setReport(message);
+            setReason('');
+          }}
+        />
       )}
       {viewPhoto && status === 'active' && (
         <ChatPhotoViewer
