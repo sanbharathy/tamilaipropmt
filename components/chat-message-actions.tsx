@@ -7,6 +7,7 @@ import {
   Smile,
   Gamepad2,
   Pencil,
+  Camera,
   X,
 } from 'lucide-react';
 import { REACTION_EMOJIS } from '@/lib/chat-interactions';
@@ -156,12 +157,14 @@ export function ChatAttachmentMenu({
   onStickers,
   onGames,
   onDraw,
+  onCamera,
 }: {
   disabled: boolean;
   onPhoto: () => void;
   onStickers: () => void;
   onGames: () => void;
   onDraw: () => void;
+  onCamera: () => void;
 }) {
   const details = useRef<HTMLDetailsElement>(null),
     timer = useRef<ReturnType<typeof setTimeout> | null>(null),
@@ -178,6 +181,7 @@ export function ChatAttachmentMenu({
     };
   }, []);
   const choices = [
+    { label: 'Camera / GIF', icon: Camera, action: onCamera },
     { label: 'Photos', icon: ImagePlus, action: onPhoto },
     { label: 'Draw & send', icon: Pencil, action: onDraw },
     { label: 'Stickers & emoji', icon: Smile, action: onStickers },

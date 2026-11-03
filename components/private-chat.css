@@ -202,3 +202,10 @@
   background: #f9fcfa;
   color: #193c37;
 }
+.messenger-single-emoji {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 52px;
+  line-height: 1.15;
+  padding: 4px 0;
+}

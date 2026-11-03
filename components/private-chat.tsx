@@ -1,4 +1,5 @@
 'use client';
+import { copyChatLink } from '@/lib/chat-copy';
 import { ChatArchiveNotice } from '@/components/chat-archive-notice';
 import { ChatPresence } from '@/components/chat-presence';
 import {
@@ -6,6 +7,9 @@ import {
   chatThemes,
   type ChatTheme,
 } from '@/components/chat-theme-picker';
+import { ChatCamera } from '@/components/chat-camera';
+import { CAMERA_MOTION } from '@/lib/chat-camera';
+import { isSingleEmoji } from '@/lib/chat-emoji';
 import { ChatDrawing } from '@/components/chat-drawing';
 import { ChatGames } from '@/components/chat-games';
 
@@ -132,8 +136,12 @@ export function PrivateChat({ roomId }: { roomId: string }) {
     null,
   );
   const [image, setImage] = useState<File | null>(null);
+  const [cameraMotion, setCameraMotion] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
   const [preview, setPreview] = useState('');
   const [copied, setCopied] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState('');
+  const invitationInput = useRef<HTMLInputElement>(null);
   const [confirm, setConfirm] = useState<'end' | 'block' | null>(null);
   const [report, setReport] = useState<ChatMessage | null>(null);
   const [reason, setReason] = useState('');
@@ -229,14 +237,14 @@ export function PrivateChat({ roomId }: { roomId: string }) {
     [status, me?.archive_notice, connected, roomId],
   );
   useEffect(() => {
-    if (!draft.trim() || showDrawing || !connected) {
+    if (!draft.trim() || showDrawing || showCamera || !connected) {
       notifyTyping(false);
       return;
     }
     notifyTyping(true);
     const timer = setTimeout(() => notifyTyping(false), 1600);
     return () => clearTimeout(timer);
-  }, [draft, showDrawing, connected, notifyTyping]);
+  }, [draft, showDrawing, showCamera, connected, notifyTyping]);
   useEffect(() => {
     const stop = () => notifyTyping(false);
     const visibility = () => {
@@ -450,6 +458,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       setReplyTo(null);
       setActionMessage(null);
       setShowDrawing(false);
+      setShowCamera(false);
     }
   }, [status]);
   useEffect(
@@ -572,6 +581,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   async function send(
     event: { preventDefault: () => void },
     attachment: File | null = image,
+    motion = attachment === image && cameraMotion,
   ) {
     event.preventDefault();
     if (
@@ -602,6 +612,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
     try {
       const form = new FormData();
       form.set('image', attachment);
+      if (motion) form.set('motion', CAMERA_MOTION);
       form.set('roomId', roomId);
       form.set('clientId', crypto.randomUUID());
       form.set('caption', draft);
@@ -641,6 +652,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   async function chooseImage(file: File | undefined) {
     if (!file) return;
     const job = ++imageJob.current;
+    setCameraMotion(false);
     setProcessingImage(true);
     setImage(null);
     setError('');
@@ -682,14 +694,29 @@ export function PrivateChat({ roomId }: { roomId: string }) {
     }
   }
   async function copyInvite() {
-    try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/chat/${roomId}#invite=${inviteToken}`,
+    const success = await copyChatLink(
+      `${window.location.origin}/chat/${roomId}#invite=${inviteToken}`,
+    );
+    setCopied(success);
+    setError('');
+    setCopyFeedback(
+      success
+        ? txt(
+            'இணைப்பு நகலெடுக்கப்பட்டது. நண்பருடன் பகிருங்கள்.',
+            'Link copied! Share it with your friend.',
+          )
+        : txt(
+            'தானாக நகலெடுக்க முடியவில்லை. தேர்ந்தெடுத்த இணைப்பை நீண்ட நேரம் தொட்டு Copy செய்யவும்.',
+            'Automatic copying is blocked. Copy the selected link manually (touch and hold, or Ctrl/Cmd+C).',
+          ),
+    );
+    if (!success) {
+      invitationInput.current?.focus();
+      invitationInput.current?.select();
+      invitationInput.current?.setSelectionRange(
+        0,
+        invitationInput.current.value.length,
       );
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setError('Select the invitation link and copy it manually.');
     }
   }
   const incoming =
@@ -1056,6 +1083,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 </p>
                 <input
                   readOnly
+                  ref={invitationInput}
                   aria-label="Private invitation link"
                   onFocus={(e) => e.target.select()}
                   value={
@@ -1075,6 +1103,14 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                     ? txt('நகலெடுத்தது', 'Copied')
                     : txt('Link நகலெடு', 'Copy link')}
                 </button>
+                {copyFeedback && (
+                  <output
+                    aria-live="polite"
+                    className={`mt-3 block rounded-xl px-3 py-2 text-xs font-semibold ${copied ? 'bg-emerald-100 text-emerald-900' : 'bg-amber-100 text-amber-900'}`}
+                  >
+                    {copyFeedback}
+                  </output>
+                )}
               </div>
             )}
             {(status === 'ended' || status === 'declined' || missing) &&
@@ -1186,7 +1222,14 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                           {!sticker &&
                             (!message.has_image ||
                               message.body !== '📷 Shared image') && (
-                              <span className="whitespace-pre-wrap break-words text-[14px] leading-[1.55] [overflow-wrap:anywhere]">
+                              <span
+                                className={
+                                  !message.has_image &&
+                                  isSingleEmoji(message.body)
+                                    ? 'messenger-single-emoji'
+                                    : 'whitespace-pre-wrap break-words text-[14px] leading-[1.55] [overflow-wrap:anywhere]'
+                                }
+                              >
                                 <ChatMessageBody
                                   text={message.body}
                                   onOpenPhoto={setViewPhoto}
@@ -1383,14 +1426,19 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                 <img
                   src={preview}
                   alt="Selected attachment preview"
-                  className="max-h-32 max-w-40 rounded-lg object-contain"
+                  className={
+                    cameraMotion
+                      ? 'h-28 w-36 rounded-lg object-cover object-top'
+                      : 'max-h-32 max-w-40 rounded-lg object-contain'
+                  }
                 />
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold">
                     {txt('பகிரத் தயாராக உள்ளது', 'Ready to share')}
                   </p>
                   <p className="mt-1 text-xs leading-6 text-[#60776c]">
-                    Optimized · {Math.ceil((image?.size ?? 0) / 1024)} KB
+                    {cameraMotion ? '5-second GIF' : 'Optimized'} ·{' '}
+                    {Math.ceil((image?.size ?? 0) / 1024)} KB
                   </p>
                 </div>
                 <button
@@ -1437,6 +1485,11 @@ export function PrivateChat({ roomId }: { roomId: string }) {
               <ChatAttachmentMenu
                 disabled={busy || processingImage || !connected}
                 onPhoto={() => fileInput.current?.click()}
+                onCamera={() => {
+                  setShowCamera(true);
+                  setShowStickers(false);
+                  setShowGames(false);
+                }}
                 onDraw={() => {
                   setShowDrawing(true);
                   setShowStickers(false);
@@ -1517,6 +1570,17 @@ export function PrivateChat({ roomId }: { roomId: string }) {
           </form>
         </>
       )}
+      {showCamera && status === 'active' && (
+        <ChatCamera
+          onClose={() => setShowCamera(false)}
+          onUse={(file, motion) => {
+            imageJob.current++;
+            setImage(file);
+            setCameraMotion(motion);
+            setShowCamera(false);
+          }}
+        />
+      )}
       {showThemes && (
         <ChatThemePicker
           theme={theme}
@@ -1526,7 +1590,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       )}
       {showDrawing && status === 'active' && (
         <ChatDrawing
-          initialImage={image}
+          initialImage={cameraMotion ? null : image}
           onClose={() => setShowDrawing(false)}
           onSend={(file) => {
             setShowDrawing(false);

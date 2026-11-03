@@ -1,4 +1,6 @@
 import sharp from 'sharp';
+import { CAMERA_MOTION } from '@/lib/chat-camera';
+import { normalizeCameraMotion } from '@/lib/chat-camera-server';
 import {
   assertOrigin,
   chatDb,
@@ -84,28 +86,37 @@ export async function POST(request: Request) {
           : null;
     if (!kind || file.type !== kind)
       throw new ChatError('Only valid JPG, PNG and WebP images are supported.');
+    const motion = form.get('motion');
+    if (motion !== null && motion !== CAMERA_MOTION)
+      throw new ChatError('Invalid camera recording.');
     let image: Buffer;
     try {
-      const input = sharp(bytes, {
-        limitInputPixels: 16000000,
-        failOn: 'warning',
-      });
-      const metadata = await input.metadata();
-      if (!metadata.width || !metadata.height || (metadata.pages ?? 1) > 1)
-        throw new Error();
-      image = await input
-        .rotate()
-        .resize({
-          width: 1200,
-          height: 1200,
-          fit: 'inside',
-          withoutEnlargement: true,
-        })
-        .webp({ quality: 76 })
-        .toBuffer();
-    } catch {
+      if (motion === CAMERA_MOTION) image = await normalizeCameraMotion(bytes);
+      else {
+        const input = sharp(bytes, {
+          limitInputPixels: 16000000,
+          failOn: 'warning',
+        });
+        const metadata = await input.metadata();
+        if (!metadata.width || !metadata.height || (metadata.pages ?? 1) > 1)
+          throw new Error();
+        image = await input
+          .rotate()
+          .resize({
+            width: 1200,
+            height: 1200,
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 76 })
+          .toBuffer();
+      }
+    } catch (error) {
+      if (error instanceof ChatError) throw error;
       throw new ChatError(
-        'This image cannot be processed. Try a smaller, non-animated JPG, PNG or WebP.',
+        motion
+          ? 'This recording cannot be processed. Please retake it.'
+          : 'This image cannot be processed. Try a smaller, non-animated JPG, PNG or WebP.',
       );
     }
     if (image.byteLength > 524288)
@@ -115,7 +126,7 @@ export async function POST(request: Request) {
       );
     const result = await sql.begin(async (tx) => {
       const [room] =
-        await tx`select host_id,guest_id,status from tamil_chat.rooms where id=${roomId} and expires_at>now() for update`;
+        await tx`select host_id,guest_id,status,expires_at from tamil_chat.rooms where id=${roomId} and expires_at>now() for update`;
       if (room?.status !== 'active' || !room.guest_id)
         throw new ChatError('The chat has ended. Images were not saved.', 403);
       const blocked =
@@ -165,6 +176,8 @@ export async function POST(request: Request) {
       }
       const [message] =
         await tx`insert into tamil_chat.messages(room_id,sender_id,client_id,body,image_data,image_type) values(${roomId},${me.id},${clientId},${stored},${image},'image/webp') returning id::text`;
+      if (motion === CAMERA_MOTION)
+        await tx`insert into tamil_chat.limits(key,count,expires_at) values(${`camera:${roomId}:${message.id}`},1,${room.expires_at})`;
       return message;
     });
     return respond({ ok: true, messageId: result.id });

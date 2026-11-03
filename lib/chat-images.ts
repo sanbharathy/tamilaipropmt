@@ -1,3 +1,4 @@
+import { cameraGif } from '@/lib/chat-camera-server';
 import { ChatError } from '@/lib/chat-server';
 
 export const imageHeaders = {
@@ -9,8 +10,19 @@ export const imageHeaders = {
   'Cross-Origin-Resource-Policy': 'same-origin',
   'X-Robots-Tag': 'noindex, nofollow',
 };
-export function imageResponse(data: Uint8Array) {
-  return new Response(new Uint8Array(data), { headers: imageHeaders });
+export async function imageResponse(data: Uint8Array, camera = false) {
+  const gif = await cameraGif(Buffer.from(data), camera);
+  return new Response(new Uint8Array(gif ?? data), {
+    headers: {
+      ...imageHeaders,
+      ...(gif
+        ? {
+            'Content-Type': 'image/gif',
+            'Content-Disposition': 'inline; filename="chat-camera.gif"',
+          }
+        : {}),
+    },
+  });
 }
 export async function uploadForm(request: Request) {
   const maximum = 2 * 1024 * 1024 + 16384;

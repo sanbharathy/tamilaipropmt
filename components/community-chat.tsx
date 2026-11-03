@@ -1,4 +1,5 @@
 'use client';
+import { copyChatLink } from '@/lib/chat-copy';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -50,6 +51,8 @@ export function CommunityChat() {
   const [invite, setInvite] = useState<Invite | null>(null);
   const [shareLink, setShareLink] = useState('');
   const [copied, setCopied] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState('');
+  const invitationInput = useRef<HTMLInputElement>(null);
   const [connected, setConnected] = useState(true);
   const [report, setReport] = useState<ChatMessage | null>(null);
   const [reason, setReason] = useState('');
@@ -232,16 +235,26 @@ export function CommunityChat() {
     // On failure, the draft stays available so the visitor can retry.
   }
   async function copyLink() {
-    try {
-      await navigator.clipboard.writeText(shareLink);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setError(
-        txt(
-          'இணைப்பைத் தேர்ந்தெடுத்து நகலெடுக்கவும்.',
-          'Select the invitation link and copy it manually.',
-        ),
+    const success = await copyChatLink(shareLink);
+    setCopied(success);
+    setError('');
+    setCopyFeedback(
+      success
+        ? txt(
+            'இணைப்பு நகலெடுக்கப்பட்டது. நண்பருடன் பகிருங்கள்.',
+            'Link copied! Share it with your friend.',
+          )
+        : txt(
+            'தானாக நகலெடுக்க முடியவில்லை. தேர்ந்தெடுத்த இணைப்பை நீண்ட நேரம் தொட்டு Copy செய்யவும்.',
+            'Automatic copying is blocked. Copy the selected link manually (touch and hold, or Ctrl/Cmd+C).',
+          ),
+    );
+    if (!success) {
+      invitationInput.current?.focus();
+      invitationInput.current?.select();
+      invitationInput.current?.setSelectionRange(
+        0,
+        invitationInput.current.value.length,
       );
     }
   }
@@ -840,6 +853,7 @@ export function CommunityChat() {
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <input
+                        ref={invitationInput}
                         readOnly
                         value={shareLink}
                         aria-label="Private invitation link"
@@ -856,6 +870,14 @@ export function CommunityChat() {
                           ? txt('நகலெடுத்தது', 'Copied')
                           : txt('Link நகலெடு', 'Copy link')}
                       </button>
+                      {copyFeedback && (
+                        <output
+                          aria-live="polite"
+                          className={`mt-3 block rounded-xl px-3 py-2 text-xs font-semibold ${copied ? 'bg-emerald-100 text-emerald-900' : 'bg-amber-100 text-amber-900'}`}
+                        >
+                          {copyFeedback}
+                        </output>
+                      )}
                     </div>
                   </div>
                 )}
