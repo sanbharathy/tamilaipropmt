@@ -29,6 +29,7 @@ export type ChatRoom = {
   peer_read_at?: string | null;
   peer_viewing?: boolean;
   peer_active_until?: string | null;
+  peer_typing_until?: string | null;
   expires_at: string;
   created_at: string;
 };

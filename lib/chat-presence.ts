@@ -1,4 +1,6 @@
 import { chatDb, ChatError, validId } from './chat-server';
+export const TYPING_RECORD_SECONDS = 3600;
+export const TYPING_TTL_SECONDS = 8;
 
 export function screenSequence(value: unknown) {
   const sequence = typeof value === 'string' ? Number(value) : value;
@@ -25,6 +27,7 @@ export async function updatePresence(
     throw new ChatError('Invalid read receipt.');
   const sql = chatDb();
   if (!present) {
+    await sql`update tamil_chat.limits set expires_at=now()+${TYPING_RECORD_SECONDS}*interval '1 second',count=${-sequence} where key=${`typing:${roomId}:${sessionId}:${screen}`} and abs(count)<${sequence}`;
     await sql`update tamil_chat.room_presence set present=false,last_seen=now(),sequence=${sequence} where room_id=${roomId} and session_id=${sessionId} and screen_id=${screen} and sequence<${sequence}`;
     return;
   }
@@ -62,5 +65,24 @@ export async function updatePresence(
         or exists(select 1 from tamil_chat.room_presence where room_id=${roomId} and session_id=${sessionId} and screen_id=${screen})
       on conflict(room_id,session_id,screen_id) do update set present=true,last_seen=now(),sequence=excluded.sequence
       where tamil_chat.room_presence.sequence<excluded.sequence`;
+  });
+}
+
+// Draft text never leaves the device. Keep sequence tombstones for an hour so
+// a delayed request cannot revive a stopped indicator; activity lasts only 8s.
+export async function updateTyping(
+  roomId: string,
+  sessionId: string,
+  screen: string,
+  sequence: number,
+  typing: boolean,
+) {
+  const sql = chatDb();
+  await sql.begin(async (tx) => {
+    const [room] =
+      await tx`select r.id from tamil_chat.rooms r join tamil_chat.sessions h on h.id=r.host_id join tamil_chat.sessions g on g.id=r.guest_id where r.id=${roomId} and (r.host_id=${sessionId} or r.guest_id=${sessionId}) and r.status='active' and r.expires_at>now() and h.expires_at>now() and g.expires_at>now() and not h.suspended and not g.suspended and not exists(select 1 from tamil_chat.blocks b where (b.blocker_id=r.host_id and b.blocked_id=r.guest_id) or (b.blocker_id=r.guest_id and b.blocked_id=r.host_id)) for update of r`;
+    if (!room) throw new ChatError('Conversation not available.', 404);
+    const key = `typing:${roomId}:${sessionId}:${screen}`;
+    await tx`insert into tamil_chat.limits(key,count,expires_at) values(${key},${typing ? sequence : -sequence},now()+${TYPING_RECORD_SECONDS}*interval '1 second') on conflict(key) do update set count=excluded.count,expires_at=excluded.expires_at where abs(tamil_chat.limits.count)<abs(excluded.count)`;
   });
 }

@@ -19,7 +19,12 @@ import {
 import { chatTopics, type ChatMessage } from '@/lib/chat-types';
 import { gameChoices } from '@/lib/chat-games';
 import { scheduleArchives } from '@/lib/chat-archives';
-import { screenSequence, updatePresence } from '@/lib/chat-presence';
+import {
+  TYPING_RECORD_SECONDS,
+  TYPING_TTL_SECONDS,
+  screenSequence,
+  updatePresence,
+} from '@/lib/chat-presence';
 import {
   REACTION_EMOJIS,
   REPLY_TEXT_LIMIT,
@@ -86,7 +91,8 @@ export async function GET(request: Request) {
         );
       const [presence] = await sql`select max(last_seen) as peer_last_seen,
         coalesce(bool_or(present and last_seen>now()-interval '20 seconds'),false) as peer_viewing,
-        max(last_seen+interval '20 seconds') filter(where present) as peer_active_until
+        max(last_seen+interval '20 seconds') filter(where present) as peer_active_until,
+        (select max(expires_at - ${TYPING_RECORD_SECONDS - TYPING_TTL_SECONDS}*interval '1 second') from tamil_chat.limits where key like ${`typing:${room.id}:${room.peer_id}:%`} and count>0 and expires_at>now()+${TYPING_RECORD_SECONDS - TYPING_TTL_SECONDS}*interval '1 second') as peer_typing_until
         from tamil_chat.room_presence where room_id=${room.id} and session_id=${room.peer_id}`;
       Object.assign(room, presence);
     }

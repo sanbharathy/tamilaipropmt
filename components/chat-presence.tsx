@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { Pencil } from 'lucide-react';
 import type { ChatRoom } from '@/lib/chat-types';
 
 export function ChatPresence({
@@ -22,6 +23,11 @@ export function ChatPresence({
     (!now ||
       (!!room.peer_active_until &&
         new Date(room.peer_active_until).getTime() > now));
+  const typing =
+    online &&
+    !!room.peer_typing_until &&
+    !!now &&
+    new Date(room.peer_typing_until).getTime() > now;
   const seen = room.peer_last_seen ? new Date(room.peer_last_seen) : null;
   const today =
     seen && now && seen.toDateString() === new Date(now).toDateString();
@@ -38,8 +44,8 @@ export function ChatPresence({
       : 'Presence unavailable'
     : online
       ? tamil
-        ? 'இந்த chat-ல் இருக்கிறார்'
-        : 'Viewing this chat'
+        ? 'ஆன்லைனில் உள்ளார்'
+        : 'Online'
       : seen
         ? tamil
           ? `கடைசி: ${time}`
@@ -61,7 +67,19 @@ export function ChatPresence({
         aria-hidden="true"
         className={`size-1.5 shrink-0 rounded-full ${online ? 'bg-emerald-500' : 'bg-slate-400'}`}
       />
-      <span className="truncate">{text}</span>
+      {typing ? (
+        <span className="flex items-center gap-1.5 text-[#218568]">
+          <Pencil size={12} className="chat-typing-pencil" aria-hidden="true" />
+          <span>{tamil ? 'எழுதுகிறார்' : 'Typing'}</span>
+          <span className="chat-typing-dots flex gap-0.5" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+        </span>
+      ) : (
+        <span className="truncate">{text}</span>
+      )}
     </span>
   );
 }

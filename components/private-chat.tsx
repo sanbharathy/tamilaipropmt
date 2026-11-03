@@ -1,6 +1,12 @@
 'use client';
 import { ChatArchiveNotice } from '@/components/chat-archive-notice';
 import { ChatPresence } from '@/components/chat-presence';
+import {
+  ChatThemePicker,
+  chatThemes,
+  type ChatTheme,
+} from '@/components/chat-theme-picker';
+import { ChatDrawing } from '@/components/chat-drawing';
 import { ChatGames } from '@/components/chat-games';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -134,6 +140,27 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   const [viewPhoto, setViewPhoto] = useState<string | null>(null);
   const [showStickers, setShowStickers] = useState(false);
   const [showGames, setShowGames] = useState(false);
+  const [showDrawing, setShowDrawing] = useState(false);
+  const [theme, setTheme] = useState<ChatTheme>('mint');
+  const [showThemes, setShowThemes] = useState(false);
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('tamilai-chat-theme');
+      if (chatThemes.some((choice) => choice.id === saved)) {
+        // Hydrate the device preference after mounting.
+        // oxlint-disable-next-line
+        setTheme(saved as ChatTheme);
+      }
+    } catch {}
+  }, []);
+  function changeTheme(value: ChatTheme) {
+    setTheme(value);
+    try {
+      localStorage.setItem('tamilai-chat-theme', value);
+    } catch {}
+  }
+  const typingLast = useRef(0);
+  const typingActive = useRef(false);
   const [stickerTab, setStickerTab] = useState<'sticker' | 'meme' | 'comedy'>(
     'sticker',
   );
@@ -169,6 +196,62 @@ export function PrivateChat({ roomId }: { roomId: string }) {
     (message) => !message.game_event && !message.reaction_event,
   );
   const txt = (ta: string, en: string) => (tamil ? ta : en);
+
+  const notifyTyping = useCallback(
+    (typing: boolean) => {
+      if (status !== 'active' || !me?.archive_notice) return;
+      if (
+        typing &&
+        (!connected ||
+          document.visibilityState !== 'visible' ||
+          !document.hasFocus())
+      )
+        return;
+      const now = Date.now();
+      if (typing && typingActive.current && now - typingLast.current < 2000)
+        return;
+      if (!typing && !typingActive.current) return;
+      typingActive.current = typing;
+      typingLast.current = now;
+      presenceScreen.current ??= crypto.randomUUID();
+      void fetch('/api/chat/presence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+          roomId,
+          screen: presenceScreen.current,
+          sequence: ++presenceSequence.current,
+          typing,
+        }),
+      }).catch(() => {});
+    },
+    [status, me?.archive_notice, connected, roomId],
+  );
+  useEffect(() => {
+    if (!draft.trim() || showDrawing || !connected) {
+      notifyTyping(false);
+      return;
+    }
+    notifyTyping(true);
+    const timer = setTimeout(() => notifyTyping(false), 1600);
+    return () => clearTimeout(timer);
+  }, [draft, showDrawing, connected, notifyTyping]);
+  useEffect(() => {
+    const stop = () => notifyTyping(false);
+    const visibility = () => {
+      if (document.visibilityState !== 'visible') stop();
+    };
+    window.addEventListener('blur', stop);
+    window.addEventListener('pagehide', stop);
+    document.addEventListener('visibilitychange', visibility);
+    return () => {
+      stop();
+      window.removeEventListener('blur', stop);
+      window.removeEventListener('pagehide', stop);
+      document.removeEventListener('visibilitychange', visibility);
+    };
+  }, [notifyTyping]);
 
   const readVisible = useCallback(() => {
     if (
@@ -366,6 +449,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       setProcessingImage(false);
       setReplyTo(null);
       setActionMessage(null);
+      setShowDrawing(false);
     }
   }, [status]);
   useEffect(
@@ -485,17 +569,20 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       setBusy(false);
     }
   }
-  async function send(event: { preventDefault: () => void }) {
+  async function send(
+    event: { preventDefault: () => void },
+    attachment: File | null = image,
+  ) {
     event.preventDefault();
     if (
       busy ||
       processingImage ||
       !connected ||
       status !== 'active' ||
-      (!draft.trim() && !image)
+      (!draft.trim() && !attachment)
     )
       return;
-    if (!image) {
+    if (!attachment) {
       await act(
         {
           action: 'send',
@@ -514,7 +601,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
     setError('');
     try {
       const form = new FormData();
-      form.set('image', image);
+      form.set('image', attachment);
       form.set('roomId', roomId);
       form.set('clientId', crypto.randomUUID());
       form.set('caption', draft);
@@ -623,6 +710,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   return (
     <main
       ref={screen}
+      data-chat-theme={theme}
       lang={tamil ? 'ta' : 'en'}
       className="messenger-screen relative isolate mx-auto flex h-dvh min-h-0 max-w-6xl flex-col overflow-hidden md:my-4 md:h-[calc(100dvh-2rem)] md:rounded-[28px]"
     >
@@ -750,6 +838,16 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                   Report chat
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (actionsMenu.current) actionsMenu.current.open = false;
+                  setShowThemes(true);
+                }}
+                className="min-h-11 w-full rounded-xl px-3 text-left text-sm font-semibold hover:bg-[#edf4ef]"
+              >
+                Change theme
+              </button>
               <a
                 href="/community-chat/rules"
                 target="_blank"
@@ -1054,6 +1152,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                   >
                     <MessagePressable onOpen={() => setActionMessage(message)}>
                       <div
+                        data-mine={mine}
                         className={`messenger-bubble overflow-hidden rounded-[20px] ${mine ? 'rounded-br-[5px] bg-[#d9f4e2] text-[#1b473b]' : 'rounded-bl-[5px] bg-white text-[#28473f]'}`}
                       >
                         {message.reply && (
@@ -1166,7 +1265,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             />
           )}
           <form
-            onSubmit={send}
+            onSubmit={(event) => void send(event)}
             className="messenger-composer relative shrink-0 border-t border-[#e3ece5] bg-white px-2 pb-2 pt-2 sm:px-6"
           >
             {showStickers && (
@@ -1338,6 +1437,11 @@ export function PrivateChat({ roomId }: { roomId: string }) {
               <ChatAttachmentMenu
                 disabled={busy || processingImage || !connected}
                 onPhoto={() => fileInput.current?.click()}
+                onDraw={() => {
+                  setShowDrawing(true);
+                  setShowStickers(false);
+                  setShowGames(false);
+                }}
                 onStickers={() => {
                   setShowStickers((value) => !value);
                   setShowGames(false);
@@ -1412,6 +1516,23 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             </div>
           </form>
         </>
+      )}
+      {showThemes && (
+        <ChatThemePicker
+          theme={theme}
+          onChange={changeTheme}
+          onClose={() => setShowThemes(false)}
+        />
+      )}
+      {showDrawing && status === 'active' && (
+        <ChatDrawing
+          initialImage={image}
+          onClose={() => setShowDrawing(false)}
+          onSend={(file) => {
+            setShowDrawing(false);
+            void send({ preventDefault() {} }, file);
+          }}
+        />
       )}
       {actionMessage && status === 'active' && (
         <ChatActionDialog

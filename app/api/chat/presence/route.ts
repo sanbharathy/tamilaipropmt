@@ -9,7 +9,11 @@ import {
   sessionOf,
   validId,
 } from '@/lib/chat-server';
-import { screenSequence, updatePresence } from '@/lib/chat-presence';
+import {
+  screenSequence,
+  updatePresence,
+  updateTyping,
+} from '@/lib/chat-presence';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
@@ -20,6 +24,18 @@ export async function POST(request: Request) {
     await limit(`presence:${me.id}`, 90, 60);
     const roomId = validId(body.roomId),
       screen = validId(body.screen);
+    if (typeof body.typing === 'boolean') {
+      if (!me.archive_notice)
+        throw new ChatError('Acknowledge the privacy notice first.', 403);
+      await updateTyping(
+        roomId,
+        me.id,
+        screen,
+        screenSequence(body.sequence),
+        body.typing,
+      );
+      return respond({ ok: true });
+    }
     if (body.present !== false)
       throw new ChatError('Unsupported presence update.');
     const [room] =
