@@ -28,16 +28,16 @@ import {
   Expand,
   MessageCircle,
   ShieldCheck,
-  Gamepad2,
 } from 'lucide-react';
 import type { ChatMessage, ChatState } from '@/lib/chat-types';
 import { DestroyChatButton } from '@/components/destroy-chat-button';
 import { ChatPhotoViewer } from '@/components/chat-photo-viewer';
 import { ChatMessageBody } from '@/components/chat-message-body';
+import { ChatStickerPicker } from '@/components/chat-sticker-picker';
 import { ChatStickerCard } from '@/components/chat-sticker-card';
 import {
-  chatStickers,
   findChatSticker,
+  chatStickerPreview,
   stickerBody,
   type ChatSticker,
 } from '@/lib/chat-stickers';
@@ -169,9 +169,6 @@ export function PrivateChat({ roomId }: { roomId: string }) {
   }
   const typingLast = useRef(0);
   const typingActive = useRef(false);
-  const [stickerTab, setStickerTab] = useState<'sticker' | 'meme' | 'comedy'>(
-    'sticker',
-  );
   const composer = useRef<HTMLTextAreaElement>(null);
   const actionsMenu = useRef<HTMLDetailsElement>(null);
   const inviteRef = useRef('');
@@ -1312,112 +1309,21 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             className="messenger-composer relative shrink-0 border-t border-[#e3ece5] bg-white px-2 pb-2 pt-2 sm:px-6"
           >
             {showStickers && (
-              <section
-                aria-label="Tamil stickers and memes"
-                className="mb-3 overflow-hidden rounded-[22px] border border-[#e0eae2] bg-[#fbfdfb] shadow-[0_-4px_20px_#244b3610]"
-              >
-                <div className="flex items-center justify-between gap-2 border-b border-[#e9efea] px-3 py-2">
-                  <div className="flex min-w-0 gap-1 overflow-x-auto">
-                    <button
-                      type="button"
-                      aria-pressed={stickerTab === 'sticker'}
-                      onClick={() => setStickerTab('sticker')}
-                      className={`min-h-10 rounded-full px-4 text-xs font-bold ${stickerTab === 'sticker' ? 'bg-[#dfeee5] text-[#28715b]' : 'text-[#8b9e92]'}`}
-                    >
-                      {txt('ஸ்டிக்கர்கள்', 'Stickers')}
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={stickerTab === 'meme'}
-                      onClick={() => setStickerTab('meme')}
-                      className={`min-h-10 rounded-full px-4 text-xs font-bold ${stickerTab === 'meme' ? 'bg-[#dfeee5] text-[#28715b]' : 'text-[#8b9e92]'}`}
-                    >
-                      Tamil memes
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={stickerTab === 'comedy'}
-                      onClick={() => setStickerTab('comedy')}
-                      className={`min-h-10 shrink-0 rounded-full px-3 text-xs font-bold ${stickerTab === 'comedy' ? 'bg-[#dfeee5] text-[#28715b]' : 'text-[#60776a]'}`}
-                    >
-                      {txt('காமெடி', 'Comedy')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowStickers(false);
-                        setShowGames(true);
-                      }}
-                      className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-bold text-[#28715b]"
-                    >
-                      <Gamepad2 size={14} />
-                      Games
-                    </button>
-                  </div>
-                  <button
-                    type="button"
-                    aria-label="Close stickers"
-                    onClick={() => setShowStickers(false)}
-                    className="grid size-9 place-items-center rounded-full text-[#6b8979]"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-                <div className="flex justify-center gap-1 border-b border-[#e9efea] px-3 py-2">
-                  {['😂', '😘', '🔥', '❤️', '🪔', '😎'].map((emoji) => (
-                    <button
-                      key={emoji}
-                      type="button"
-                      disabled={busy}
-                      onClick={() => {
-                        setDraft((current) => current + emoji);
-                        setShowStickers(false);
-                        composer.current?.focus();
-                      }}
-                      aria-label={`Add ${emoji}`}
-                      className="grid size-10 place-items-center rounded-full text-2xl hover:bg-[#ecf4ed]"
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-                <p className="px-4 pt-3 text-[10px] text-[#81968a]">
-                  {txt(
-                    'ஒரு card-ஐத் தொட்டால் உடனே அனுப்பப்படும்',
-                    'Tap a card to send it instantly',
-                  )}
-                </p>
-                <div className="grid max-h-[30dvh] grid-cols-2 gap-2 overflow-y-auto p-3 sm:grid-cols-3">
-                  {chatStickers
-                    .filter((sticker) => sticker.kind === stickerTab)
-                    .map((sticker) => (
-                      <button
-                        key={sticker.id}
-                        type="button"
-                        disabled={busy || !connected}
-                        onClick={() => void sendSticker(sticker)}
-                        aria-label={`Send ${sticker.ta}`}
-                        title={sticker.en}
-                        className="rounded-[20px] text-left transition hover:-translate-y-0.5 hover:shadow-md disabled:opacity-40 motion-reduce:transform-none"
-                      >
-                        <ChatStickerCard sticker={sticker} small />
-                      </button>
-                    ))}
-                </div>
-                {stickerTab === 'comedy' && (
-                  <p className="px-4 pb-3 text-[10px] text-[#526c5e]">
-                    Fan-made reactions ·{' '}
-                    <a
-                      href="/sticker-credits"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      Photo credits & licenses
-                    </a>
-                  </p>
-                )}
-              </section>
+              <ChatStickerPicker
+                busy={busy || !connected}
+                tamil={tamil}
+                onSend={(sticker) => void sendSticker(sticker)}
+                onClose={() => setShowStickers(false)}
+                onEmoji={(emoji) => {
+                  setDraft((current) => current + emoji);
+                  setShowStickers(false);
+                  composer.current?.focus();
+                }}
+                onGames={() => {
+                  setShowStickers(false);
+                  setShowGames(true);
+                }}
+              />
             )}
             {preview && (
               <div className="mb-3 flex items-start gap-3 rounded-xl bg-[#f0f5eb] p-3">
@@ -1468,7 +1374,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                   </p>
                   <p className="truncate text-xs">
                     {replyTo.has_image ? '📷 ' : ''}
-                    {replyTo.body}
+                    {chatStickerPreview(replyTo.body)}
                   </p>
                 </div>
                 <button

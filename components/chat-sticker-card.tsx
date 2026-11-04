@@ -7,6 +7,26 @@ export function ChatStickerCard({
   sticker: ChatSticker;
   small?: boolean;
 }) {
+  if (sticker.artwork && sticker.photo)
+    return (
+      <span className={`block ${small ? 'p-1' : 'p-1.5'}`}>
+        {/* Supplied artwork already contains its Tamil caption. Preserve its transparency and full frame. */}
+        {/* oxlint-disable-next-line next/no-img-element */}
+        <img
+          src={small ? sticker.thumbnail : sticker.photo}
+          alt={sticker.en}
+          loading="lazy"
+          decoding="async"
+          width={small ? 160 : 512}
+          height={small ? 160 : 512}
+          className={
+            small
+              ? 'h-24 w-full object-contain sm:h-28'
+              : 'size-48 max-w-full object-contain sm:size-56'
+          }
+        />
+      </span>
+    );
   return (
     <span
       className={`chat-sticker-card relative block overflow-hidden rounded-[20px] text-center ${small ? 'px-2 py-3' : 'min-w-44 px-5 py-5'}`}

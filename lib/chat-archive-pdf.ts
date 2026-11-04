@@ -2,7 +2,7 @@ import PDFDocument from 'pdfkit';
 import sharp from 'sharp';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { findChatSticker } from './chat-stickers';
+import { findChatSticker, chatStickerPreview } from './chat-stickers';
 import { readReply, readReaction } from './chat-interactions-server';
 
 export type ArchiveSnapshot = {
@@ -126,7 +126,7 @@ export async function archivePdf(snapshot: ArchiveSnapshot): Promise<Buffer> {
     doc
       .fontSize(10)
       .fillColor('#111827')
-      .text(printable(displayBody), { lineGap: 4 });
+      .text(printable(chatStickerPreview(displayBody)), { lineGap: 4 });
     const sticker = findChatSticker(displayBody);
     let bytes: Buffer | undefined;
     if (message.image) bytes = Buffer.from(message.image, 'base64');

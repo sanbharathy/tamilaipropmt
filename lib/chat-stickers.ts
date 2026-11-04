@@ -1,3 +1,4 @@
+import suppliedPacks from './chat-sticker-packs.json';
 export type ChatSticker = {
   id: string;
   kind: 'sticker' | 'meme' | 'comedy';
@@ -10,6 +11,9 @@ export type ChatSticker = {
   photo?: string;
   actor?: string;
   credit?: string;
+  artwork?: boolean;
+  thumbnail?: string;
+  pack?: string;
 };
 export const chatStickers: readonly ChatSticker[] = [
   {
@@ -155,9 +159,44 @@ export const chatStickers: readonly ChatSticker[] = [
     credit: 'Kyucasio · CC0',
   },
 ];
+export const tamilStickerPacks = suppliedPacks.map((pack) => ({
+  id: pack.id,
+  name: pack.name,
+  stickers: pack.items.map(
+    (item, index): ChatSticker => ({
+      id: item.id,
+      kind: 'sticker',
+      emoji: '🧩',
+      ta: `${pack.name} sticker ${index + 1}`,
+      en: `${pack.name} sticker ${index + 1}`,
+      tag: pack.name,
+      color: 'transparent',
+      ink: '#244b42',
+      photo: `/chat-stickers/tamil-packs/full/${item.asset}.webp`,
+      thumbnail: `/chat-stickers/tamil-packs/thumbs/${item.asset}.webp`,
+      artwork: true,
+      pack: pack.id,
+    }),
+  ),
+}));
+export const suppliedChatStickers = tamilStickerPacks.flatMap(
+  (pack) => pack.stickers,
+);
 export function stickerBody(sticker: ChatSticker) {
-  return `${sticker.emoji} ${sticker.ta}`;
+  return sticker.artwork
+    ? `🧩 Tamil sticker ${sticker.id}`
+    : `${sticker.emoji} ${sticker.ta}`;
 }
+const stickerByBody = new Map(
+  [...chatStickers, ...suppliedChatStickers].map((sticker) => [
+    stickerBody(sticker),
+    sticker,
+  ]),
+);
 export function findChatSticker(body: string) {
-  return chatStickers.find((sticker) => stickerBody(sticker) === body);
+  return stickerByBody.get(body);
+}
+export function chatStickerPreview(body: string) {
+  const sticker = findChatSticker(body);
+  return sticker?.artwork ? sticker.en : body;
 }

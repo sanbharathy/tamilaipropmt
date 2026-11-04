@@ -14,11 +14,20 @@ export default function StickerCredits() {
       <Link href="/tamil-chat" className="text-teal-700 underline">
         ← Tamil Chat
       </Link>
-      <h1 className="text-3xl font-bold">Comedy sticker credits</h1>
+      <h1 className="text-3xl font-bold">Tamil sticker packs & credits</h1>
+      <section className="space-y-3 rounded-2xl bg-slate-50 p-6">
+        <h2 className="text-xl font-bold">Supplied Tamil sticker packs</h2>
+        <p>
+          The additional Tamil reaction packs were supplied from Tamil Stickers
+          For WhatsApp 4.6.1. Their existing artwork and Tamil captions are
+          preserved. They are separate from the original reaction cards credited
+          below.
+        </p>
+      </section>
       <p>
-        These are fan-made reaction cards with original Tamil captions. The
-        captions are not quotations from the actors. No actor endorsement or
-        affiliation is implied.
+        The original reaction cards credited below use original Tamil captions.
+        Those captions are not quotations from the actors. No actor endorsement
+        or affiliation is implied.
       </p>
       <section className="space-y-3 rounded-2xl bg-slate-50 p-6">
         <h2 className="text-xl font-bold">Vadivelu photograph</h2>

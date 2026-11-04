@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { chatStickerPreview } from './chat-stickers';
 import { ChatError } from './chat-server';
 import {
   REACTION_EMOJIS,
@@ -94,7 +95,7 @@ export function replyQuote(
     preview:
       target.has_image && original === '📷 Shared image'
         ? 'Image attachment'
-        : Array.from(original.replace(/\s+/gu, ' ').trim())
+        : Array.from(chatStickerPreview(original).replace(/\s+/gu, ' ').trim())
             .slice(0, 80)
             .join(''),
     has_image: target.has_image,

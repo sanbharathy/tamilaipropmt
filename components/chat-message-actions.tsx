@@ -10,6 +10,7 @@ import {
   Camera,
   X,
 } from 'lucide-react';
+import { chatStickerPreview } from '@/lib/chat-stickers';
 import { REACTION_EMOJIS } from '@/lib/chat-interactions';
 import type { ChatMessage } from '@/lib/chat-types';
 
@@ -112,7 +113,7 @@ export function ChatActionDialog({
       <div className="flex items-center justify-between gap-3">
         <p className="line-clamp-2 min-w-0 break-words text-xs text-[#617b6d]">
           {message.has_image ? '📷 ' : ''}
-          {message.body}
+          {chatStickerPreview(message.body)}
         </p>
         <button
           type="button"
@@ -288,7 +289,7 @@ export function ChatReportPicker({
           >
             <span className="line-clamp-2 break-words text-sm">
               {message.has_image ? '📷 ' : ''}
-              {message.body}
+              {chatStickerPreview(message.body)}
             </span>
             <time className="text-[10px] text-[#617b6d]">
               {new Date(message.created_at).toLocaleString('en-IN')}
