@@ -1186,6 +1186,16 @@ export function PrivateChat({ roomId }: { roomId: string }) {
                     <MessagePressable onOpen={() => setActionMessage(message)}>
                       <div
                         data-mine={mine}
+                        data-sticker-artwork={sticker?.artwork || undefined}
+                        style={
+                          sticker?.artwork
+                            ? {
+                                background: 'transparent',
+                                boxShadow: 'none',
+                                borderRadius: 0,
+                              }
+                            : undefined
+                        }
                         className={`messenger-bubble overflow-hidden rounded-[20px] ${mine ? 'rounded-br-[5px] bg-[#d9f4e2] text-[#1b473b]' : 'rounded-bl-[5px] bg-white text-[#28473f]'}`}
                       >
                         {message.reply && (
