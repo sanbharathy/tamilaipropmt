@@ -10,19 +10,19 @@ export function ChatStickerCard({
   if (sticker.artwork && sticker.photo)
     return (
       <span className={`block ${small ? 'p-1' : 'p-1.5'}`}>
-        {/* Supplied artwork already contains its Tamil caption. Preserve its transparency and full frame. */}
+        {/* Reuse the lightweight picker asset in chat, including the browser cache. */}
         {/* oxlint-disable-next-line next/no-img-element */}
         <img
-          src={small ? sticker.thumbnail : sticker.photo}
+          src={sticker.thumbnail ?? sticker.photo}
           alt={sticker.en}
           loading="lazy"
           decoding="async"
-          width={small ? 160 : 512}
-          height={small ? 160 : 512}
+          width={160}
+          height={160}
           className={
             small
               ? 'h-24 w-full object-contain sm:h-28'
-              : 'size-48 max-w-full object-contain sm:size-56'
+              : 'size-[84.48px] max-w-full object-contain sm:size-[98.56px]'
           }
         />
       </span>
