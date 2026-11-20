@@ -1,0 +1,7 @@
+.env*
+node_modules
+.next
+.git
+scripts
+Database
+*.tsbuildinfo
