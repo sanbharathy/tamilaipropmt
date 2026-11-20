@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Copy, MoreVertical } from 'lucide-react';
+import { ArrowRight, Copy, MoreVertical, House } from 'lucide-react';
 type Room = { id: string; peer_name: string; expires_at: string };
 type State = {
   me: null | { role: 'owner' | 'visitor'; name: string };
@@ -109,8 +109,11 @@ export function TaieContact() {
       lang="en"
       className="mx-auto flex min-h-dvh max-w-lg flex-col bg-[#f7f5f0] px-5 py-5 text-[#20372f]"
     >
-      <header className="relative flex min-h-11 items-center justify-end">
+      <header className="relative flex min-h-12 items-center justify-between">
         <h1 className="sr-only">Conversations</h1>
+        <button type="button" aria-label="Home - return to image editor" onClick={() => window.location.assign('/taie-contact/close')} className="flex min-h-12 items-center gap-2 rounded-full bg-white px-4 text-sm font-semibold shadow-sm transition hover:bg-[#edf4ef]">
+          <House size={19} aria-hidden="true" /> Home
+        </button>
         <button
           aria-label="Chat options"
           aria-expanded={menu}
