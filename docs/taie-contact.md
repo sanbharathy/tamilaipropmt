@@ -20,3 +20,9 @@ The contact and conversation pages do not load advertising or analytics scripts.
 - `node scripts/test-chat.mjs`: existing guest chat regression checks.
 - Mobile browser checks: consent, nickname entry, owner sign-in, no horizontal overflow, no ad/analytics scripts.
 - `npx tsc --noEmit`, targeted `oxlint`, and production build.
+
+## Native mobile presentation
+
+App conversation pages use one three-dot header control. Names, presence, language, report/end, theme and navigation live in its scrollable menu. A `TAIE-App` user-agent hint selects this presentation for in-app room links even without a query parameter; it grants no authorization. The regular website conversation header is preserved. The native wrapper does not display a website title/address bar on chat pages.
+
+Camera capture is requested through a capture-enabled file input. The Android host presents native photo/short-video options and FileProvider-backed private cache output. A short video is decoded locally into the existing 20-frame sprite; only the sprite is sent to the existing GIF pipeline, not the original video or audio. Normal website camera behavior is preserved outside the app presentation.

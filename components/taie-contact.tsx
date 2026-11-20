@@ -1,13 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  ArrowLeft,
-  ArrowRight,
-  Copy,
-  MessageCircle,
-  MoreVertical,
-} from 'lucide-react';
+import { ArrowRight, Copy, MoreVertical } from 'lucide-react';
 type Room = { id: string; peer_name: string; expires_at: string };
 type State = {
   me: null | { role: 'owner' | 'visitor'; name: string };
@@ -115,29 +109,8 @@ export function TaieContact() {
       lang="en"
       className="mx-auto flex min-h-dvh max-w-lg flex-col bg-[#f7f5f0] px-5 py-5 text-[#20372f]"
     >
-      <header className="relative flex items-center gap-3 border-b border-[#e1e5d7] pb-4">
-        {ownerLogin && (
-          <button
-            aria-label="Back to chat"
-            onClick={() => setOwnerLogin(false)}
-            className="grid size-11 place-items-center"
-          >
-            <ArrowLeft size={20} />
-          </button>
-        )}
-        <span className="grid size-11 place-items-center rounded-2xl bg-[#ed6344] text-white">
-          <MessageCircle size={23} />
-        </span>
-        <div className="flex-1">
-          <h1 className="text-lg font-bold">
-            {state.me?.role === 'owner'
-              ? 'Your chats'
-              : ownerLogin
-                ? 'Owner sign-in'
-                : 'Chat with me'}
-          </h1>
-          <p className="text-xs text-[#738172]">Tamil AI Image Editor</p>
-        </div>
+      <header className="relative flex min-h-11 items-center justify-end">
+        <h1 className="sr-only">Conversations</h1>
         <button
           aria-label="Chat options"
           aria-expanded={menu}
@@ -147,7 +120,24 @@ export function TaieContact() {
           <MoreVertical size={20} />
         </button>
         {menu && (
-          <div className="absolute right-0 top-16 z-10 min-w-48 rounded-2xl border border-[#e1e5d7] bg-white p-2 shadow-lg">
+          <div className="absolute right-0 top-12 z-10 min-w-48 rounded-2xl border border-[#e1e5d7] bg-white p-2 shadow-lg">
+            {ownerLogin && (
+              <button
+                className="min-h-12 w-full px-3 text-left text-sm"
+                onClick={() => {
+                  setOwnerLogin(false);
+                  setMenu(false);
+                }}
+              >
+                Back
+              </button>
+            )}
+            <button
+              className="min-h-12 w-full px-3 text-left text-sm"
+              onClick={() => window.location.assign('/taie-contact/close')}
+            >
+              Return to editor
+            </button>
             {state.me?.role === 'owner' ? (
               <button
                 className="min-h-12 w-full px-3 text-left text-sm"
@@ -184,6 +174,7 @@ export function TaieContact() {
             }}
             className="space-y-5"
           >
+            <h2 className="text-2xl font-semibold">Owner sign-in</h2>
             <p className="text-sm leading-6 text-[#738172]">
               Sign in to reply to your visitors. Visitors do not need an owner
               key.

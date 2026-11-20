@@ -8,6 +8,7 @@ import {
   type ChatTheme,
 } from '@/components/chat-theme-picker';
 import { ChatCamera } from '@/components/chat-camera';
+import { nativeCameraSprite } from '@/lib/chat-native-camera';
 import { CAMERA_MOTION } from '@/lib/chat-camera';
 import { isSingleEmoji } from '@/lib/chat-emoji';
 import { ChatDrawing } from '@/components/chat-drawing';
@@ -103,7 +104,14 @@ function ChatImage({
   );
 }
 
-export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: string; returnTo?: '/community-chat' | '/taie-contact' }) {
+export function PrivateChat({
+  roomId,
+  returnTo = '/community-chat',
+}: {
+  roomId: string;
+  returnTo?: '/community-chat' | '/taie-contact';
+}) {
+  const compactHeader = returnTo === '/taie-contact';
   const screen = useRef<HTMLElement>(null);
   const presenceScreen = useRef<string | null>(null);
   const presenceSequence = useRef(0);
@@ -138,6 +146,7 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
   const [image, setImage] = useState<File | null>(null);
   const [cameraMotion, setCameraMotion] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const nativeCameraInput = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState('');
   const [copied, setCopied] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState('');
@@ -327,9 +336,13 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
       inviteRef.current = '';
       setInviteToken('');
       setInvitation(null);
-      window.history.replaceState(null, '', window.location.pathname);
+      window.history.replaceState(
+        null,
+        '',
+        window.location.pathname + (compactHeader ? '?from=taie' : ''),
+      );
     }
-  }, [roomId, readVisible]);
+  }, [roomId, readVisible, compactHeader]);
   useEffect(() => {
     const secret =
       new URLSearchParams(window.location.hash.slice(1)).get('invite') ?? '';
@@ -665,6 +678,34 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
       if (job === imageJob.current) setProcessingImage(false);
     }
   }
+  async function chooseNativeCapture(file: File | undefined) {
+    if (!file) return;
+    if (!file.type.startsWith('video/')) return chooseImage(file);
+    const job = ++imageJob.current;
+    setProcessingImage(true);
+    setCameraMotion(false);
+    setImage(null);
+    setError('');
+    try {
+      const sprite = await nativeCameraSprite(
+        file,
+        () => job !== imageJob.current,
+      );
+      if (job === imageJob.current) {
+        setImage(sprite);
+        setCameraMotion(true);
+      }
+    } catch (error) {
+      if (job === imageJob.current)
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Unable to process recording.',
+        );
+    } finally {
+      if (job === imageJob.current) setProcessingImage(false);
+    }
+  }
   async function reactTo(message: ChatMessage, emoji: string) {
     if (busy || status !== 'active' || !connected) return;
     setBusy(true);
@@ -739,8 +780,15 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
       className="messenger-screen relative isolate mx-auto flex h-dvh min-h-0 max-w-6xl flex-col overflow-hidden md:my-4 md:h-[calc(100dvh-2rem)] md:rounded-[28px]"
     >
       <ChatEmojiShower burst={burst} />
-      <header className="messenger-header relative z-20 flex shrink-0 items-center justify-between gap-3 border-b border-[#e1eae4] bg-white/95 px-3 py-3 sm:px-6">
-        <div className="flex min-w-0 items-center gap-2.5">
+      <header
+        className={`messenger-header relative z-20 flex shrink-0 items-center bg-white/95 ${compactHeader ? 'justify-end px-2 py-1' : 'justify-between gap-3 border-b border-[#e1eae4] px-3 py-3 sm:px-6'}`}
+      >
+        {compactHeader && <h1 className="sr-only">Conversation</h1>}
+        <div
+          className={
+            compactHeader ? 'hidden' : 'flex min-w-0 items-center gap-2.5'
+          }
+        >
           <Link
             href={returnTo}
             aria-label="Back to chats"
@@ -779,7 +827,11 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
           <button
             type="button"
             onClick={() => setTamil(!tamil)}
-            className="min-h-10 rounded-full bg-[#f0f5f2] px-3 text-[11px] font-bold text-[#4a6e62]"
+            className={
+              compactHeader
+                ? 'hidden'
+                : 'min-h-10 rounded-full bg-[#f0f5f2] px-3 text-[11px] font-bold text-[#4a6e62]'
+            }
           >
             {tamil ? 'EN' : 'தமிழ்'}
           </button>
@@ -790,7 +842,50 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
             >
               <EllipsisVertical size={20} />
             </summary>
-            <div className="absolute right-0 top-full mt-3 w-64 rounded-[20px] border border-[#e3ebe5] bg-white p-2 shadow-[0_12px_50px_#153c3025]">
+            <div className="absolute right-0 top-full mt-3 max-h-[calc(100dvh-80px)] w-64 overflow-y-auto overscroll-contain rounded-[20px] border border-[#e3ebe5] bg-white p-2 shadow-[0_12px_50px_#153c3025]">
+              {compactHeader && (
+                <>
+                  {room && (
+                    <div className="border-b border-[#edf2ed] px-3 py-3 text-xs text-[#6a8179]">
+                      <strong className="block text-[#244e41]">
+                        {room.peer_name || 'Conversation'}
+                      </strong>
+                      {status === 'active' && (
+                        <ChatPresence
+                          room={room}
+                          tamil={tamil}
+                          connected={connected}
+                        />
+                      )}
+                    </div>
+                  )}
+                  <Link
+                    href={returnTo}
+                    className="flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold hover:bg-[#edf4ef]"
+                  >
+                    Back to conversations
+                  </Link>
+                  <button
+                    type="button"
+                    className="min-h-11 w-full rounded-xl px-3 text-left text-sm font-semibold hover:bg-[#edf4ef]"
+                    onClick={() => {
+                      setTamil(!tamil);
+                      if (actionsMenu.current) actionsMenu.current.open = false;
+                    }}
+                  >
+                    {tamil ? 'English' : 'தமிழ்'}
+                  </button>
+                  <button
+                    type="button"
+                    className="min-h-11 w-full rounded-xl px-3 text-left text-sm font-semibold hover:bg-[#edf4ef]"
+                    onClick={() =>
+                      window.location.assign('/taie-contact/close')
+                    }
+                  >
+                    Return to editor
+                  </button>
+                </>
+              )}
               {me && (
                 <p className="border-b border-[#edf2ed] px-3 py-3 text-xs text-[#6a8179]">
                   {txt('உங்கள் பெயர்', 'Chatting as')}{' '}
@@ -818,7 +913,8 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
                       window.history.replaceState(
                         null,
                         '',
-                        window.location.pathname,
+                        window.location.pathname +
+                          (compactHeader ? '?from=taie' : ''),
                       );
                       await load();
                     }}
@@ -872,15 +968,15 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
               >
                 Change theme
               </button>
-              <a
+              <Link
                 href="/community-chat/rules"
-                target="_blank"
+                target={compactHeader ? undefined : '_blank'}
                 rel="noopener noreferrer"
                 className="flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-[#5a786b] hover:bg-[#edf4ef]"
               >
                 <ShieldCheck size={15} aria-hidden="true" />
                 Privacy & limits
-              </a>
+              </Link>
             </div>
           </details>
         </div>
@@ -1032,7 +1128,8 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
                         window.history.replaceState(
                           null,
                           '',
-                          window.location.pathname,
+                          window.location.pathname +
+                            (compactHeader ? '?from=taie' : ''),
                         );
                       },
                     )
@@ -1054,7 +1151,8 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
                       window.history.replaceState(
                         null,
                         '',
-                        window.location.pathname,
+                        window.location.pathname +
+                          (compactHeader ? '?from=taie' : ''),
                       );
                     }
                   }}
@@ -1402,7 +1500,8 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
                 disabled={busy || processingImage || !connected}
                 onPhoto={() => fileInput.current?.click()}
                 onCamera={() => {
-                  setShowCamera(true);
+                  if (compactHeader) nativeCameraInput.current?.click();
+                  else setShowCamera(true);
                   setShowStickers(false);
                   setShowGames(false);
                 }}
@@ -1420,6 +1519,21 @@ export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: 
                   setShowStickers(false);
                 }}
               />
+              {compactHeader && (
+                <input
+                  ref={nativeCameraInput}
+                  type="file"
+                  accept="image/jpeg,video/mp4,video/3gpp"
+                  capture="environment"
+                  aria-label="Take a photo or short video"
+                  className="sr-only"
+                  disabled={busy}
+                  onChange={(e) => {
+                    void chooseNativeCapture(e.target.files?.[0]);
+                    e.target.value = '';
+                  }}
+                />
+              )}
               <input
                 ref={fileInput}
                 type="file"

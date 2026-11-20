@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { PrivateChat } from '@/components/private-chat';
 
@@ -22,11 +23,13 @@ export default async function PrivateChatPage({
   )
     notFound();
   const { from } = await searchParams;
+  const native =
+    (await headers()).get('user-agent')?.includes('TAIE-App') ?? false;
   return (
     <PrivateChat
       key={roomId}
       roomId={roomId}
-      returnTo={from === 'taie' ? '/taie-contact' : '/community-chat'}
+      returnTo={native || from === 'taie' ? '/taie-contact' : '/community-chat'}
     />
   );
 }
