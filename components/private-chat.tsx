@@ -781,9 +781,17 @@ export function PrivateChat({
     >
       <ChatEmojiShower burst={burst} />
       <header
-        className={`messenger-header relative z-20 flex shrink-0 items-center bg-white/95 ${compactHeader ? 'justify-end px-2 py-1' : 'justify-between gap-3 border-b border-[#e1eae4] px-3 py-3 sm:px-6'}`}
+        className={`messenger-header relative z-20 flex shrink-0 items-center bg-white/95 ${compactHeader ? 'justify-between gap-2 px-2 py-1' : 'justify-between gap-3 border-b border-[#e1eae4] px-3 py-3 sm:px-6'}`}
       >
-        {compactHeader && <h1 className="sr-only">Conversation</h1>}
+        {compactHeader && (
+          <>
+            <h1 className="sr-only">Conversation</h1>
+            <Link href={returnTo} aria-label="Back to chats" className="grid size-12 shrink-0 place-items-center rounded-full text-[#57756c] transition hover:bg-[#edf4ef]">
+              <ArrowLeft size={21} />
+            </Link>
+            <div className="chat-header-art" aria-hidden="true"><span /><span /><span /><i /></div>
+          </>
+        )}
         <div
           className={
             compactHeader ? 'hidden' : 'flex min-w-0 items-center gap-2.5'
@@ -838,7 +846,7 @@ export function PrivateChat({
           <details ref={actionsMenu} className="messenger-actions relative">
             <summary
               aria-label={txt('Chat விருப்பங்கள்', 'Chat options')}
-              className="grid size-10 cursor-pointer list-none place-items-center rounded-full text-[#547268] transition hover:bg-[#edf4ef]"
+              className="grid size-12 cursor-pointer list-none place-items-center rounded-full text-[#547268] transition hover:bg-[#edf4ef]"
             >
               <EllipsisVertical size={20} />
             </summary>
