@@ -189,6 +189,14 @@ export function PrivateChat({
   const reportDialog = useRef<HTMLDialogElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
+  const heartTap = useRef<{
+    x: number;
+    y: number;
+    at: number;
+    valid: boolean;
+  } | null>(null);
+  const heartSending = useRef(false);
+  const lastHeartTap = useRef(0);
   const followLatest = useRef(true);
   const scrollLatest = useCallback(() => {
     followLatest.current = true;
@@ -525,6 +533,7 @@ export function PrivateChat({
       const age = Date.parse(state.server_time) - Date.parse(event.at);
       if (
         event.emoji &&
+        event.emoji !== '❤️' &&
         age >= -1000 &&
         age < 15000 &&
         document.visibilityState === 'visible' &&
@@ -613,6 +622,24 @@ export function PrivateChat({
       setError(err instanceof Error ? err.message : 'Please retry.');
     } finally {
       setBusy(false);
+    }
+  }
+  async function sendBeatingHeart() {
+    if (
+      busy ||
+      processingImage ||
+      !connected ||
+      status !== 'active' ||
+      heartSending.current ||
+      Date.now() - lastHeartTap.current < 2000
+    )
+      return;
+    heartSending.current = true;
+    lastHeartTap.current = Date.now();
+    try {
+      await act({ action: 'send', text: '❤️', clientId: crypto.randomUUID() });
+    } finally {
+      heartSending.current = false;
     }
   }
   async function send(
@@ -912,6 +939,19 @@ export function PrivateChat({
               <EllipsisVertical size={20} />
             </summary>
             <div className="absolute right-0 top-full mt-3 max-h-[calc(100dvh-80px)] w-64 overflow-y-auto overscroll-contain rounded-[20px] border border-[#e3ebe5] bg-white p-2 shadow-[0_12px_50px_#153c3025]">
+              {status === 'active' && (
+                <button
+                  type="button"
+                  disabled={busy || !connected}
+                  onClick={() => {
+                    if (actionsMenu.current) actionsMenu.current.open = false;
+                    void sendBeatingHeart();
+                  }}
+                  className="min-h-12 w-full rounded-xl px-3 text-left text-sm disabled:opacity-40"
+                >
+                  Send beating heart ❤️
+                </button>
+              )}
               {room?.admin_review && (
                 <p lang="en" className="border-b p-3 text-xs leading-5">
                   Admin review enabled. Authorized admins can view messages and
@@ -1329,6 +1369,44 @@ export function PrivateChat({
         <>
           <div
             ref={thread}
+            onPointerDown={(event) => {
+              const target = event.target as HTMLElement;
+              heartTap.current =
+                event.button === 0 &&
+                event.isPrimary &&
+                !target.closest(
+                  'article,button,a,input,textarea,summary,dialog,time,[role="button"]',
+                ) &&
+                !window.getSelection()?.toString()
+                  ? {
+                      x: event.clientX,
+                      y: event.clientY,
+                      at: Date.now(),
+                      valid: true,
+                    }
+                  : null;
+            }}
+            onPointerMove={(event) => {
+              const tap = heartTap.current;
+              if (
+                tap &&
+                Math.hypot(event.clientX - tap.x, event.clientY - tap.y) > 8
+              )
+                tap.valid = false;
+            }}
+            onPointerCancel={() => {
+              heartTap.current = null;
+            }}
+            onPointerUp={() => {
+              const tap = heartTap.current;
+              heartTap.current = null;
+              if (
+                tap?.valid &&
+                Date.now() - tap.at < 450 &&
+                !window.getSelection()?.toString()
+              )
+                void sendBeatingHeart();
+            }}
             onScroll={(event) => {
               const node = event.currentTarget;
               followLatest.current =
@@ -1486,7 +1564,7 @@ export function PrivateChat({
                                 className={
                                   !message.has_image &&
                                   isSingleEmoji(message.body)
-                                    ? 'messenger-single-emoji'
+                                    ? `messenger-single-emoji${loveEmoji(message.body) === '❤️' ? ' messenger-beating-heart' : ''}`
                                     : 'whitespace-pre-wrap break-words text-[14px] leading-[1.55] [overflow-wrap:anywhere]'
                                 }
                               >
