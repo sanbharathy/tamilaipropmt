@@ -7,10 +7,12 @@ export function ChatPresence({
   room,
   tamil,
   connected,
+  compact = false,
 }: {
   room: ChatRoom;
   tamil: boolean;
   connected: boolean;
+  compact?: boolean;
 }) {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
@@ -49,13 +51,14 @@ export function ChatPresence({
       : seen
         ? tamil
           ? `கடைசி: ${time}`
-          : `Last here: ${time}`
+          : `Last active: ${time}`
         : tamil
           ? 'இந்த chat-க்கு இன்னும் வரவில்லை'
           : 'Not seen in this chat yet';
   return (
     <span
       aria-live="polite"
+      data-presence={!connected ? 'unavailable' : online ? 'online' : 'offline'}
       className="flex min-w-0 items-center gap-1.5"
       title={
         tamil
@@ -65,21 +68,45 @@ export function ChatPresence({
     >
       <span
         aria-hidden="true"
-        className={`size-1.5 shrink-0 rounded-full ${online ? 'bg-emerald-500' : 'bg-slate-400'}`}
+        className={`size-2 shrink-0 rounded-full ${!connected ? 'bg-slate-400' : online ? 'bg-emerald-500' : 'bg-red-500'}`}
       />
-      {typing ? (
-        <span className="flex items-center gap-1.5 text-[#218568]">
-          <Pencil size={12} className="chat-typing-pencil" aria-hidden="true" />
-          <span>{tamil ? 'எழுதுகிறார்' : 'Typing'}</span>
-          <span className="chat-typing-dots flex gap-0.5" aria-hidden="true">
-            <i />
-            <i />
-            <i />
+      <span className="min-w-0">
+        {typing ? (
+          <span className="flex items-center gap-1.5 text-[#218568]">
+            <Pencil
+              size={12}
+              className="chat-typing-pencil"
+              aria-hidden="true"
+            />
+            <span>{tamil ? 'எழுதுகிறார்' : 'Typing'}</span>
+            <span className="chat-typing-dots flex gap-0.5" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
           </span>
-        </span>
-      ) : (
-        <span className="truncate">{text}</span>
-      )}
+        ) : (
+          <span className="block truncate">
+            {compact && connected
+              ? online
+                ? tamil
+                  ? 'ஆன்லைனில் உள்ளார்'
+                  : 'Online'
+                : tamil
+                  ? 'ஆஃப்லைன்'
+                  : 'Offline'
+              : text}
+          </span>
+        )}
+        {compact && (
+          <span
+            className="block truncate text-[9px] opacity-80"
+            title={seen ? `Last active: ${time}` : 'No activity recorded yet'}
+          >
+            {seen ? `Last active: ${time}` : 'No activity yet'}
+          </span>
+        )}
+      </span>
     </span>
   );
 }

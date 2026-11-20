@@ -189,13 +189,23 @@ export function PrivateChat({
   const reportDialog = useRef<HTMLDialogElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const bottom = useRef<HTMLDivElement>(null);
+  const followLatest = useRef(true);
+  const scrollLatest = useCallback(() => {
+    followLatest.current = true;
+    window.requestAnimationFrame(() => {
+      if (thread.current)
+        thread.current.scrollTop = thread.current.scrollHeight;
+    });
+  }, []);
   useEffect(() => {
     const viewport = window.visualViewport;
-    const resize = () =>
+    const resize = () => {
       screen.current?.style.setProperty(
         '--chat-viewport-height',
         `${viewport?.height ?? window.innerHeight}px`,
       );
+      if (document.activeElement === composer.current) scrollLatest();
+    };
     resize();
     viewport?.addEventListener('resize', resize);
     window.addEventListener('resize', resize);
@@ -203,7 +213,7 @@ export function PrivateChat({
       viewport?.removeEventListener('resize', resize);
       window.removeEventListener('resize', resize);
     };
-  }, []);
+  }, [scrollLatest]);
   const me = state.me;
   const meId = me?.id;
   const room = state.room;
@@ -211,6 +221,7 @@ export function PrivateChat({
   const chatMessages = state.messages.filter(
     (message) => !message.game_event && !message.reaction_event,
   );
+  const latestMessageId = chatMessages.at(-1)?.id;
   const txt = (ta: string, en: string) => (tamil ? ta : en);
 
   const notifyTyping = useCallback(
@@ -533,8 +544,18 @@ export function PrivateChat({
     return () => clearTimeout(timer);
   }, [burst]);
   useEffect(() => {
-    bottom.current?.scrollIntoView({ block: 'nearest' });
-  }, [chatMessages.length]);
+    scrollLatest();
+  }, [latestMessageId, scrollLatest]);
+  useEffect(() => {
+    if (status !== 'active' || !thread.current) return;
+    const observer = new ResizeObserver(() => {
+      if (document.activeElement === composer.current) scrollLatest();
+    });
+    observer.observe(thread.current);
+    const form = composer.current?.closest('form');
+    if (form) observer.observe(form);
+    return () => observer.disconnect();
+  }, [status, scrollLatest]);
   useEffect(() => {
     if (state.game?.id) {
       // Open newly received game invitations without moving focus from chat.
@@ -763,6 +784,15 @@ export function PrivateChat({
       );
     }
   }
+  function beginReply(message: ChatMessage) {
+    if (busy || status !== 'active') return;
+    setReplyTo(message);
+    setDraft((current) =>
+      Array.from(current).slice(0, REPLY_TEXT_LIMIT).join(''),
+    );
+    setActionMessage(null);
+    composer.current?.focus();
+  }
   const incoming =
     room?.status === 'pending' &&
     room.guest_id === meId &&
@@ -787,7 +817,7 @@ export function PrivateChat({
     >
       <ChatEmojiShower burst={burst} />
       <header
-        className={`messenger-header relative z-20 flex shrink-0 items-center bg-white/95 ${compactHeader ? 'justify-between gap-2 px-2 py-1' : 'justify-between gap-3 border-b border-[#e1eae4] px-3 py-3 sm:px-6'}`}
+        className={`messenger-header relative z-20 flex shrink-0 items-center bg-white/95 ${compactHeader ? 'compact-chat-header justify-between gap-2 px-2 py-1' : 'justify-between gap-3 border-b border-[#e1eae4] px-3 py-3 sm:px-6'}`}
       >
         {compactHeader && (
           <>
@@ -799,6 +829,22 @@ export function PrivateChat({
             >
               <ArrowLeft size={21} />
             </Link>
+            <div className="min-w-0 flex-1 text-[10px] leading-4 text-[#57756c]">
+              {status === 'active' && room ? (
+                <ChatPresence
+                  room={room}
+                  tamil={tamil}
+                  connected={connected}
+                  compact
+                />
+              ) : (
+                <span className="text-[10px]">
+                  {status === 'ended' || status === 'declined'
+                    ? 'Chat ended'
+                    : 'Waiting for friend'}
+                </span>
+              )}
+            </div>
             <div className="chat-header-art" aria-hidden="true">
               <span />
               <span />
@@ -1283,6 +1329,18 @@ export function PrivateChat({
         <>
           <div
             ref={thread}
+            onScroll={(event) => {
+              const node = event.currentTarget;
+              followLatest.current =
+                node.scrollHeight - node.clientHeight - node.scrollTop < 64;
+            }}
+            onLoadCapture={() => {
+              if (
+                followLatest.current ||
+                document.activeElement === composer.current
+              )
+                scrollLatest();
+            }}
             role="log"
             aria-label="Conversation messages"
             aria-live="polite"
@@ -1327,7 +1385,7 @@ export function PrivateChat({
                       month: 'short',
                     });
               return (
-                <div key={message.id}>
+                <div key={message.id} id={`chat-message-${message.id}`}>
                   {newDay && (
                     <div className="mb-5 mt-2 text-center">
                       <time
@@ -1341,7 +1399,10 @@ export function PrivateChat({
                   <div
                     className={`flex ${mine ? 'justify-end' : 'justify-start'}`}
                   >
-                    <MessagePressable onOpen={() => setActionMessage(message)}>
+                    <MessagePressable
+                      onOpen={() => setActionMessage(message)}
+                      onReply={() => beginReply(message)}
+                    >
                       <div
                         data-mine={mine}
                         data-sticker-artwork={sticker?.artwork || undefined}
@@ -1357,7 +1418,41 @@ export function PrivateChat({
                         className={`messenger-bubble overflow-hidden rounded-[20px] ${mine ? 'rounded-br-[5px] bg-[#d9f4e2] text-[#1b473b]' : 'rounded-bl-[5px] bg-white text-[#28473f]'}`}
                       >
                         {message.reply && (
-                          <div className="mx-1.5 mt-1.5 max-w-full rounded-xl border-l-[3px] border-[#479b79] bg-black/[0.04] px-3 py-2 text-xs">
+                          <button
+                            type="button"
+                            aria-label="Jump to replied message"
+                            disabled={message.reply.available === false}
+                            onClick={() => {
+                              const original = document.getElementById(
+                                `chat-message-${message.reply!.id}`,
+                              );
+                              if (!original) {
+                                setNotice(
+                                  'The original message is no longer in this view.',
+                                );
+                                return;
+                              }
+                              original.scrollIntoView({
+                                behavior: window.matchMedia(
+                                  '(prefers-reduced-motion: reduce)',
+                                ).matches
+                                  ? 'auto'
+                                  : 'smooth',
+                                block: 'center',
+                              });
+                              original.classList.add(
+                                'messenger-reply-highlight',
+                              );
+                              window.setTimeout(
+                                () =>
+                                  original.classList.remove(
+                                    'messenger-reply-highlight',
+                                  ),
+                                1200,
+                              );
+                            }}
+                            className="mx-1.5 mt-1.5 block max-w-full rounded-xl border-l-[3px] border-[#479b79] bg-black/[0.04] px-3 py-2 text-left text-xs disabled:opacity-60"
+                          >
                             <strong className="block text-[10px] text-[#317257]">
                               {message.reply.sender_id === meId
                                 ? 'You'
@@ -1367,7 +1462,7 @@ export function PrivateChat({
                               {message.reply.has_image ? '📷 ' : ''}
                               {message.reply.preview}
                             </span>
-                          </div>
+                          </button>
                         )}
                         {message.has_image && (
                           <div className="p-1.5 pb-0">
@@ -1612,6 +1707,7 @@ export function PrivateChat({
               <textarea
                 ref={composer}
                 id="private-message"
+                onFocus={scrollLatest}
                 value={draft}
                 onChange={(e) => {
                   setDraft(e.target.value);
@@ -1693,14 +1789,7 @@ export function PrivateChat({
           message={actionMessage}
           busy={busy}
           onClose={() => setActionMessage(null)}
-          onReply={() => {
-            setReplyTo(actionMessage);
-            setDraft((current) =>
-              Array.from(current).slice(0, REPLY_TEXT_LIMIT).join(''),
-            );
-            setActionMessage(null);
-            composer.current?.focus();
-          }}
+          onReply={() => beginReply(actionMessage)}
           onReact={(emoji) => void reactTo(actionMessage, emoji)}
         />
       )}

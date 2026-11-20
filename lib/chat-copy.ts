@@ -11,7 +11,7 @@ export async function copyChatLink(text: string): Promise<boolean> {
   const field = document.createElement('textarea');
   field.value = text;
   field.readOnly = true;
-  field.setAttribute('aria-label', 'Invitation link to copy');
+  field.setAttribute('aria-label', 'Text to copy');
   Object.assign(field.style, {
     position: 'fixed',
     left: '0',
@@ -20,7 +20,9 @@ export async function copyChatLink(text: string): Promise<boolean> {
     height: '1px',
     opacity: '0',
   });
-  document.body.appendChild(field);
+  (document.querySelector?.('dialog[open]') ?? document.body).appendChild(
+    field,
+  );
   try {
     field.focus();
     field.select();

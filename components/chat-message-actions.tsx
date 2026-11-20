@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   MoreHorizontal,
   Plus,
@@ -10,17 +10,24 @@ import {
   Camera,
   X,
 } from 'lucide-react';
-import { chatStickerPreview } from '@/lib/chat-stickers';
+import { chatStickerPreview, findChatSticker } from '@/lib/chat-stickers';
+import { copyChatLink } from '@/lib/chat-copy';
 import { REACTION_EMOJIS } from '@/lib/chat-interactions';
 import type { ChatMessage } from '@/lib/chat-types';
 
 export function MessagePressable({
   children,
   onOpen,
+  onReply,
 }: {
   children: ReactNode;
   onOpen: () => void;
+  onReply: () => void;
 }) {
+  const [offset, setOffset] = useState(0);
+  const gesture = useRef<{ id: number; dx: number; cancelled: boolean } | null>(
+    null,
+  );
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null),
     start = useRef({ x: 0, y: 0 }),
     held = useRef(false);
@@ -34,22 +41,47 @@ export function MessagePressable({
   return (
     // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <article
-      className="group relative min-w-0 max-w-[88%] sm:max-w-[72%]"
+      className="message-pressable group relative min-w-0 max-w-[88%] sm:max-w-[72%]"
+      style={{
+        transform: `translateX(${offset}px)`,
+        transition: offset ? 'none' : 'transform 160ms ease-out',
+        touchAction: 'pan-y pinch-zoom',
+      }}
       onPointerDown={(event) => {
         if (
           event.button !== 0 ||
-          (event.target as HTMLElement).closest('button')
+          (event.target as HTMLElement).closest('button,input,textarea,video')
         )
           return;
         clear();
         held.current = false;
         start.current = { x: event.clientX, y: event.clientY };
+        gesture.current =
+          event.pointerType === 'mouse'
+            ? null
+            : { id: event.pointerId, dx: 0, cancelled: false };
         timer.current = setTimeout(() => {
           held.current = true;
           onOpen();
         }, 450);
       }}
       onPointerMove={(event) => {
+        const current = gesture.current;
+        if (current && current.id === event.pointerId && !held.current) {
+          const dx = event.clientX - start.current.x,
+            dy = event.clientY - start.current.y;
+          current.dx = dx;
+          if (dx <= 12) setOffset(0);
+          if (Math.abs(dy) > 18 && Math.abs(dy) > Math.abs(dx)) {
+            current.cancelled = true;
+            setOffset(0);
+          }
+          if (!current.cancelled && dx > 12 && dx > Math.abs(dy) * 1.5) {
+            clear();
+            setOffset(Math.min(48, dx * 0.6));
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }
+        }
         if (
           Math.hypot(
             event.clientX - start.current.x,
@@ -58,8 +90,26 @@ export function MessagePressable({
         )
           clear();
       }}
-      onPointerUp={clear}
-      onPointerCancel={clear}
+      onPointerUp={() => {
+        clear();
+        const current = gesture.current;
+        gesture.current = null;
+        setOffset(0);
+        if (
+          current &&
+          !current.cancelled &&
+          current.dx >= 60 &&
+          !held.current
+        ) {
+          held.current = true;
+          onReply();
+        }
+      }}
+      onPointerCancel={() => {
+        clear();
+        gesture.current = null;
+        setOffset(0);
+      }}
       onPointerLeave={clear}
       onContextMenu={(event) => {
         event.preventDefault();
@@ -74,6 +124,14 @@ export function MessagePressable({
         }
       }}
     >
+      {offset > 12 && (
+        <span
+          aria-hidden="true"
+          className="absolute -left-6 top-3 text-lg text-[#34836d]"
+        >
+          ↩
+        </span>
+      )}
       {children}
       <button
         type="button"
@@ -100,6 +158,14 @@ export function ChatActionDialog({
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'manual'>(
+    'idle',
+  );
+  const canCopy =
+    !!message.body.trim() &&
+    !findChatSticker(message.body) &&
+    !message.game_event &&
+    !message.reaction_event;
   useEffect(() => {
     dialog.current?.showModal();
   }, []);
@@ -149,6 +215,36 @@ export function ChatActionDialog({
       >
         Reply to message
       </button>
+      {canCopy && (
+        <button
+          type="button"
+          onClick={async () =>
+            setCopyState(
+              (await copyChatLink(message.body)) ? 'copied' : 'manual',
+            )
+          }
+          className="mt-2 min-h-12 w-full rounded-xl border border-[#d8e5dc] text-sm font-bold"
+        >
+          Copy text
+        </button>
+      )}
+      {copyState === 'copied' && (
+        <output className="mt-3 block text-center text-xs text-[#28775a]">
+          Text copied!
+        </output>
+      )}
+      {copyState === 'manual' && (
+        <label className="mt-3 block text-xs leading-5">
+          Select the text below, then Copy:
+          <textarea
+            aria-label="Message text to copy"
+            readOnly
+            value={message.body}
+            onFocus={(event) => event.target.select()}
+            className="mt-2 w-full rounded-xl border p-3"
+          />
+        </label>
+      )}
     </dialog>
   );
 }
