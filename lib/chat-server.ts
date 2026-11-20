@@ -12,6 +12,8 @@ export function chatDb() {
   pool ??= postgres(process.env.CHAT_DATABASE_URL, {
     ssl: 'require',
     max: 3,
+    // Supavisor transaction pooling needs one in-flight query per connection.
+    max_pipeline: 1,
     prepare: false,
     idle_timeout: 20,
     connect_timeout: 10,
@@ -108,7 +110,26 @@ export function textOf(value: unknown, min: number, max: number) {
     throw new ChatError(`Please use ${min}–${max} characters.`);
   return text;
 }
-export async function sessionOf(request: Request, required = true) {
+type ChatSession = {
+  id: string;
+  name: string;
+  available: boolean;
+  topic: string;
+  suspended: boolean;
+  archive_notice: boolean;
+};
+export function sessionOf(
+  request: Request,
+  required?: true,
+): Promise<ChatSession>;
+export function sessionOf(
+  request: Request,
+  required: false,
+): Promise<ChatSession | null>;
+export async function sessionOf(
+  request: Request,
+  required = true,
+): Promise<ChatSession | null> {
   const secret = cookieToken(request);
   const sql = chatDb();
   const [me] = secret
@@ -121,7 +142,16 @@ export async function sessionOf(request: Request, required = true) {
       'This guest session has been suspended by a moderator.',
       403,
     );
-  return me ?? null;
+  if (me?.topic === 'taie-contact-owner') {
+    const [ownerSession] =
+      await sql`select 1 from tamil_chat.limits where key=${`taie-owner:${me.id}:${hash(secret!)}`} and expires_at>now()`;
+    if (!ownerSession) {
+      if (required)
+        throw new ChatError('Owner sign-in expired. Sign in again.', 401);
+      return null;
+    }
+  }
+  return (me ?? null) as ChatSession | null;
 }
 export async function limit(key: string, maximum: number, seconds: number) {
   const sql = chatDb();

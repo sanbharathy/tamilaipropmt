@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 
 export function AdsenseLoader({ publisherId }: { publisherId: string }) {
   const pathname = usePathname();
-  if (pathname?.startsWith('/chat/') || pathname?.startsWith('/community-chat'))
+  if (pathname?.startsWith('/chat/') || pathname?.startsWith('/community-chat') || pathname?.startsWith('/taie-contact'))
     return null;
   return (
     <script

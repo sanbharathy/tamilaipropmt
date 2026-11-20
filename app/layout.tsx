@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_Tamil, Outfit } from 'next/font/google';
-import { Analytics } from '@vercel/analytics/next';
+import { SiteAnalytics } from '@/components/site-analytics';
 import {AdsenseLoader} from '@/components/adsense-loader';
 import './globals.css';
 
@@ -168,7 +168,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <Analytics />
+        <SiteAnalytics />
       </body>
     </html>
   );

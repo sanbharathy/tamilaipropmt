@@ -103,7 +103,7 @@ function ChatImage({
   );
 }
 
-export function PrivateChat({ roomId }: { roomId: string }) {
+export function PrivateChat({ roomId, returnTo = '/community-chat' }: { roomId: string; returnTo?: '/community-chat' | '/taie-contact' }) {
   const screen = useRef<HTMLElement>(null);
   const presenceScreen = useRef<string | null>(null);
   const presenceSequence = useRef(0);
@@ -742,7 +742,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
       <header className="messenger-header relative z-20 flex shrink-0 items-center justify-between gap-3 border-b border-[#e1eae4] bg-white/95 px-3 py-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-2.5">
           <Link
-            href="/community-chat"
+            href={returnTo}
             aria-label="Back to chats"
             className="grid size-10 shrink-0 place-items-center rounded-full text-[#57756c] transition hover:bg-[#edf4ef]"
           >
@@ -1113,7 +1113,7 @@ export function PrivateChat({ roomId }: { roomId: string }) {
             {(status === 'ended' || status === 'declined' || missing) &&
               !canAccept && (
                 <Link
-                  href="/community-chat"
+                  href={returnTo}
                   className="mt-6 inline-flex min-h-11 items-center rounded-xl border border-[#cbd9c7] px-5 text-sm font-semibold"
                 >
                   {txt('Chats-க்குத் திரும்பு', 'Back to chats')}

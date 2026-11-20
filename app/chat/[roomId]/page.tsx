@@ -9,8 +9,10 @@ export const metadata: Metadata = {
 };
 export default async function PrivateChatPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ roomId: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   const { roomId } = await params;
   if (
@@ -19,5 +21,12 @@ export default async function PrivateChatPage({
     )
   )
     notFound();
-  return <PrivateChat key={roomId} roomId={roomId} />;
+  const { from } = await searchParams;
+  return (
+    <PrivateChat
+      key={roomId}
+      roomId={roomId}
+      returnTo={from === 'taie' ? '/taie-contact' : '/community-chat'}
+    />
+  );
 }
