@@ -68,6 +68,7 @@ export async function GET(request: Request) {
     if (roomId) validId(roomId);
     const rooms =
       await sql`select r.id,r.host_id,r.guest_id,r.source,r.status,r.created_at,r.expires_at,
+      exists(select 1 from tamil_chat.limits l where l.key='taie-review:'||r.id::text and l.expires_at>now()) as admin_review,
       case when r.host_id=${me.id} then g.name else h.name end as peer_name,
       case when r.host_id=${me.id} then r.guest_read_id else r.host_read_id end::text as peer_read_id,
       case when r.host_id=${me.id} then r.guest_read_at else r.host_read_at end as peer_read_at,
@@ -331,6 +332,8 @@ export async function POST(request: Request) {
         }
         const [created] =
           await tx`insert into tamil_chat.rooms(id,host_id,guest_id,invite_hash,source,archive_enabled) values(${randomUUID()},${me.id},${peer},${invite ? hash(invite) : null},${peer ? 'directory' : 'link'},true) returning id`;
+        if (body.action === 'create' && body.reviewAccepted === true)
+          await tx`insert into tamil_chat.limits(key,count,expires_at) values(${'taie-review:' + created.id},1,now()+interval '24 hours')`;
         return created;
       });
       return respond({ roomId: room.id, invite });
@@ -352,8 +355,16 @@ export async function POST(request: Request) {
             'This invitation belongs to a different conversation.',
             400,
           );
+        const review =
+          await tx`select 1 from tamil_chat.limits where key=${'taie-review:' + room.id} and expires_at>now()`;
+        const reviewRequired = review.length > 0;
         if (room.host_id === me.id || room.guest_id === me.id)
-          return { roomId: room.id, hostName: room.host_name, own: true };
+          return {
+            roomId: room.id,
+            hostName: room.host_name,
+            own: true,
+            reviewRequired,
+          };
         if (room.guest_id)
           throw new ChatError('This conversation already has two people.', 409);
         const blocked =
@@ -366,9 +377,23 @@ export async function POST(request: Request) {
               'Please acknowledge the security archive notice before joining.',
               403,
             );
+        if (
+          body.action === 'accept-invite' &&
+          reviewRequired &&
+          body.reviewAccepted !== true
+        )
+          throw new ChatError(
+            'Please acknowledge admin review before joining.',
+            403,
+          );
         if (body.action === 'accept-invite')
           await tx`update tamil_chat.rooms set guest_id=${me.id},status='active',invite_hash=null where id=${room.id}`;
-        return { roomId: room.id, hostName: room.host_name, own: false };
+        return {
+          roomId: room.id,
+          hostName: room.host_name,
+          own: false,
+          reviewRequired,
+        };
       });
       return respond(result);
     }

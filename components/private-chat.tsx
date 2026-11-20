@@ -127,10 +127,12 @@ export function PrivateChat({
   const [notice, setNotice] = useState('');
   const [nickname, setNickname] = useState('');
   const [agreed, setAgreed] = useState(false);
+  const [reviewAccepted, setReviewAccepted] = useState(false);
   const [inviteToken, setInviteToken] = useState('');
   const [invitation, setInvitation] = useState<{
     hostName: string;
     own: boolean;
+    reviewRequired?: boolean;
   } | null>(null);
   const [missing, setMissing] = useState(false);
   const [draft, setDraft] = useState('');
@@ -433,7 +435,11 @@ export function PrivateChat({
             data.error ?? 'This invitation is for a different conversation.',
           );
         if (!cancelled)
-          setInvitation({ hostName: data.hostName, own: data.own });
+          setInvitation({
+            hostName: data.hostName,
+            own: data.own,
+            reviewRequired: data.reviewRequired,
+          });
       })
       .catch((err) => {
         if (!cancelled) {
@@ -786,10 +792,19 @@ export function PrivateChat({
         {compactHeader && (
           <>
             <h1 className="sr-only">Conversation</h1>
-            <Link href={returnTo} aria-label="Back to chats" className="grid size-12 shrink-0 place-items-center rounded-full text-[#57756c] transition hover:bg-[#edf4ef]">
+            <Link
+              href={returnTo}
+              aria-label="Back to chats"
+              className="grid size-12 shrink-0 place-items-center rounded-full text-[#57756c] transition hover:bg-[#edf4ef]"
+            >
               <ArrowLeft size={21} />
             </Link>
-            <div className="chat-header-art" aria-hidden="true"><span /><span /><span /><i /></div>
+            <div className="chat-header-art" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <i />
+            </div>
           </>
         )}
         <div
@@ -851,6 +866,12 @@ export function PrivateChat({
               <EllipsisVertical size={20} />
             </summary>
             <div className="absolute right-0 top-full mt-3 max-h-[calc(100dvh-80px)] w-64 overflow-y-auto overscroll-contain rounded-[20px] border border-[#e3ebe5] bg-white p-2 shadow-[0_12px_50px_#153c3025]">
+              {room?.admin_review && (
+                <p lang="en" className="border-b p-3 text-xs leading-5">
+                  Admin review enabled. Authorized admins can view messages and
+                  images while active. The 30-day security archive applies.
+                </p>
+              )}
               {compactHeader && (
                 <>
                   {room && (
@@ -1119,15 +1140,46 @@ export function PrivateChat({
                 )
               )}
             </p>
+            {canAccept && invitation.reviewRequired && (
+              <label
+                lang="en"
+                className="mt-5 flex items-start gap-3 rounded-xl bg-[#eef4ef] p-4 text-left text-xs leading-6"
+              >
+                <input
+                  type="checkbox"
+                  checked={reviewAccepted}
+                  onChange={(e) => setReviewAccepted(e.target.checked)}
+                  className="mt-1 size-5 shrink-0"
+                />
+                <span>
+                  I understand that authorized admins can review messages and
+                  shared images while this chat is active. A security PDF with
+                  messages, reduced-size images, names and timestamps is kept
+                  for 30 days after it ends. This chat is not end-to-end
+                  encrypted.
+                </span>
+              </label>
+            )}
             {(canAccept || incoming) && (
               <div className="mt-5 flex justify-center gap-3">
                 <button
                   type="button"
-                  disabled={busy}
+                  disabled={
+                    busy ||
+                    !!(
+                      canAccept &&
+                      invitation.reviewRequired &&
+                      !reviewAccepted
+                    )
+                  }
                   onClick={() =>
                     void act(
                       canAccept
-                        ? { action: 'accept-invite', invite: inviteToken }
+                        ? {
+                            action: 'accept-invite',
+                            invite: inviteToken,
+                            reviewAccepted,
+                          }
                         : { action: 'accept' },
                       () => {
                         inviteRef.current = '';

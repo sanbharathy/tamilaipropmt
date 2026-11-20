@@ -17,6 +17,7 @@ export type ChatSession = {
   archive_notice?: boolean;
 };
 export type ChatRoom = {
+  admin_review?: boolean;
   id: string;
   host_id: string;
   guest_id: string | null;

@@ -1,5 +1,7 @@
 'use client';
 import Link from 'next/link';
+import { ChatLinkCreator } from './chat-link-creator';
+import { ChatAdminConversations } from './chat-admin-conversations';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, Copy, MoreVertical, House } from 'lucide-react';
 type Room = { id: string; peer_name: string; expires_at: string };
@@ -37,6 +39,7 @@ export function TaieContact() {
     [key, setKey] = useState(''),
     [copyStatus, setCopyStatus] = useState('');
   const [returnLink, setReturnLink] = useState('');
+  const [linkMode, setLinkMode] = useState(false);
   const startup = useRef<Promise<void> | null>(null);
   const refresh = useCallback(async () => {
     setState(await call());
@@ -111,7 +114,12 @@ export function TaieContact() {
     >
       <header className="relative flex min-h-12 items-center justify-between">
         <h1 className="sr-only">Conversations</h1>
-        <button type="button" aria-label="Home - return to image editor" onClick={() => window.location.assign('/taie-contact/close')} className="flex min-h-12 items-center gap-2 rounded-full bg-white px-4 text-sm font-semibold shadow-sm transition hover:bg-[#edf4ef]">
+        <button
+          type="button"
+          aria-label="Home - return to image editor"
+          onClick={() => window.location.assign('/taie-contact/close')}
+          className="flex min-h-12 items-center gap-2 rounded-full bg-white px-4 text-sm font-semibold shadow-sm transition hover:bg-[#edf4ef]"
+        >
           <House size={19} aria-hidden="true" /> Home
         </button>
         <button
@@ -166,8 +174,22 @@ export function TaieContact() {
           </div>
         )}
       </header>
+      {!linkMode && !ownerLogin && (
+        <button
+          type="button"
+          onClick={() => setLinkMode(true)}
+          className="mt-5 min-h-14 rounded-2xl border border-[#d9e3da] bg-white px-5 py-4 text-left"
+        >
+          <strong className="block text-sm">Create a chat link</strong>
+          <span className="text-xs text-[#66796d]">
+            Invite a friend and chat together
+          </span>
+        </button>
+      )}
       <section className="flex flex-1 flex-col justify-center py-8">
-        {!ready ? (
+        {linkMode ? (
+          <ChatLinkCreator onBack={() => setLinkMode(false)} />
+        ) : !ready ? (
           <output>Connecting…</output>
         ) : ownerLogin ? (
           <form
@@ -213,6 +235,7 @@ export function TaieContact() {
           </form>
         ) : state.me?.role === 'owner' ? (
           <div>
+            <ChatAdminConversations />
             <p className="mb-5 text-sm text-[#738172]">
               Open a conversation to reply. Chats end after 24 hours or when
               destroyed.

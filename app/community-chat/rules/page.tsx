@@ -7,6 +7,10 @@ export const metadata: Metadata = {
 };
 const rules = [
   [
+    'Disclosed admin review for app invitation links',
+    'New friend links created in the TAIE app enable an owner-only review panel. The creator acknowledges this before creating the link, and the invited participant must acknowledge it before joining. Authorized owners can review the newest 100 messages and shared images while the room is active. Review access is logged for up to 30 days. Ending or expiry stops live review access; the disclosed 30-day encrypted security PDF policy still applies. This panel does not expose older conversations that were not created with the review notice.',
+  ],
+  [
     'Games together',
     'Accepted chat participants can invite one another to simple turn-based games. Your friend must accept before play starts. Game invitations and moves are stored as chat activity and follow the same chat expiry and disclosed security-archive policy. One game can be active at a time. Leaving a game does not end the conversation. Games use no external game service and have no prizes or paid stakes.',
   ],
