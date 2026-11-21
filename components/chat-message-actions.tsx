@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   MoreHorizontal,
+  Copy,
+  Check,
   Plus,
   ImagePlus,
   Smile,
@@ -156,14 +158,12 @@ export function ChatActionDialog({
   message,
   busy,
   anchor,
-  onReply,
   onReact,
   onClose,
 }: {
   message: ChatMessage;
   busy: boolean;
   anchor?: DOMRect | null;
-  onReply: () => void;
   onReact: (emoji: string) => void;
   onClose: () => void;
 }) {
@@ -218,11 +218,11 @@ export function ChatActionDialog({
   }, [anchor, message.id]);
   // Native dialog provides Escape and a focusable Close button; clicks here only dismiss its backdrop.
   return (
-    // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
+    // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={dialog}
       onCancel={onClose}
-      onClick={(event) => {
+      onPointerDown={(event) => {
         if (event.target !== event.currentTarget) return;
         const r = event.currentTarget.getBoundingClientRect();
         if (
@@ -236,58 +236,42 @@ export function ChatActionDialog({
       aria-label="Message actions"
       className="messenger-dialog messenger-reaction-popup fixed m-0 max-h-[70dvh] overflow-y-auto rounded-2xl border border-[#dbe7df] bg-white p-2 text-[#193c37] shadow-xl backdrop:bg-black/10"
     >
-      <div className="flex items-center gap-0.5" aria-label="Quick reactions">
-        {REACTION_EMOJIS.map((emoji) => (
-          <button
-            key={emoji}
-            type="button"
-            disabled={busy}
-            aria-label={`React ${emoji}`}
-            onClick={() => onReact(emoji)}
-            className="grid h-11 min-w-0 flex-1 place-items-center rounded-full text-[26px] hover:bg-[#edf5ef] disabled:opacity-40"
-          >
-            {emoji}
-          </button>
-        ))}
-      </div>
-      <div className="mt-1 flex items-center gap-1 border-t border-[#edf2ed] pt-1">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            dialog.current?.close();
-            onReply();
-          }}
-          className="min-h-11 flex-1 rounded-xl text-xs font-bold hover:bg-[#edf5ef]"
+      <div className="flex items-center gap-1" aria-label="Quick reactions">
+        <div
+          className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto"
+          style={{ scrollbarWidth: 'none' }}
         >
-          Reply to message
-        </button>
+          {REACTION_EMOJIS.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              disabled={busy}
+              aria-label={`React ${emoji}`}
+              onClick={() => onReact(emoji)}
+              className="grid size-11 shrink-0 place-items-center rounded-full text-[26px] hover:bg-[#edf5ef] disabled:opacity-40"
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
         {canCopy && (
           <button
             type="button"
+            aria-label={copyState === 'copied' ? 'Text copied' : 'Copy text'}
+            title={copyState === 'copied' ? 'Copied!' : 'Copy text'}
             onClick={async () =>
               setCopyState(
                 (await copyChatLink(message.body)) ? 'copied' : 'manual',
               )
             }
-            className="min-h-11 flex-1 rounded-xl text-xs font-bold hover:bg-[#edf5ef]"
+            className="grid size-11 shrink-0 place-items-center rounded-full border-l border-[#e0e9e3] text-[#365d50] hover:bg-[#edf5ef]"
           >
-            Copy text
+            {copyState === 'copied' ? <Check size={19} /> : <Copy size={19} />}
           </button>
         )}
-        <button
-          type="button"
-          aria-label="Close message actions"
-          onClick={onClose}
-          className="grid size-10 shrink-0 place-items-center rounded-full"
-        >
-          <X size={17} />
-        </button>
       </div>
       {copyState === 'copied' && (
-        <output className="mt-1 block text-center text-xs text-[#28775a]">
-          Text copied!
-        </output>
+        <output className="sr-only">Text copied!</output>
       )}
       {copyState === 'manual' && (
         <label className="block text-xs">

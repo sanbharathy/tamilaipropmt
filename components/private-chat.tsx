@@ -1872,7 +1872,6 @@ export function PrivateChat({
           anchor={actionAnchor}
           busy={busy}
           onClose={() => setActionMessage(null)}
-          onReply={() => beginReply(actionMessage)}
           onReact={(emoji) => void reactTo(actionMessage, emoji)}
         />
       )}
