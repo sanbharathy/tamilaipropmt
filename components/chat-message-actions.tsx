@@ -21,9 +21,13 @@ export function MessagePressable({
   onReply,
 }: {
   children: ReactNode;
-  onOpen: () => void;
+  onOpen: (bounds: DOMRect) => void;
   onReply: () => void;
 }) {
+  const article = useRef<HTMLElement>(null);
+  const openActions = () => {
+    if (article.current) onOpen(article.current.getBoundingClientRect());
+  };
   const [offset, setOffset] = useState(0);
   const gesture = useRef<{ id: number; dx: number; cancelled: boolean } | null>(
     null,
@@ -41,6 +45,7 @@ export function MessagePressable({
   return (
     // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <article
+      ref={article}
       className="message-pressable group relative min-w-0 max-w-[88%] sm:max-w-[72%]"
       style={{
         transform: `translateX(${offset}px)`,
@@ -48,9 +53,12 @@ export function MessagePressable({
         touchAction: 'pan-y pinch-zoom',
       }}
       onPointerDown={(event) => {
+        const control = (event.target as Element).closest(
+          'button,input,textarea,video',
+        );
         if (
           event.button !== 0 ||
-          (event.target as HTMLElement).closest('button,input,textarea,video')
+          (control && !control.classList.contains('messenger-photo'))
         )
           return;
         clear();
@@ -62,7 +70,7 @@ export function MessagePressable({
             : { id: event.pointerId, dx: 0, cancelled: false };
         timer.current = setTimeout(() => {
           held.current = true;
-          onOpen();
+          openActions();
         }, 450);
       }}
       onPointerMove={(event) => {
@@ -114,7 +122,7 @@ export function MessagePressable({
       onContextMenu={(event) => {
         event.preventDefault();
         clear();
-        onOpen();
+        openActions();
       }}
       onClickCapture={(event) => {
         if (held.current) {
@@ -136,7 +144,7 @@ export function MessagePressable({
       <button
         type="button"
         aria-label="Reply or react to message"
-        onClick={onOpen}
+        onClick={openActions}
         className="messenger-message-menu absolute right-0 top-0 grid size-7 place-items-center rounded-full bg-white/90 text-[#52766a] opacity-0 group-hover:opacity-100 focus:opacity-100"
       >
         <MoreHorizontal size={17} />
@@ -147,12 +155,14 @@ export function MessagePressable({
 export function ChatActionDialog({
   message,
   busy,
+  anchor,
   onReply,
   onReact,
   onClose,
 }: {
   message: ChatMessage;
   busy: boolean;
+  anchor?: DOMRect | null;
   onReply: () => void;
   onReact: (emoji: string) => void;
   onClose: () => void;
@@ -167,30 +177,66 @@ export function ChatActionDialog({
     !message.game_event &&
     !message.reaction_event;
   useEffect(() => {
-    dialog.current?.showModal();
-  }, []);
+    const node = dialog.current!;
+    node.showModal();
+    const place = () => {
+      const liveAnchor =
+        document
+          .getElementById(`chat-message-${message.id}`)
+          ?.querySelector('article')
+          ?.getBoundingClientRect() ?? anchor;
+      const viewport = window.visualViewport;
+      const width = Math.min(360, (viewport?.width ?? innerWidth) - 16);
+      node.style.width = width + 'px';
+      const height = node.offsetHeight,
+        viewHeight = viewport?.height ?? innerHeight;
+      const above = (liveAnchor?.top ?? viewHeight / 2) - height - 8;
+      const top =
+        above >= 8
+          ? above
+          : Math.min((liveAnchor?.bottom ?? 8) + 8, viewHeight - height - 8);
+      node.style.top = Math.max(8, top) + 'px';
+      node.style.left =
+        Math.max(
+          8,
+          Math.min(
+            liveAnchor?.left ?? 8,
+            (viewport?.width ?? innerWidth) - width - 8,
+          ),
+        ) + 'px';
+    };
+    const observer = new ResizeObserver(place);
+    observer.observe(node);
+    window.addEventListener('resize', place);
+    window.visualViewport?.addEventListener('resize', place);
+    place();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', place);
+      window.visualViewport?.removeEventListener('resize', place);
+    };
+  }, [anchor, message.id]);
+  // Native dialog provides Escape and a focusable Close button; clicks here only dismiss its backdrop.
   return (
+    // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={dialog}
       onCancel={onClose}
+      onClick={(event) => {
+        if (event.target !== event.currentTarget) return;
+        const r = event.currentTarget.getBoundingClientRect();
+        if (
+          event.clientX < r.left ||
+          event.clientX > r.right ||
+          event.clientY < r.top ||
+          event.clientY > r.bottom
+        )
+          onClose();
+      }}
       aria-label="Message actions"
-      className="messenger-dialog m-auto w-[calc(100%-24px)] max-w-sm rounded-3xl border-0 bg-white p-4 text-[#193c37] backdrop:bg-black/40"
+      className="messenger-dialog messenger-reaction-popup fixed m-0 max-h-[70dvh] overflow-y-auto rounded-2xl border border-[#dbe7df] bg-white p-2 text-[#193c37] shadow-xl backdrop:bg-black/10"
     >
-      <div className="flex items-center justify-between gap-3">
-        <p className="line-clamp-2 min-w-0 break-words text-xs text-[#617b6d]">
-          {message.has_image ? '📷 ' : ''}
-          {chatStickerPreview(message.body)}
-        </p>
-        <button
-          type="button"
-          aria-label="Close message actions"
-          onClick={onClose}
-          className="grid size-11 shrink-0 place-items-center"
-        >
-          <X size={18} />
-        </button>
-      </div>
-      <div className="my-3 grid grid-cols-4 gap-1">
+      <div className="flex items-center gap-0.5" aria-label="Quick reactions">
         {REACTION_EMOJIS.map((emoji) => (
           <button
             key={emoji}
@@ -198,50 +244,60 @@ export function ChatActionDialog({
             disabled={busy}
             aria-label={`React ${emoji}`}
             onClick={() => onReact(emoji)}
-            className="min-h-12 rounded-xl text-3xl hover:bg-[#edf5ef] disabled:opacity-40"
+            className="grid h-11 min-w-0 flex-1 place-items-center rounded-full text-[26px] hover:bg-[#edf5ef] disabled:opacity-40"
           >
             {emoji}
           </button>
         ))}
       </div>
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => {
-          dialog.current?.close();
-          onReply();
-        }}
-        className="min-h-12 w-full rounded-xl bg-[#e7f2eb] text-sm font-bold"
-      >
-        Reply to message
-      </button>
-      {canCopy && (
+      <div className="mt-1 flex items-center gap-1 border-t border-[#edf2ed] pt-1">
         <button
           type="button"
-          onClick={async () =>
-            setCopyState(
-              (await copyChatLink(message.body)) ? 'copied' : 'manual',
-            )
-          }
-          className="mt-2 min-h-12 w-full rounded-xl border border-[#d8e5dc] text-sm font-bold"
+          disabled={busy}
+          onClick={() => {
+            dialog.current?.close();
+            onReply();
+          }}
+          className="min-h-11 flex-1 rounded-xl text-xs font-bold hover:bg-[#edf5ef]"
         >
-          Copy text
+          Reply to message
         </button>
-      )}
+        {canCopy && (
+          <button
+            type="button"
+            onClick={async () =>
+              setCopyState(
+                (await copyChatLink(message.body)) ? 'copied' : 'manual',
+              )
+            }
+            className="min-h-11 flex-1 rounded-xl text-xs font-bold hover:bg-[#edf5ef]"
+          >
+            Copy text
+          </button>
+        )}
+        <button
+          type="button"
+          aria-label="Close message actions"
+          onClick={onClose}
+          className="grid size-10 shrink-0 place-items-center rounded-full"
+        >
+          <X size={17} />
+        </button>
+      </div>
       {copyState === 'copied' && (
-        <output className="mt-3 block text-center text-xs text-[#28775a]">
+        <output className="mt-1 block text-center text-xs text-[#28775a]">
           Text copied!
         </output>
       )}
       {copyState === 'manual' && (
-        <label className="mt-3 block text-xs leading-5">
-          Select the text below, then Copy:
+        <label className="block text-xs">
+          Select and copy:
           <textarea
             aria-label="Message text to copy"
             readOnly
             value={message.body}
             onFocus={(event) => event.target.select()}
-            className="mt-2 w-full rounded-xl border p-3"
+            className="mt-1 max-h-20 w-full rounded-xl border p-2"
           />
         </label>
       )}

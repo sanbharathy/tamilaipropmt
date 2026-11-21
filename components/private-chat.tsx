@@ -138,6 +138,7 @@ export function PrivateChat({
   const [draft, setDraft] = useState('');
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
+  const [actionAnchor, setActionAnchor] = useState<DOMRect | null>(null);
   const [reportPicker, setReportPicker] = useState(false);
   const [processingImage, setProcessingImage] = useState(false);
   const imageJob = useRef(0);
@@ -1478,7 +1479,10 @@ export function PrivateChat({
                     className={`flex ${mine ? 'justify-end' : 'justify-start'}`}
                   >
                     <MessagePressable
-                      onOpen={() => setActionMessage(message)}
+                      onOpen={(bounds) => {
+                        setActionAnchor(bounds);
+                        setActionMessage(message);
+                      }}
                       onReply={() => beginReply(message)}
                     >
                       <div
@@ -1865,6 +1869,7 @@ export function PrivateChat({
       {actionMessage && status === 'active' && (
         <ChatActionDialog
           message={actionMessage}
+          anchor={actionAnchor}
           busy={busy}
           onClose={() => setActionMessage(null)}
           onReply={() => beginReply(actionMessage)}
