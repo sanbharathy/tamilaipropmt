@@ -12,6 +12,7 @@ import {
   LoaderCircle,
 } from 'lucide-react';
 import { downloadChatImage } from '@/lib/chat-image-download';
+import { compressChatImage } from '@/lib/chat-image-client';
 type Point = { x: number; y: number };
 type Stroke = { points: Point[]; color: string; width: number };
 function paint(context: CanvasRenderingContext2D, strokes: Stroke[]) {
@@ -44,10 +45,12 @@ export function ChatPhotoViewer({
   messageId,
   tamil,
   onClose,
+  onSend,
 }: {
   messageId: string;
   tamil: boolean;
   onClose: () => void;
+  onSend?: (file: File) => Promise<void>;
 }) {
   const stage = useRef<HTMLDivElement>(null);
   const [natural, setNatural] = useState<{
@@ -60,6 +63,7 @@ export function ChatPhotoViewer({
     canvas = useRef<HTMLCanvasElement>(null),
     strokes = useRef<Stroke[]>([]),
     active = useRef<{ id: number; stroke: Stroke; start: Point } | null>(null);
+  const [sending, setSending] = useState(false);
   const [zoom, setZoom] = useState(false),
     [drawing, setDrawing] = useState(false),
     [tool, setTool] = useState<'pen' | 'line'>('pen'),
@@ -143,29 +147,57 @@ export function ChatPhotoViewer({
       ),
     };
   }
+  async function renderedBlob(): Promise<Blob> {
+    if (!blob || !loaded) throw Error('Wait for the picture to load.');
+    let output = blob;
+    if (strokes.current.length) {
+      const result = document.createElement('canvas');
+      result.width = canvas.current!.width;
+      result.height = canvas.current!.height;
+      const ctx = result.getContext('2d')!;
+      ctx.drawImage(image.current!, 0, 0);
+      ctx.drawImage(canvas.current!, 0, 0);
+      output = await new Promise<Blob>((resolve, reject) =>
+        result.toBlob(
+          (value) =>
+            value
+              ? resolve(value)
+              : reject(Error('Could not prepare drawing.')),
+          'image/png',
+        ),
+      );
+    }
+    return output;
+  }
+  async function sendCopy() {
+    if (!onSend || !strokes.current.length || saving) return;
+    setSaving(true);
+    setSending(true);
+    setFeedback('');
+    try {
+      const value = await renderedBlob();
+      const file = await compressChatImage(
+        new File([value], 'edited-chat-picture.png', { type: 'image/png' }),
+      );
+      await onSend(file);
+      onClose();
+    } catch (error) {
+      setFeedback(
+        error instanceof Error
+          ? error.message
+          : 'Could not send this picture. Please retry.',
+      );
+    } finally {
+      setSaving(false);
+      setSending(false);
+    }
+  }
   async function save() {
     if (!blob || !loaded || saving) return;
     setSaving(true);
     setFeedback('');
     try {
-      let output = blob;
-      if (strokes.current.length) {
-        const result = document.createElement('canvas');
-        result.width = canvas.current!.width;
-        result.height = canvas.current!.height;
-        const ctx = result.getContext('2d')!;
-        ctx.drawImage(image.current!, 0, 0);
-        ctx.drawImage(canvas.current!, 0, 0);
-        output = await new Promise<Blob>((resolve, reject) =>
-          result.toBlob(
-            (value) =>
-              value
-                ? resolve(value)
-                : reject(Error('Could not prepare drawing.')),
-            'image/png',
-          ),
-        );
-      }
+      const output = await renderedBlob();
       const result = await downloadChatImage(output);
       setFeedback(
         result.saved
@@ -426,6 +458,18 @@ export function ChatPhotoViewer({
             </div>
           )}
         </div>
+        {onSend && (
+          <div className="shrink-0 border-t border-white/10 bg-[#112421] px-3 py-2">
+            <button
+              type="button"
+              disabled={!count || !loaded || saving}
+              onClick={() => void sendCopy()}
+              className="min-h-12 w-full rounded-xl bg-[#25836c] px-4 text-sm font-bold text-white disabled:opacity-40"
+            >
+              {sending ? 'Sending image…' : 'Send as new image'}
+            </button>
+          </div>
+        )}
         {feedback && (
           <output className="shrink-0 bg-[#112421] px-4 py-3 text-center text-xs leading-5">
             {feedback}

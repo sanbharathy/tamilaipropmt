@@ -625,6 +625,28 @@ export function PrivateChat({
       setBusy(false);
     }
   }
+  async function sendAnnotatedImage(file: File) {
+    if (busy || processingImage || !connected || status !== 'active')
+      throw Error('Wait until this chat is connected and ready.');
+    setBusy(true);
+    setError('');
+    try {
+      const form = new FormData();
+      form.set('roomId', roomId);
+      form.set('clientId', crypto.randomUUID());
+      form.set('caption', 'Edited image');
+      form.set('image', file, file.name);
+      const response = await fetch('/api/chat/images', {
+        method: 'POST',
+        body: form,
+      });
+      const data = await response.json();
+      if (!response.ok) throw Error(data.error ?? 'Could not send this image.');
+      await load().catch(() => setConnected(false));
+    } finally {
+      setBusy(false);
+    }
+  }
   async function sendBeatingHeart() {
     if (
       busy ||
@@ -1893,6 +1915,7 @@ export function PrivateChat({
           key={viewPhoto}
           messageId={viewPhoto}
           tamil={tamil}
+          onSend={sendAnnotatedImage}
           onClose={() => setViewPhoto(null)}
         />
       )}
