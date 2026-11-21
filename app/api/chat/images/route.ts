@@ -142,14 +142,10 @@ export async function POST(request: Request) {
           'This chat has reached its 1,000-message limit.',
           429,
         );
-      const [count] =
-        await tx`select count(*)::int as count from tamil_chat.messages where room_id=${roomId} and image_data is not null`;
-      if (count.count >= 10)
-        throw new ChatError('This chat has reached its 10-image limit.', 429);
       let stored = caption;
       if (replyTo) {
         const [target] =
-          await tx`select id::text,sender_id,body,image_type is not null as has_image from tamil_chat.messages where id=${replyTo} and room_id=${roomId} and removed_at is null`;
+          await tx`select id::text,sender_id,body,(image_type is not null or exists(select 1 from tamil_chat.limits ci where ci.key='cleared-image:'||messages.room_id::text||':'||messages.id::text and ci.expires_at>now())) as has_image from tamil_chat.messages where id=${replyTo} and room_id=${roomId} and removed_at is null`;
         if (
           !target ||
           target.body.startsWith(GAME_PREFIX) ||
@@ -176,6 +172,14 @@ export async function POST(request: Request) {
       }
       const [message] =
         await tx`insert into tamil_chat.messages(room_id,sender_id,client_id,body,image_data,image_type) values(${roomId},${me.id},${clientId},${stored},${image},'image/webp') returning id::text`;
+      // Room lock serializes uploads; rollback preserves the previous image on failure.
+      await tx`with cleared as (
+        update tamil_chat.messages set image_data=null,image_type=null
+        where room_id=${roomId} and id<>${message.id} and image_data is not null
+        returning id
+      ) insert into tamil_chat.limits(key,count,expires_at)
+        select 'cleared-image:'||${roomId}||':'||id::text,1,${room.expires_at} from cleared
+        on conflict(key) do nothing`;
       if (motion === CAMERA_MOTION)
         await tx`insert into tamil_chat.limits(key,count,expires_at) values(${`camera:${roomId}:${message.id}`},1,${room.expires_at})`;
       return message;

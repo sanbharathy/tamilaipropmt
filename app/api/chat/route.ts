@@ -99,9 +99,9 @@ export async function GET(request: Request) {
     }
     const messages =
       room?.status === 'active'
-        ? await sql`select id::text,sender_id,body,created_at,has_image,
+        ? await sql`select id::text,sender_id,body,created_at,has_image,image_cleared,
           exists(select 1 from tamil_chat.limits l where l.key=${'seen:' + room.id + ':'}||m.id::text and l.expires_at>now()) as seen
-          from (select id,sender_id,body,created_at,image_type is not null as has_image from tamil_chat.messages where room_id=${room.id} and removed_at is null order by id desc limit 100) m order by id`
+          from (select id,sender_id,body,created_at,(image_type is not null or exists(select 1 from tamil_chat.limits ci where ci.key='cleared-image:'||messages.room_id::text||':'||messages.id::text and ci.expires_at>now())) as has_image,exists(select 1 from tamil_chat.limits ci where ci.key='cleared-image:'||messages.room_id::text||':'||messages.id::text and ci.expires_at>now()) as image_cleared from tamil_chat.messages where room_id=${room.id} and removed_at is null order by id desc limit 100) m order by id`
         : [];
     const people = me.available
       ? await sql`select s.id,s.name,s.topic from tamil_chat.sessions s where s.available=true and s.suspended=false
@@ -484,7 +484,7 @@ export async function POST(request: Request) {
         let stored = message;
         if (replyTo) {
           const [target] =
-            await tx`select id::text,sender_id,body,image_type is not null as has_image from tamil_chat.messages where id=${replyTo} and room_id=${roomId} and removed_at is null`;
+            await tx`select id::text,sender_id,body,(image_type is not null or exists(select 1 from tamil_chat.limits ci where ci.key='cleared-image:'||messages.room_id::text||':'||messages.id::text and ci.expires_at>now())) as has_image from tamil_chat.messages where id=${replyTo} and room_id=${roomId} and removed_at is null`;
           if (
             !target ||
             target.body.startsWith(GAME_PREFIX) ||

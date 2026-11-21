@@ -39,6 +39,7 @@ export type ChatMessage = {
   sender_id: string;
   body: string;
   has_image?: boolean;
+  image_cleared?: boolean;
   seen?: boolean;
   game_event?: boolean;
   reply?: ChatReply;

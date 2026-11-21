@@ -1570,11 +1570,19 @@ export function PrivateChat({
                         )}
                         {message.has_image && (
                           <div className="p-1.5 pb-0">
-                            <ChatImage
-                              id={message.id}
-                              onOpen={setViewPhoto}
-                              tamil={tamil}
-                            />
+                            {message.image_cleared ? (
+                              <p className="px-2 py-1 text-xs opacity-70">
+                                {tamil
+                                  ? 'முந்தைய படம் நீக்கப்பட்டது'
+                                  : 'Previous image cleared'}
+                              </p>
+                            ) : (
+                              <ChatImage
+                                id={message.id}
+                                onOpen={setViewPhoto}
+                                tamil={tamil}
+                              />
+                            )}
                           </div>
                         )}
                         {sticker && (
@@ -1910,15 +1918,19 @@ export function PrivateChat({
           }}
         />
       )}
-      {viewPhoto && status === 'active' && (
-        <ChatPhotoViewer
-          key={viewPhoto}
-          messageId={viewPhoto}
-          tamil={tamil}
-          onSend={sendAnnotatedImage}
-          onClose={() => setViewPhoto(null)}
-        />
-      )}
+      {viewPhoto &&
+        status === 'active' &&
+        !state.messages.some(
+          (message) => message.id === viewPhoto && message.image_cleared,
+        ) && (
+          <ChatPhotoViewer
+            key={viewPhoto}
+            messageId={viewPhoto}
+            tamil={tamil}
+            onSend={sendAnnotatedImage}
+            onClose={() => setViewPhoto(null)}
+          />
+        )}
       {confirm && (
         <dialog
           ref={confirmDialog}

@@ -21,11 +21,12 @@ export function ChatArchiveNotice({
       <section className="w-full max-w-lg rounded-3xl bg-white p-7 shadow-sm">
         <h1 className="text-xl font-bold">Updated chat privacy notice</h1>
         <p className="mt-4 text-[13px] leading-6">
-          For new chats, messages, smaller copies of shared images, nicknames
-          and timestamps are saved in an admin-only PDF for security review when
-          a chat ends or its link expires or is destroyed. The archive is
-          retained for 30 days, then automatically removed. This is not
-          end-to-end encrypted chat.
+          For new chats, messages, a smaller copy of the latest available image,
+          nicknames and timestamps are saved in an admin-only PDF for security
+          review when a chat ends or its link expires or is destroyed. The
+          archive is retained for 30 days, then automatically removed. This is
+          not end-to-end encrypted chat. Each new image clears earlier live
+          images in that chat; cleared images are not included in future PDFs.
         </p>
         <p className="mt-3 text-xs leading-5">
           Existing conversations keep their original retention policy.{' '}
